@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoCut Studio AI — Enterprise Video SaaS & Sub-Account Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #18181b; }
+    ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+    
+    input[type="range"] {
+      -webkit-appearance: none;
+      background: #27272a;
+      height: 5px;
+      border-radius: 4px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #6366f1;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .glass-panel {
+      background: rgba(24, 24, 27, 0.9);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gradient-border { position: relative; }
+    .gradient-border::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, #6366f1, #ec4899, #8b5cf6);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.25); }
+      50% { box-shadow: 0 0 28px rgba(236, 72, 153, 0.45); }
+    }
+    .ai-glow { animation: pulseGlow 3s infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col select-none">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="h-14 border-b border-zinc-800 bg-zinc-950/95 px-4 flex items-center justify-between sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+        <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span></h1>
+          <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH (FREE)</span>
+        </div>
+        <p class="text-[10px] text-zinc-400">Enterprise Video SaaS • Multi-Account & GitHub Deploy Ready</p>
+      </div>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="hidden md:flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+      <button id="tabAutoBtn" onclick="switchWorkspaceMode('auto')" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow">
+        <i class="fa-solid fa-robot mr-1.5"></i>Auto-Edit AI Agent
+      </button>
+      <button id="tabEditorBtn" onclick="switchWorkspaceMode('editor')" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all text-zinc-400 hover:text-white">
+        <i class="fa-solid fa-sliders mr-1.5"></i>Studio Trực Quan
+      </button>
+    </div>
+
+    <!-- Account & Export Actions -->
+    <div class="flex items-center gap-2">
+      <!-- Current Logged-in User Display -->
+      <div id="loggedUserChip" class="hidden sm:flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg">
+        <div id="userAvatarBadge" class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold">G</div>
+        <div class="text-[11px] leading-tight">
+          <div id="headerUserName" class="font-semibold text-zinc-200">Khách Trải Nghiệm</div>
+          <div id="headerUserExpiry" class="text-[9px] text-zinc-500">Chưa đăng nhập</div>
+        </div>
+      </div>
+
+      <!-- Auth Button (Login / Register) -->
+      <button id="authActionBtn" onclick="openAuthModal('login')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white border border-zinc-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-user-circle text-indigo-400"></i>
+        <span id="authBtnLabel">Đăng Nhập / Đăng Ký</span>
+      </button>
+
+      <!-- Owner Sub-account Control Panel Button -->
+      <button id="ownerAdminBtn" onclick="openOwnerDashboard()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-400 border border-amber-500/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-crown"></i>
+        <span class="hidden lg:inline">Quản Trị & Tài Khoản Con</span>
+      </button>
+
+      <!-- Export Button -->
+      <button onclick="openExportModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/25 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-film"></i> Xuất Video
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+
+    <!-- LEFT PANEL: AI AGENT PROMPT & UNLIMITED MEDIA INPUTS -->
+    <aside id="leftSidebar" class="w-full lg:w-[400px] border-r border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto p-4 gap-4">
+      
+      <!-- Permission Status Banner -->
+      <div id="permissionNoticeBar" class="p-2.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 flex items-center justify-between text-[11px]">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-shield-halved text-indigo-400"></i>
+          <span id="permissionSummaryText" class="text-zinc-300">Chế độ Khách: Xuất tối đa 1080p. Đăng nhập để dùng full quyền.</span>
+        </div>
+        <button onclick="openAuthModal('login')" class="text-indigo-400 hover:underline font-semibold shrink-0 ml-2">Đăng nhập</button>
+      </div>
+
+      <!-- Step 1: Unlimited Media Upload -->
+      <div class="glass-panel rounded-xl p-3.5 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px]">1</span>
+            Nạp Tài Nguyên (Không Giới Hạn)
+          </span>
+          <button onclick="loadDemoVideo()" class="text-[11px] text-pink-400 hover:text-pink-300 underline font-medium">
+            + Nạp Video Mẫu Test
+          </button>
+        </div>
+
+        <!-- Raw Video Input -->
+        <label class="block border border-dashed border-zinc-700 hover:border-indigo-500 rounded-lg p-3 cursor-pointer transition bg-zinc-900/50 group">
+          <input type="file" id="rawVideoInput" accept="video/*" class="hidden" onchange="handleRawVideoUpload(event)" />
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-zinc-800 group-hover:bg-indigo-500/20 flex items-center justify-center text-zinc-400 group-hover:text-indigo-400 transition shrink-0">
+              <i class="fa-solid fa-video text-base"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p id="rawVideoName" class="text-xs font-semibold text-zinc-200 truncate">Chọn Video Thô (Không giới hạn GB)</p>
+              <p id="rawVideoMeta" class="text-[10px] text-zinc-500">Hỗ trợ MP4, MOV, MKV, 4K Raw Stream trực tiếp</p>
+            </div>
+          </div>
+        </label>
+
+        <div class="grid grid-cols-2 gap-2">
+          <!-- Reference Video Input -->
+          <label class="block border border-dashed border-zinc-700 hover:border-pink-500 rounded-lg p-2.5 cursor-pointer transition bg-zinc-900/50">
+            <input type="file" id="refVideoInput" accept="video/*" class="hidden" onchange="handleRefVideoUpload(event)" />
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-clapperboard text-pink-400 text-xs"></i>
+              <div class="min-w-0">
+                <p id="refVideoName" class="text-[11px] font-medium text-zinc-300 truncate">Video Mẫu Style</p>
+                <p id="refVideoMeta" class="text-[9px] text-zinc-500 truncate">Học nhịp & khung hình</p>
+              </div>
+            </div>
+          </label>
+
+          <!-- Background Music Input -->
+          <label class="block border border-dashed border-zinc-700 hover:border-emerald-500 rounded-lg p-2.5 cursor-pointer transition bg-zinc-900/50">
+            <input type="file" id="bgmInput" accept="audio/*" class="hidden" onchange="handleBgmUpload(event)" />
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-music text-emerald-400 text-xs"></i>
+              <div class="min-w-0">
+                <p id="bgmName" class="text-[11px] font-medium text-zinc-300 truncate">Nhạc Nền (BGM)</p>
+                <p class="text-[9px] text-zinc-500">MP3, WAV, AAC</p>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 2: AI Agent Prompt (ChatGPT Plus Style) -->
+      <div class="glass-panel rounded-xl p-3.5 space-y-3 gradient-border">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-[10px]">2</span>
+            Ra Lệnh AI Thấu Hiểu Ý Định
+          </span>
+          <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
+            <i class="fa-solid fa-brain mr-1"></i>Gemini AI Agent
+          </span>
+        </div>
+
+        <!-- Quick Prompt Chips -->
+        <div class="grid grid-cols-2 gap-1.5">
+          <button onclick="applyPresetPrompt('luxury')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-indigo-500/50 transition">
+            <div class="text-[11px] font-semibold text-indigo-300"><i class="fa-solid fa-gem mr-1"></i>Review Sang Trọng</div>
+            <div class="text-[9px] text-zinc-500 truncate">Giữ màu gốc sáng nét, zoom mượt</div>
+          </button>
+          <button onclick="applyPresetPrompt('tiktok')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-pink-500/50 transition">
+            <div class="text-[11px] font-semibold text-pink-300"><i class="fa-solid fa-bolt mr-1"></i>TikTok Viral 2026</div>
+            <div class="text-[9px] text-zinc-500 truncate">Chạy chữ động + SFX dồn dập</div>
+          </button>
+          <button onclick="applyPresetPrompt('vlog')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/50 transition">
+            <div class="text-[11px] font-semibold text-emerald-300"><i class="fa-solid fa-face-smile mr-1"></i>Vlog / Kể Chuyện</div>
+            <div class="text-[9px] text-zinc-500 truncate">Cắt khoảng lặng, màu ấm áp</div>
+          </button>
+          <button onclick="applyPresetPrompt('cinematic')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/50 transition">
+            <div class="text-[11px] font-semibold text-amber-300"><i class="fa-solid fa-film mr-1"></i>Cinematic Phim</div>
+            <div class="text-[9px] text-zinc-500 truncate">Khung 16:9, slow-motion nhẹ</div>
+          </button>
+        </div>
+
+        <!-- Natural Language Prompt Box -->
+        <div>
+          <textarea id="aiPromptInput" rows="3" placeholder="Viết suy nghĩ của bạn tự nhiên như chat với ChatGPT Plus... Ví dụ: 'Cắt gọn đoạn thừa ở đầu, giữ màu kim loại sáng bóng tự nhiên không ám vàng, thêm chữ động bắt mắt và chèn tiếng whoosh chuyển cảnh'" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
+        </div>
+
+        <!-- AI Trend Hub 2026 Toggles -->
+        <div class="bg-zinc-900/80 border border-zinc-800 rounded-lg p-2.5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
+              <i class="fa-solid fa-satellite-dish text-emerald-400 mr-1"></i>AI Trend Hub (2026)
+            </span>
+            <span id="trendLockTag" class="text-[9px] text-emerald-400 font-semibold">Đang mở khóa</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5 text-[10px]">
+            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
+              <input type="checkbox" id="trendKinetic" checked class="accent-indigo-500 rounded" />
+              <span>Kinetic Captions</span>
+            </label>
+            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
+              <input type="checkbox" id="trendPreHook" checked class="accent-indigo-500 rounded" />
+              <span>0.5s Pre-Hook Zoom</span>
+            </label>
+            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
+              <input type="checkbox" id="trendRawPolish" checked class="accent-indigo-500 rounded" />
+              <span>Raw-Premium Polish</span>
+            </label>
+            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
+              <input type="checkbox" id="trendAutoSfx" checked class="accent-indigo-500 rounded" />
+              <span>Beat-Sync SFX</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Execute AI Auto-Edit Button -->
+        <button id="runAutoEditBtn" onclick="runSmartAutoEdit()" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2 ai-glow">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI Tự Động Dựng Video 100%</span>
+        </button>
+
+        <!-- AI Execution Log -->
+        <div id="aiStatusBox" class="hidden rounded-lg bg-zinc-900 border border-indigo-500/30 p-2.5 space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-300">
+            <span id="aiStatusTitle"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>AI đang phân tích ý định...</span>
+            <span id="aiProgressPercent">0%</span>
+          </div>
+          <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+            <div id="aiProgressBar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
+          </div>
+          <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-1 max-h-24 overflow-y-auto"></ul>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE: VISUAL PREVIEW & CHAT REFINEMENT -->
+    <section class="flex-1 flex flex-col bg-[#0c0c0e] relative overflow-hidden">
+      
+      <!-- Top Canvas Toolbar -->
+      <div class="h-11 border-b border-zinc-800/80 px-4 flex items-center justify-between bg-zinc-950/50">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[11px] text-zinc-400 mr-1">Khung hình:</span>
+          <button onclick="setAspectRatio('9:16')" data-ratio="9:16" class="ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-indigo-600 text-white">9:16</button>
+          <button onclick="setAspectRatio('16:9')" data-ratio="16:9" class="ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-400 hover:text-white">16:9</button>
+          <button onclick="setAspectRatio('1:1')" data-ratio="1:1" class="ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-400 hover:text-white">1:1</button>
+          <button onclick="setAspectRatio('4:5')" data-ratio="4:5" class="ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-400 hover:text-white">4:5</button>
+        </div>
+
+        <div class="flex items-center gap-2 text-[11px]">
+          <span id="outputResIndicator" class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-semibold">
+            1080p Full HD
+          </span>
+          <span class="hidden sm:inline text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1 text-indigo-400"></i>Kéo chữ trên màn hình</span>
+        </div>
+      </div>
+
+      <!-- Canvas Preview Viewport -->
+      <div id="viewportContainer" class="flex-1 flex items-center justify-center p-4 overflow-hidden relative bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px]">
+        <div id="canvasWrapper" class="relative shadow-2xl shadow-black/90 rounded-lg overflow-hidden border border-zinc-800 bg-black flex items-center justify-center">
+          <canvas id="previewCanvas" class="block cursor-move"></canvas>
+          
+          <!-- Empty State Overlay -->
+          <div id="emptyCanvasOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 text-center p-6">
+            <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 text-indigo-400">
+              <i class="fa-solid fa-film text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-white mb-1">Chưa có video nào được nạp</h3>
+            <p class="text-xs text-zinc-400 max-w-xs mb-4">Tải video thô dung lượng bất kỳ ở cột bên trái hoặc bấm nút dưới để chạy thử ngay.</p>
+            <button onclick="loadDemoVideo()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
+              <i class="fa-solid fa-play mr-1.5"></i>Tạo Video Mẫu Thử Nghiệm
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instant AI Chat Command Bar -->
+      <div class="px-4 py-2 bg-zinc-950 border-t border-zinc-800/80 flex items-center gap-2">
+        <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs shrink-0">
+          <i class="fa-solid fa-comment-dots"></i>
+        </div>
+        <input type="text" id="quickChatCommand" onkeydown="if(event.key==='Enter') handleQuickChatCommand()" placeholder="Chat ra lệnh chỉnh sửa nhanh (VD: 'Tăng sáng thêm chút', 'Đổi chữ sang màu vàng nổi bật', 'Tắt zoom')..." class="flex-1 bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none" />
+        <button onclick="handleQuickChatCommand()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-indigo-600 text-xs font-semibold text-zinc-200 hover:text-white transition">
+          Gửi Lệnh
+        </button>
+      </div>
+
+      <!-- BOTTOM TIMELINE & PLAYBACK CONTROLS -->
+      <div class="h-44 border-t border-zinc-800 bg-zinc-950 flex flex-col">
+        <!-- Transport Controls -->
+        <div class="h-10 px-4 border-b border-zinc-900 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button onclick="skipToStart()" class="text-zinc-400 hover:text-white text-xs"><i class="fa-solid fa-backward-step"></i></button>
+            <button id="playPauseBtn" onclick="togglePlay()" class="w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-xs shadow">
+              <i class="fa-solid fa-play"></i>
+            </button>
+            <span class="text-xs font-mono text-zinc-300">
+              <span id="currentTimeDisplay">00:00.0</span> <span class="text-zinc-600">/</span> <span id="totalDurationDisplay" class="text-zinc-500">00:00.0</span>
+            </span>
+          </div>
+
+          <div class="flex items-center gap-3 text-[11px] text-zinc-400">
+            <span>Cắt đoạn: <b id="trimRangeLabel" class="text-indigo-400">0.0s - 10.0s</b></span>
+            <button onclick="resetTrim()" class="text-zinc-500 hover:text-zinc-300 underline">Đặt lại</button>
+          </div>
+        </div>
+
+        <!-- Visual Multi-Track Timeline -->
+        <div class="flex-1 p-3 overflow-x-auto flex flex-col justify-center gap-2 relative" id="timelineArea">
+          <!-- Scrubber Bar -->
+          <div class="relative h-6 bg-zinc-900 rounded-md border border-zinc-800 cursor-pointer flex items-center px-1" id="scrubberTrack" onclick="seekTimeline(event)">
+            <div id="trimHighlight" class="absolute top-0 bottom-0 bg-indigo-500/20 border-x-2 border-indigo-500 pointer-events-none" style="left: 0%; width: 100%;"></div>
+            <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-pink-500 z-10 pointer-events-none" style="left: 0%;">
+              <div class="w-2.5 h-2.5 rounded-full bg-pink-500 -ml-1 -mt-1"></div>
+            </div>
+            <span class="text-[10px] text-zinc-500 z-0 pl-2"><i class="fa-solid fa-film mr-1"></i>Video Track (Smart Cut & Zoom)</span>
+          </div>
+
+          <!-- Text / Kinetic Captions Track -->
+          <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 justify-between">
+            <span class="text-[10px] text-purple-400 truncate"><i class="fa-solid fa-font mr-1.5"></i>Caption Layer: <b id="timelineTextPreview">AUTOCUT STUDIO AI</b></span>
+            <span id="kineticBadge" class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">Kinetic Active</span>
+          </div>
+
+          <!-- Audio & SFX Track -->
+          <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 gap-2 overflow-hidden" id="sfxTimelineTrack">
+            <span class="text-[10px] text-emerald-400 shrink-0"><i class="fa-solid fa-waveform-lines mr-1"></i>Audio/SFX:</span>
+            <div id="sfxMarkersContainer" class="flex items-center gap-1.5 overflow-x-auto">
+              <span class="text-[10px] text-zinc-600 italic">Chưa có hiệu ứng âm thanh</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: VISUAL STUDIO INSPECTOR -->
+    <aside id="rightSidebar" class="w-full lg:w-[320px] border-l border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
+      
+      <!-- Inspector Tabs -->
+      <div class="grid grid-cols-4 border-b border-zinc-800 bg-zinc-950 text-[11px] font-semibold">
+        <button onclick="switchInspectorTab('transform')" id="ins-tab-transform" class="ins-tab py-2.5 text-indigo-400 border-b-2 border-indigo-500">Cắt & Zoom</button>
+        <button onclick="switchInspectorTab('color')" id="ins-tab-color" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Màu Sắc</button>
+        <button onclick="switchInspectorTab('text')" id="ins-tab-text" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Chữ Động</button>
+        <button onclick="switchInspectorTab('audio')" id="ins-tab-audio" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Âm & SFX</button>
+      </div>
+
+      <div class="p-4 space-y-4">
+        <!-- TAB 1: TRANSFORM & TRIM -->
+        <div id="ins-panel-transform" class="ins-panel space-y-4">
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Điểm bắt đầu (Start)</span>
+              <span id="trimStartVal" class="font-mono text-indigo-400">0.0s</span>
+            </div>
+            <input type="range" id="trimStartSlider" min="0" max="10" step="0.1" value="0" oninput="updateTrim()" class="w-full" />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Điểm kết thúc (End)</span>
+              <span id="trimEndVal" class="font-mono text-indigo-400">10.0s</span>
+            </div>
+            <input type="range" id="trimEndSlider" min="0.5" max="10" step="0.1" value="10" oninput="updateTrim()" class="w-full" />
+          </div>
+
+          <hr class="border-zinc-800" />
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Thu phóng (Zoom)</span>
+              <span id="zoomVal" class="font-mono text-zinc-200">100%</span>
+            </div>
+            <input type="range" id="zoomSlider" min="80" max="180" value="100" oninput="updateTransform()" class="w-full" />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Tốc độ phát (Speed)</span>
+              <span id="speedVal" class="font-mono text-zinc-200">1.0x</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.1" value="1.0" oninput="updateSpeed()" class="w-full" />
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <span class="text-xs text-zinc-300">Auto Dynamic Zoom (Nhịp AI)</span>
+            <input type="checkbox" id="autoZoomToggle" onchange="state.autoZoom = this.checked" class="w-4 h-4 accent-indigo-600 rounded" />
+          </div>
+        </div>
+
+        <!-- TAB 2: COLOR & FILTERS -->
+        <div id="ins-panel-color" class="ins-panel hidden space-y-4">
+          <div>
+            <label class="text-[11px] font-semibold text-zinc-400 uppercase block mb-2">Bộ Lọc Màu Nhanh</label>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button onclick="applyColorPreset('original')" class="p-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-left">Nguyên Bản</button>
+              <button onclick="applyColorPreset('silver')" class="p-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-indigo-500/40 text-xs text-left text-indigo-300">Sáng Nét Bạc</button>
+              <button onclick="applyColorPreset('vivid')" class="p-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-left text-pink-300">Rực Rỡ Trend</button>
+              <button onclick="applyColorPreset('cinematic')" class="p-2 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs text-left text-amber-300">Điện Ảnh Ấm</button>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Độ sáng (Brightness)</span>
+              <span id="brightVal" class="font-mono">100%</span>
+            </div>
+            <input type="range" id="brightSlider" min="50" max="160" value="100" oninput="updateFilters()" class="w-full" />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Tương phản (Contrast)</span>
+              <span id="contrastVal" class="font-mono">100%</span>
+            </div>
+            <input type="range" id="contrastSlider" min="50" max="160" value="100" oninput="updateFilters()" class="w-full" />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Độ bão hòa (Saturation)</span>
+              <span id="saturateVal" class="font-mono">100%</span>
+            </div>
+            <input type="range" id="saturateSlider" min="0" max="180" value="100" oninput="updateFilters()" class="w-full" />
+          </div>
+        </div>
+
+        <!-- TAB 3: TEXT & KINETIC CAPTIONS -->
+        <div id="ins-panel-text" class="ins-panel hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-zinc-200">Hiển thị lớp chữ</span>
+            <input type="checkbox" id="showTextToggle" checked onchange="state.text.visible = this.checked" class="w-4 h-4 accent-indigo-600" />
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-zinc-300">Hiệu ứng Chạy Chữ Động (Kinetic)</span>
+            <input type="checkbox" id="kineticTextToggle" checked onchange="state.text.kinetic = this.checked" class="w-4 h-4 accent-pink-500" />
+          </div>
+
+          <div>
+            <label class="text-xs text-zinc-400 block mb-1">Nội dung chữ / Phụ đề</label>
+            <input type="text" id="overlayTextInput" value="AUTOCUT STUDIO AI" oninput="updateTextOverlay()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1">Màu chữ</label>
+              <input type="color" id="textColorPicker" value="#ffffff" oninput="updateTextOverlay()" class="w-full h-8 bg-zinc-900 border border-zinc-700 rounded cursor-pointer" />
+            </div>
+            <div>
+              <label class="text-xs text-zinc-400 block mb-1">Màu nền nhãn</label>
+              <input type="color" id="textBgPicker" value="#4f46e5" oninput="updateTextOverlay()" class="w-full h-8 bg-zinc-900 border border-zinc-700 rounded cursor-pointer" />
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Cỡ chữ</span>
+              <span id="fontSizeVal" class="font-mono">28px</span>
+            </div>
+            <input type="range" id="fontSizeSlider" min="14" max="64" value="28" oninput="updateTextOverlay()" class="w-full" />
+          </div>
+        </div>
+
+        <!-- TAB 4: AUDIO & SFX SYNTHESIZER -->
+        <div id="ins-panel-audio" class="ins-panel hidden space-y-4">
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Âm lượng Video gốc</span>
+              <span id="origVolVal" class="font-mono">100%</span>
+            </div>
+            <input type="range" id="origVolSlider" min="0" max="100" value="100" oninput="updateAudioVolumes()" class="w-full" />
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between text-xs">
+              <span class="text-zinc-400">Âm lượng Nhạc nền</span>
+              <span id="bgmVolVal" class="font-mono">45%</span>
+            </div>
+            <input type="range" id="bgmVolSlider" min="0" max="100" value="45" oninput="updateAudioVolumes()" class="w-full" />
+          </div>
+
+          <hr class="border-zinc-800" />
+
+          <div>
+            <label class="text-[11px] font-semibold text-zinc-400 uppercase block mb-2">Chèn Hiệu Ứng SFX Tại Vị Trí Phát</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="triggerAndAddSfx('whoosh')" class="p-2 rounded-lg bg-zinc-900 hover:bg-indigo-600/20 border border-zinc-800 hover:border-indigo-500 text-xs flex items-center gap-2 transition">
+                <i class="fa-solid fa-wind text-indigo-400"></i> Whoosh
+              </button>
+              <button onclick="triggerAndAddSfx('pop')" class="p-2 rounded-lg bg-zinc-900 hover:bg-pink-600/20 border border-zinc-800 hover:border-pink-500 text-xs flex items-center gap-2 transition">
+                <i class="fa-solid fa-comment-dots text-pink-400"></i> Pop!
+              </button>
+              <button onclick="triggerAndAddSfx('ding')" class="p-2 rounded-lg bg-zinc-900 hover:bg-amber-600/20 border border-zinc-800 hover:border-amber-500 text-xs flex items-center gap-2 transition">
+                <i class="fa-solid fa-bell text-amber-400"></i> Ding ✨
+              </button>
+              <button onclick="triggerAndAddSfx('bass')" class="p-2 rounded-lg bg-zinc-900 hover:bg-emerald-600/20 border border-zinc-800 hover:border-emerald-500 text-xs flex items-center gap-2 transition">
+                <i class="fa-solid fa-drum text-emerald-400"></i> Bass Drop
+              </button>
+            </div>
+          </div>
+
+          <button onclick="clearAllSfx()" class="w-full py-1.5 rounded bg-zinc-900 hover:bg-red-950/50 text-xs text-zinc-400 hover:text-red-400 border border-zinc-800 transition">
+            Xóa tất cả SFX trên Timeline
+          </button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 1: ĐĂNG NHẬP & ĐĂNG KÝ TÀI KHOẢN (USER & OWNER AUTH)            -->
+  <!-- ===================================================================== -->
+  <div id="authModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Cổng Tài Khoản AutoCut Studio</h3>
+            <p class="text-[11px] text-zinc-400">Đăng nhập Owner hoặc Đăng ký Tài khoản con</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Auth Switch Tabs -->
+      <div class="grid grid-cols-2 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-semibold">
+        <button id="authSwitchLogin" onclick="switchAuthTab('login')" class="py-2 rounded-lg bg-indigo-600 text-white transition">Đăng Nhập</button>
+        <button id="authSwitchRegister" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-zinc-400 hover:text-white transition">Đăng Ký Tài Khoản Con</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div id="loginFormPanel" class="space-y-3">
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email đăng nhập</label>
+          <input type="email" id="loginEmailInput" placeholder="VD: admin@autocut.vn hoặc email của bạn" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Mật khẩu / Mã Chủ Sở Hữu</label>
+          <input type="password" id="loginPasswordInput" onkeydown="if(event.key==='Enter') handleLoginSubmit()" placeholder="Nhập mật khẩu..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+        </div>
+
+        <button onclick="handleLoginSubmit()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">
+          Đăng Nhập Ngay
+        </button>
+
+        <div class="pt-2 border-t border-zinc-800 flex items-center justify-between">
+          <button onclick="quickOwnerLogin()" class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+            <i class="fa-solid fa-crown"></i> Đăng Nhập Nhanh Quyền Chủ Sở Hữu
+          </button>
+          <button onclick="logoutAccount()" class="text-[11px] text-zinc-500 hover:text-red-400">Đăng xuất</button>
+        </div>
+      </div>
+
+      <!-- REGISTER SUB-ACCOUNT FORM -->
+      <div id="registerFormPanel" class="hidden space-y-3">
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Họ và Tên / Tên Shop</label>
+          <input type="text" id="regNameInput" placeholder="VD: Nguyễn Văn A - Studio Bạc" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email tài khoản mới</label>
+          <input type="email" id="regEmailInput" placeholder="tenban@gmail.com" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Tạo mật khẩu</label>
+          <input type="password" id="regPasswordInput" placeholder="Nhập mật khẩu tự chọn..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+        </div>
+        <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-400">
+          <i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i>
+          Sau khi đăng ký, tài khoản của bạn sẽ được gửi tới <b>Chủ Sở Hữu (Owner)</b> để kích hoạt gói năm và mở khóa quyền xuất 2K/4K.
+        </div>
+        <button onclick="handleRegisterSubmit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white transition">
+          Tạo Tài Khoản Con Mới
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 2: BẢNG QUẢN TRỊ CHỦ SỞ HỮU & PHÂN QUYỀN TÀI KHOẢN CON           -->
+  <!-- ===================================================================== -->
+  <div id="ownerDashboardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white">Cổng Chủ Sở Hữu — Quản Trị Tài Khoản Con & Lịch Gia Hạn Năm</h2>
+            <p class="text-[11px] text-zinc-400">Toàn quyền tạo, cấp quyền tính năng, gia hạn theo năm và chia sẻ link GitHub Pages</p>
+          </div>
+        </div>
+        <button onclick="closeOwnerDashboard()" class="text-zinc-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Owner Verification Gate (If not logged in as Owner yet) -->
+      <div id="ownerAuthGate" class="p-8 flex flex-col items-center justify-center text-center space-y-4">
+        <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">Xác Thực Quyền Chủ Sở Hữu Độc Quyền</h3>
+          <p class="text-xs text-zinc-400 max-w-md mt-1">Chỉ chủ sở hữu hệ thống mới có quyền tạo/khóa tài khoản con và cấp phép sử dụng. Nhập mã Master Owner để mở khóa.</p>
+        </div>
+        <div class="flex items-center gap-2 w-full max-w-sm">
+          <input type="password" id="ownerMasterPassInput" onkeydown="if(event.key==='Enter') verifyOwnerMaster()" placeholder="Nhập mã bí mật (Mặc định: OWNER-MASTER-2026)" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none" />
+          <button onclick="verifyOwnerMaster()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs transition">
+            Mở Khóa
+          </button>
+        </div>
+      </div>
+
+      <!-- Authenticated Owner Workspace -->
+      <div id="ownerControlContent" class="hidden flex-1 flex flex-col overflow-hidden">
+        <!-- Sub-tabs -->
+        <div class="flex border-b border-zinc-800 bg-zinc-950/60 px-6 text-xs font-semibold">
+          <button onclick="switchOwnerTab('subaccounts')" id="own-tab-subaccounts" class="own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400">
+            <i class="fa-solid fa-users-gear mr-1.5"></i>1. Quản Lý & Cấp Quyền Tài Khoản Con
+          </button>
+          <button onclick="switchOwnerTab('schedule')" id="own-tab-schedule" class="own-tab py-3 px-4 text-zinc-400 hover:text-white">
+            <i class="fa-solid fa-calendar-check mr-1.5"></i>2. Lịch Biểu Gia Hạn Theo Năm (2026–2027)
+          </button>
+          <button onclick="switchOwnerTab('github')" id="own-tab-github" class="own-tab py-3 px-4 text-zinc-400 hover:text-white">
+            <i class="fa-brands fa-github mr-1.5"></i>3. Link GitHub Pages & Bảo Mật Owner
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          
+          <!-- TAB 1: SUB-ACCOUNTS & GRANULAR PERMISSIONS -->
+          <div id="own-panel-subaccounts" class="own-panel space-y-5">
+            <!-- Create New Sub-Account Box -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tạo & Cấp Quyền Tài Khoản Con Mới</h4>
+                <span class="text-[11px] text-emerald-400">Cấp quyền tức thì theo chu kỳ năm</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-5 gap-2.5">
+                <input type="text" id="newSubName" placeholder="Tên người dùng / Đối tác" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+                <input type="email" id="newSubEmail" placeholder="Email đăng nhập" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+                <input type="text" id="newSubPass" placeholder="Mật khẩu cấp sẵn" value="123456" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+                <select id="newSubDuration" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white">
+                  <option value="1">Thời hạn: 1 Năm (365 ngày)</option>
+                  <option value="2">Thời hạn: 2 Năm (730 ngày)</option>
+                  <option value="0.08">Dùng thử: 30 Ngày</option>
+                </select>
+                <button onclick="createSubAccountByOwner()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg py-2 px-3 transition">
+                  <i class="fa-solid fa-user-plus mr-1"></i>Tạo & Cấp Quyền
+                </button>
+              </div>
+            </div>
+
+            <!-- Sub-Accounts Permission Table -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+                <span class="text-xs font-bold text-zinc-200">Danh Sách Tài Khoản Con & Phân Quyền Chi Tiết (<span id="subAccountCount">0</span>)</span>
+                <span class="text-[11px] text-zinc-400">Tích chọn trực tiếp để bật/tắt từng quyền cho tài khoản con</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-zinc-800 text-[10px] uppercase text-zinc-400 bg-zinc-900/50">
+                      <th class="py-2.5 px-3">Tài Khoản Con</th>
+                      <th class="py-2.5 px-3">Mật Khẩu</th>
+                      <th class="py-2.5 px-3 text-center">Auto-Edit AI</th>
+                      <th class="py-2.5 px-3 text-center">Xuất 2K / 4K</th>
+                      <th class="py-2.5 px-3 text-center">AI Trend Hub</th>
+                      <th class="py-2.5 px-3">Hết Hạn (Năm)</th>
+                      <th class="py-2.5 px-3">Trạng Thái</th>
+                      <th class="py-2.5 px-3 text-right">Thao Tác</th>
+                    </tr>
+                  </thead>
+                  <tbody id="subAccountsTableBody" class="divide-y divide-zinc-800/80 text-xs"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ANNUAL RENEWAL SCHEDULE -->
+          <div id="own-panel-schedule" class="own-panel hidden space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+                <div class="text-[11px] text-zinc-400">Tài Khoản Con Đang Hoạt Động</div>
+                <div id="statActiveSubs" class="text-2xl font-bold text-emerald-400 mt-1">0</div>
+              </div>
+              <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+                <div class="text-[11px] text-zinc-400">Chờ Duyệt / Sắp Hết Hạn (&lt;30 ngày)</div>
+                <div id="statExpiringSubs" class="text-2xl font-bold text-amber-400 mt-1">0</div>
+              </div>
+              <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
+                <div class="text-[11px] text-zinc-400">Chu Kỳ Gia Hạn Chuẩn</div>
+                <div class="text-lg font-bold text-indigo-400 mt-1">365 Ngày / Năm</div>
+              </div>
+            </div>
+
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <h4 class="text-xs font-bold text-white uppercase">Lịch Biểu Gia Hạn 12 Tháng Theo Năm (2026 – 2027)</h4>
+              <p class="text-[11px] text-zinc-400">Hệ thống tự động xếp lịch các tài khoản con đến hạn gia hạn theo từng tháng trong năm để bạn chủ động thu phí và gia hạn +1 năm.</p>
+              <div id="annualCalendarGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 pt-2"></div>
+            </div>
+          </div>
+
+          <!-- TAB 3: GITHUB PAGES SHARE LINK & OWNER SECURITY -->
+          <div id="own-panel-github" class="own-panel hidden space-y-5">
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-white uppercase flex items-center gap-2">
+                  <i class="fa-brands fa-github text-base"></i> Cấu Hình Link Web GitHub Pages Của Bạn
+                </h4>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded">Miễn phí 100% & Băng thông không giới hạn</span>
+              </div>
+              <p class="text-[11px] text-zinc-400">Nhập đường dẫn GitHub Pages sau khi bạn tải file <code class="text-indigo-400">index.html</code> lên GitHub (VD: <code class="text-zinc-300">https://ten-cua-ban.github.io/autocut-studio/</code>):</p>
+              <div class="flex gap-2">
+                <input type="text" id="githubUrlInput" value="https://your-username.github.io/autocut-studio/" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
+                <button onclick="saveGithubUrl()" class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white">Lưu Link</button>
+              </div>
+            </div>
+
+            <!-- 5-Step GitHub Pages Guide -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2.5 text-xs">
+              <h4 class="font-bold text-amber-400">Hướng Dẫn 5 Bước Tạo Link Web Riêng Trên GitHub Pages:</h4>
+              <ol class="list-decimal list-inside space-y-1.5 text-[11px] text-zinc-300 leading-relaxed">
+                <li>Lưu toàn bộ mã nguồn ứng dụng này thành 1 file duy nhất tên là <b class="text-white">index.html</b> trên máy tính.</li>
+                <li>Đăng nhập <a href="https://github.com" target="_blank" class="text-indigo-400 underline">github.com</a> → bấm dấu <b>+</b> góc trên phải → chọn <b>New repository</b> → đặt tên (VD: <code class="text-indigo-300">autocut-studio</code>) → chọn <b>Public</b> → bấm <b>Create repository</b>.</li>
+                <li>Bấm <b>Add file</b> → <b>Upload files</b> → kéo thả file <code class="text-indigo-300">index.html</code> vào → bấm nút xanh <b>Commit changes</b>.</li>
+                <li>Vào tab <b>Settings</b> của Repository → chọn mục <b>Pages</b> ở menu bên trái → tại phần <b>Branch</b> đổi từ <i>None</i> sang <b>main</b> → bấm <b>Save</b>.</li>
+                <li>Đợi 30 giây và tải lại trang, GitHub sẽ cấp cho bạn đường dẫn web riêng (dạng <code class="text-emerald-400">https://ten-cua-ban.github.io/autocut-studio/</code>). Bạn chỉ cần gửi link này kèm tài khoản con đã tạo ở Tab 1 cho khách hàng!</li>
+              </ol>
+            </div>
+
+            <!-- Change Master Password -->
+            <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <h4 class="text-xs font-bold text-amber-400 uppercase">Đổi Mã Bí Mật Chủ Sở Hữu (Master Owner Password)</h4>
+              <div class="flex gap-2">
+                <input type="text" id="newOwnerMasterPass" placeholder="Nhập mã bí mật mới của riêng bạn..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+                <button onclick="updateOwnerMasterPass()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs">Cập Nhật Mã</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 3: XUẤT VIDEO 4 CHUẨN CHẤT LƯỢNG (720P / 1080P / 2K / 4K)       -->
+  <!-- ===================================================================== -->
+  <div id="exportModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Thành Phẩm
+          </h3>
+          <p class="text-[11px] text-zinc-400">Chọn độ phân giải đầu ra chuẩn Studio</p>
+        </div>
+        <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- 4 Quality Tiers -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="selectExportQuality('720p')" id="q-btn-720p" class="q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-indigo-500 text-left transition">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-white">720p HD</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">Nhanh</span>
+          </div>
+          <div class="text-[10px] text-zinc-500 mt-1">1280×720 • 6 Mbps • Mọi tài khoản</div>
+        </button>
+
+        <button onclick="selectExportQuality('1080p')" id="q-btn-1080p" class="q-btn p-3 rounded-xl bg-indigo-950/40 border-2 border-indigo-500 text-left transition">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-white">1080p Full HD</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Chuẩn</span>
+          </div>
+          <div class="text-[10px] text-zinc-400 mt-1">1920×1080 • 12 Mbps • TikTok/Reels</div>
+        </button>
+
+        <button onclick="selectExportQuality('2k')" id="q-btn-2k" class="q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-purple-500 text-left transition">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-purple-300">2K QHD</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">Pro</span>
+          </div>
+          <div class="text-[10px] text-zinc-500 mt-1">2560×1440 • 22 Mbps • Siêu nét</div>
+        </button>
+
+        <button onclick="selectExportQuality('4k')" id="q-btn-4k" class="q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-amber-500 text-left transition">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-amber-400">4K Ultra HD</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Master</span>
+          </div>
+          <div class="text-[10px] text-zinc-500 mt-1">3840×2160 • 35 Mbps • Cao cấp nhất</div>
+        </button>
+      </div>
+
+      <div class="bg-zinc-950 rounded-xl p-3 border border-zinc-800 text-xs space-y-1.5">
+        <div class="flex justify-between">
+          <span class="text-zinc-400">Độ phân giải xuất thực tế:</span>
+          <span id="exportExactPixel" class="text-indigo-400 font-mono font-bold">1080 × 1920 px (9:16)</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-zinc-400">Thời lượng đoạn cắt:</span>
+          <span id="exportDurationInfo" class="text-zinc-200 font-mono">10.0s</span>
+        </div>
+      </div>
+
+      <div id="exportProgressSection" class="hidden space-y-2">
+        <div class="flex justify-between text-xs">
+          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang kết xuất video chất lượng cao...</span>
+          <span id="exportPercentText" class="font-mono text-white">0%</span>
+        </div>
+        <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+          <div id="exportProgressBar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full w-0 transition-all"></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="startRenderBtn" onclick="startVideoExport()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg transition">
+          Bắt Đầu Xuất & Tải Video Về Máy
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Media Elements -->
+  <video id="sourceVideo" class="hidden" playsinline crossorigin="anonymous"></video>
+  <audio id="bgmAudio" class="hidden" loop crossorigin="anonymous"></audio>
+
+  <script>
+    // =========================================================================
+    // 1. MULTI-ACCOUNT, SUB-ACCOUNT PERMISSIONS & OWNER SAAS ENGINE
+    // =========================================================================
+    const STORAGE_KEY = 'autocut_enterprise_saas_v3';
+
+    function loadSystemData() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+
+      const now = new Date();
+      const nextYear = new Date(now);
+      nextYear.setFullYear(now.getFullYear() + 1);
+
+      const expireSoon = new Date(now);
+      expireSoon.setDate(now.getDate() + 18);
+
+      return {
+        ownerEmail: 'admin@autocut.vn',
+        ownerMasterPass: 'OWNER-MASTER-2026',
+        githubUrl: 'https://your-username.github.io/autocut-studio/',
+        currentSession: null, // { role: 'owner' | 'sub', email: string }
+        subAccounts: [
+          {
+            id: 'SUB-01',
+            name: 'Studio Trang Sức Bạc Cao Cấp',
+            email: 'silver@studio.vn',
+            password: '123',
+            status: 'active', // 'active' | 'pending' | 'locked'
+            createdAt: now.toISOString(),
+            expiresAt: nextYear.toISOString(),
+            permissions: { autoEdit: true, export4k: true, trendHub: true }
+          },
+          {
+            id: 'SUB-02',
+            name: 'Team Media TikTok Hà Nội',
+            email: 'tiktok@media.vn',
+            password: '123',
+            status: 'active',
+            createdAt: now.toISOString(),
+            expiresAt: expireSoon.toISOString(),
+            permissions: { autoEdit: true, export4k: false, trendHub: true }
+          }
+        ]
+      };
+    }
+
+    let sysData = loadSystemData();
+    let isOwnerUnlocked = false;
+
+    function saveSystemData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sysData));
+      refreshAccountUI();
+    }
+
+    function getActivePermissions() {
+      if (sysData.currentSession?.role === 'owner') {
+        return { role: 'owner', name: 'Chủ Sở Hữu (Master)', autoEdit: true, export4k: true, trendHub: true, expiresAt: null };
+      }
+      if (sysData.currentSession?.role === 'sub') {
+        const sub = sysData.subAccounts.find(u => u.email === sysData.currentSession.email);
+        if (sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date()) {
+          return {
+            role: 'sub',
+            name: sub.name,
+            autoEdit: sub.permissions.autoEdit,
+            export4k: sub.permissions.export4k,
+            trendHub: sub.permissions.trendHub,
+            expiresAt: sub.expiresAt
+          };
+        }
+      }
+      // Default Guest permissions
+      return { role: 'guest', name: 'Khách Trải Nghiệm', autoEdit: true, export4k: false, trendHub: false, expiresAt: null };
+    }
+
+    function refreshAccountUI() {
+      const perms = getActivePermissions();
+      const roleBadge = document.getElementById('headerRoleBadge');
+      const userNameEl = document.getElementById('headerUserName');
+      const userExpEl = document.getElementById('headerUserExpiry');
+      const avatarEl = document.getElementById('userAvatarBadge');
+      const permNotice = document.getElementById('permissionSummaryText');
+      const trendTag = document.getElementById('trendLockTag');
+      const authBtnLabel = document.getElementById('authBtnLabel');
+
+      userNameEl.innerText = perms.name;
+      avatarEl.innerText = perms.name.charAt(0).toUpperCase();
+
+      if (perms.role === 'owner') {
+        roleBadge.innerText = 'CHỦ SỞ HỮU (MASTER)';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400';
+        userExpEl.innerText = 'Toàn quyền vĩnh viễn';
+        permNotice.innerHTML = 'Quyền Chủ Sở Hữu: Mở khóa <b>100% tính năng & Xuất 4K</b>.';
+        trendTag.innerText = 'Đã mở khóa (Owner)';
+        trendTag.className = 'text-[9px] text-amber-400 font-semibold';
+        authBtnLabel.innerText = 'Tài Khoản Owner';
+      } else if (perms.role === 'sub') {
+        const expDate = new Date(perms.expiresAt).toLocaleDateString('vi-VN');
+        roleBadge.innerText = 'TÀI KHOẢN CON';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400';
+        userExpEl.innerText = `Hết hạn: ${expDate}`;
+        permNotice.innerHTML = `Quyền được cấp: Auto-AI (${perms.autoEdit ? '✓' : '✕'}) • 2K/4K (${perms.export4k ? '✓' : '✕'})`;
+        trendTag.innerText = perms.trendHub ? 'Đã mở khóa' : 'Khóa bởi Owner';
+        trendTag.className = perms.trendHub ? 'text-[9px] text-emerald-400 font-semibold' : 'text-[9px] text-zinc-500';
+        authBtnLabel.innerText = 'Đổi Tài Khoản';
+      } else {
+        roleBadge.innerText = 'KHÁCH (FREE)';
+        roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300';
+        userExpEl.innerText = 'Chưa đăng nhập';
+        permNotice.innerHTML = 'Chế độ Khách: Xuất tối đa 1080p. Đăng nhập để dùng full quyền.';
+        trendTag.innerText = 'Cần cấp quyền';
+        trendTag.className = 'text-[9px] text-zinc-500';
+        authBtnLabel.innerText = 'Đăng Nhập / Đăng Ký';
+      }
+    }
+
+    // AUTH MODAL HANDLERS
+    function openAuthModal(tab = 'login') {
+      document.getElementById('authModal').classList.remove('hidden');
+      switchAuthTab(tab);
+    }
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+    function switchAuthTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('loginFormPanel').classList.toggle('hidden', !isLogin);
+      document.getElementById('registerFormPanel').classList.toggle('hidden', isLogin);
+      document.getElementById('authSwitchLogin').className = isLogin ? 'py-2 rounded-lg bg-indigo-600 text-white transition' : 'py-2 rounded-lg text-zinc-400 hover:text-white transition';
+      document.getElementById('authSwitchRegister').className = !isLogin ? 'py-2 rounded-lg bg-indigo-600 text-white transition' : 'py-2 rounded-lg text-zinc-400 hover:text-white transition';
+    }
+
+    function handleLoginSubmit() {
+      const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPasswordInput').value.trim();
+
+      if (!email || !pass) return alert('Vui lòng nhập đầy đủ Email và Mật khẩu!');
+
+      // Check Owner login
+      if ((email === sysData.ownerEmail || email === 'owner') && pass === sysData.ownerMasterPass) {
+        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
+        isOwnerUnlocked = true;
+        saveSystemData();
+        closeAuthModal();
+        alert('Chào mừng Chủ Sở Hữu! Toàn bộ quyền quản trị và xuất 4K đã được kích hoạt.');
+        return;
+      }
+
+      // Check Sub-Account login
+      const sub = sysData.subAccounts.find(u => u.email.toLowerCase() === email && u.password === pass);
+      if (!sub) {
+        return alert('Sai Email hoặc Mật khẩu! Nếu chưa có tài khoản, hãy chuyển sang tab Đăng Ký.');
+      }
+      if (sub.status === 'locked') {
+        return alert('Tài khoản con này đang bị Chủ Sở Hữu tạm khóa. Vui lòng liên hệ Owner.');
+      }
+      if (sub.status === 'pending') {
+        return alert('Tài khoản của bạn đã đăng ký thành công và đang chờ Chủ Sở Hữu duyệt cấp quyền!');
+      }
+      if (new Date(sub.expiresAt) < new Date()) {
+        return alert('Tài khoản của bạn đã hết hạn chu kỳ năm. Vui lòng liên hệ Chủ Sở Hữu để gia hạn!');
+      }
+
+      sysData.currentSession = { role: 'sub', email: sub.email };
+      saveSystemData();
+      closeAuthModal();
+      alert(`Đăng nhập thành công! Xin chào ${sub.name}.`);
+    }
+
+    function quickOwnerLogin() {
+      sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
+      isOwnerUnlocked = true;
+      saveSystemData();
+      closeAuthModal();
+      alert('Đã đăng nhập nhanh với quyền Chủ Sở Hữu (Master Owner)!');
+    }
+
+    function logoutAccount() {
+      sysData.currentSession = null;
+      isOwnerUnlocked = false;
+      saveSystemData();
+      closeAuthModal();
+    }
+
+    function handleRegisterSubmit() {
+      const name = document.getElementById('regNameInput').value.trim();
+      const email = document.getElementById('regEmailInput').value.trim().toLowerCase();
+      const password = document.getElementById('regPasswordInput').value.trim();
+
+      if (!name || !email || !password) return alert('Vui lòng điền đầy đủ Họ tên, Email và Mật khẩu!');
+      if (sysData.subAccounts.some(u => u.email.toLowerCase() === email) || email === sysData.ownerEmail) {
+        return alert('Email này đã tồn tại trong hệ thống!');
+      }
+
+      const now = new Date();
+      const nextYear = new Date(now);
+      nextYear.setFullYear(now.getFullYear() + 1);
+
+      sysData.subAccounts.unshift({
+        id: 'SUB-' + Math.floor(100 + Math.random() * 900),
+        name,
+        email,
+        password,
+        status: 'pending', // Chờ Owner duyệt cấp quyền
+        createdAt: now.toISOString(),
+        expiresAt: nextYear.toISOString(),
+        permissions: { autoEdit: true, export4k: false, trendHub: false }
+      });
+
+      saveSystemData();
+      alert('Đăng ký tài khoản con thành công! Tài khoản của bạn đã xuất hiện trong bảng quản trị của Chủ Sở Hữu để duyệt cấp quyền.');
+      switchAuthTab('login');
+      document.getElementById('loginEmailInput').value = email;
+    }
+
+    // OWNER DASHBOARD HANDLERS
+    function openOwnerDashboard() {
+      document.getElementById('ownerDashboardModal').classList.remove('hidden');
+      if (sysData.currentSession?.role === 'owner' || isOwnerUnlocked) {
+        showOwnerUnlockedView();
+      } else {
+        document.getElementById('ownerAuthGate').classList.remove('hidden');
+        document.getElementById('ownerControlContent').classList.add('hidden');
+      }
+    }
+
+    function closeOwnerDashboard() {
+      document.getElementById('ownerDashboardModal').classList.add('hidden');
+    }
+
+    function verifyOwnerMaster() {
+      const val = document.getElementById('ownerMasterPassInput').value.trim();
+      if (val === sysData.ownerMasterPass) {
+        isOwnerUnlocked = true;
+        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
+        saveSystemData();
+        showOwnerUnlockedView();
+      } else {
+        alert('Sai mã bí mật Chủ Sở Hữu!');
+      }
+    }
+
+    function showOwnerUnlockedView() {
+      document.getElementById('ownerAuthGate').classList.add('hidden');
+      document.getElementById('ownerControlContent').classList.remove('hidden');
+      document.getElementById('githubUrlInput').value = sysData.githubUrl || '';
+      renderSubAccountsTable();
+      renderAnnualCalendar();
+    }
+
+    function switchOwnerTab(tabName) {
+      document.querySelectorAll('.own-tab').forEach(btn => {
+        btn.classList.remove('text-amber-400', 'border-b-2', 'border-amber-400');
+        btn.classList.add('text-zinc-400');
+      });
+      document.getElementById(`own-tab-${tabName}`).classList.add('text-amber-400', 'border-b-2', 'border-amber-400');
+      document.getElementById(`own-tab-${tabName}`).classList.remove('text-zinc-400');
+
+      document.querySelectorAll('.own-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`own-panel-${tabName}`).classList.remove('hidden');
+    }
+
+    function createSubAccountByOwner() {
+      const name = document.getElementById('newSubName').value.trim();
+      const email = document.getElementById('newSubEmail').value.trim().toLowerCase();
+      const password = document.getElementById('newSubPass').value.trim() || '123456';
+      const years = parseFloat(document.getElementById('newSubDuration').value);
+
+      if (!name || !email) return alert('Vui lòng nhập tên và email cho tài khoản con!');
+      if (sysData.subAccounts.some(u => u.email.toLowerCase() === email)) return alert('Email này đã tồn tại!');
+
+      const now = new Date();
+      const exp = new Date(now);
+      exp.setDate(now.getDate() + Math.round(years * 365));
+
+      sysData.subAccounts.unshift({
+        id: 'SUB-' + Math.floor(100 + Math.random() * 900),
+        name,
+        email,
+        password,
+        status: 'active',
+        createdAt: now.toISOString(),
+        expiresAt: exp.toISOString(),
+        permissions: { autoEdit: true, export4k: true, trendHub: true }
+      });
+
+      document.getElementById('newSubName').value = '';
+      document.getElementById('newSubEmail').value = '';
+      saveSystemData();
+      renderSubAccountsTable();
+      renderAnnualCalendar();
+    }
+
+    function toggleSubPermission(id, permKey) {
+      const sub = sysData.subAccounts.find(u => u.id === id);
+      if (!sub) return;
+      sub.permissions[permKey] = !sub.permissions[permKey];
+      saveSystemData();
+    }
+
+    function approveOrToggleSubStatus(id) {
+      const sub = sysData.subAccounts.find(u => u.id === id);
+      if (!sub) return;
+      if (sub.status === 'pending' || sub.status === 'locked') {
+        sub.status = 'active';
+      } else {
+        sub.status = 'locked';
+      }
+      saveSystemData();
+      renderSubAccountsTable();
+      renderAnnualCalendar();
+    }
+
+    function renewSubAccountOneYear(id) {
+      const sub = sysData.subAccounts.find(u => u.id === id);
+      if (!sub) return;
+      const baseDate = new Date(sub.expiresAt) > new Date() ? new Date(sub.expiresAt) : new Date();
+      baseDate.setFullYear(baseDate.getFullYear() + 1);
+      sub.expiresAt = baseDate.toISOString();
+      sub.status = 'active';
+      saveSystemData();
+      renderSubAccountsTable();
+      renderAnnualCalendar();
+      alert(`Đã gia hạn thêm +1 Năm cho tài khoản con: ${sub.name}`);
+    }
+
+    function deleteSubAccount(id) {
+      if (!confirm('Bạn có chắc muốn xóa vĩnh viễn tài khoản con này?')) return;
+      sysData.subAccounts = sysData.subAccounts.filter(u => u.id !== id);
+      saveSystemData();
+      renderSubAccountsTable();
+      renderAnnualCalendar();
+    }
+
+    function copySubInviteInfo(email, pass) {
+      const url = sysData.githubUrl || window.location.href;
+      const msg = `Link truy cập AutoCut Studio AI: ${url}\nEmail đăng nhập: ${email}\nMật khẩu: ${pass}`;
+      navigator.clipboard.writeText(msg);
+      alert('Đã sao chép Link GitHub + Thông tin đăng nhập tài khoản con để gửi cho khách!');
+    }
+
+    function renderSubAccountsTable() {
+      const tbody = document.getElementById('subAccountsTableBody');
+      document.getElementById('subAccountCount').innerText = sysData.subAccounts.length;
+      tbody.innerHTML = '';
+
+      let activeCount = 0;
+      let expiringCount = 0;
+      const now = new Date();
+
+      sysData.subAccounts.forEach(sub => {
+        const expDate = new Date(sub.expiresAt);
+        const daysLeft = Math.ceil((expDate - now) / (1000 * 60 * 60 * 24));
+        if (sub.status === 'active' && daysLeft > 0) activeCount++;
+        if (sub.status === 'pending' || (daysLeft > 0 && daysLeft <= 30)) expiringCount++;
+
+        let statusBadge = '';
+        if (sub.status === 'pending') {
+          statusBadge = `<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">Chờ Duyệt</span>`;
+        } else if (sub.status === 'locked' || daysLeft <= 0) {
+          statusBadge = `<span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-[10px] font-bold">Đã Khóa / Hết Hạn</span>`;
+        } else {
+          statusBadge = `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Hoạt Động (${daysLeft}d)</span>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-zinc-900/60 transition';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3">
+            <div class="font-bold text-white">${sub.name}</div>
+            <div class="text-[10px] text-zinc-400">${sub.email}</div>
+          </td>
+          <td class="py-2.5 px-3 font-mono text-zinc-300 text-[11px]">${sub.password}</td>
+          <td class="py-2.5 px-3 text-center">
+            <input type="checkbox" ${sub.permissions.autoEdit ? 'checked' : ''} onchange="toggleSubPermission('${sub.id}', 'autoEdit')" class="accent-indigo-500 w-4 h-4 cursor-pointer" />
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <input type="checkbox" ${sub.permissions.export4k ? 'checked' : ''} onchange="toggleSubPermission('${sub.id}', 'export4k')" class="accent-purple-500 w-4 h-4 cursor-pointer" />
+          </td>
+          <td class="py-2.5 px-3 text-center">
+            <input type="checkbox" ${sub.permissions.trendHub ? 'checked' : ''} onchange="toggleSubPermission('${sub.id}', 'trendHub')" class="accent-emerald-500 w-4 h-4 cursor-pointer" />
+          </td>
+          <td class="py-2.5 px-3 text-[11px] text-zinc-300">${expDate.toLocaleDateString('vi-VN')}</td>
+          <td class="py-2.5 px-3">${statusBadge}</td>
+          <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
+            <button onclick="copySubInviteInfo('${sub.email}', '${sub.password}')" title="Copy Link + Tài khoản gửi khách" class="px-2 py-1 rounded bg-zinc-800 hover:bg-indigo-600 text-[10px] text-white">
+              <i class="fa-solid fa-share-nodes"></i> Gửi Link
+            </button>
+            <button onclick="renewSubAccountOneYear('${sub.id}')" class="px-2 py-1 rounded bg-emerald-600/20 hover:bg-emerald-600 text-[10px] text-emerald-300 hover:text-white font-semibold">
+              +1 Năm
+            </button>
+            <button onclick="approveOrToggleSubStatus('${sub.id}')" class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-500 text-[10px] text-amber-300 hover:text-zinc-950 font-semibold">
+              ${sub.status === 'active' ? 'Khóa' : 'Duyệt / Mở'}
+            </button>
+            <button onclick="deleteSubAccount('${sub.id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-red-600 text-[10px] text-zinc-400 hover:text-white">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('statActiveSubs').innerText = activeCount;
+      document.getElementById('statExpiringSubs').innerText = expiringCount;
+    }
+
+    function renderAnnualCalendar() {
+      const grid = document.getElementById('annualCalendarGrid');
+      grid.innerHTML = '';
+      const months = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+
+      months.forEach((mName, idx) => {
+        const dueSubs = sysData.subAccounts.filter(u => new Date(u.expiresAt).getMonth() === idx);
+        const card = document.createElement('div');
+        card.className = `p-3 rounded-xl border ${dueSubs.length > 0 ? 'bg-indigo-950/30 border-indigo-500/40' : 'bg-zinc-900/60 border-zinc-800'}`;
+        
+        let listHtml = `<div class="text-[10px] text-zinc-500 mt-1">Không có tài khoản đến hạn</div>`;
+        if (dueSubs.length > 0) {
+          listHtml = dueSubs.map(u => `<div class="text-[10px] text-indigo-300 truncate mt-1">• ${u.name} (${new Date(u.expiresAt).getDate()}/${idx+1})</div>`).join('');
+        }
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white">${mName}</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded ${dueSubs.length > 0 ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-500'}">${dueSubs.length} hạn</span>
+          </div>
+          ${listHtml}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function saveGithubUrl() {
+      const url = document.getElementById('githubUrlInput').value.trim();
+      if (!url) return;
+      sysData.githubUrl = url;
+      saveSystemData();
+      alert('Đã lưu đường dẫn GitHub Pages của bạn!');
+    }
+
+    function updateOwnerMasterPass() {
+      const newPass = document.getElementById('newOwnerMasterPass').value.trim();
+      if (!newPass || newPass.length < 4) return alert('Mã bí mật mới phải có ít nhất 4 ký tự!');
+      sysData.ownerMasterPass = newPass;
+      saveSystemData();
+      document.getElementById('newOwnerMasterPass').value = '';
+      alert('Đã cập nhật Mã Bí Mật Chủ Sở Hữu mới thành công!');
+    }
+
+    // =========================================================================
+    // 2. VIDEO EDITOR ENGINE & AI AGENT STATE
+    // =========================================================================
+    const canvas = document.getElementById('previewCanvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('sourceVideo');
+    const bgm = document.getElementById('bgmAudio');
+
+    const state = {
+      hasVideo: false,
+      isDemoMode: false,
+      isPlaying: false,
+      duration: 10,
+      currentTime: 0,
+      trimStart: 0,
+      trimEnd: 10,
+      aspectRatio: '9:16',
+      exportQuality: '1080p',
+      zoom: 1.0,
+      speed: 1.0,
+      autoZoom: false,
+      filters: { brightness: 100, contrast: 100, saturate: 100 },
+      text: {
+        visible: true,
+        kinetic: true,
+        content: 'AUTOCUT STUDIO AI',
+        color: '#ffffff',
+        bgColor: '#4f46e5',
+        size: 28,
+        xRatio: 0.5,
+        yRatio: 0.82
+      },
+      sfxEvents: [],
+      lastTriggeredSfxIndex: -1,
+      isDraggingText: false
+    };
+
+    const QUALITY_SPECS = {
+      '720p':  { label: '720p HD', shortDim: 720, bitrate: 6000000 },
+      '1080p': { label: '1080p Full HD', shortDim: 1080, bitrate: 12000000 },
+      '2k':    { label: '2K QHD', shortDim: 1440, bitrate: 22000000 },
+      '4k':    { label: '4K Ultra HD', shortDim: 2160, bitrate: 35000000 }
+    };
+
+    // Web Audio Synthesizer for SFX
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playSynthSfx(type) {
+      const ac = getAudioContext();
+      const now = ac.currentTime;
+      const osc = ac.createOscillator();
+      const gain = ac.createGain();
+      osc.connect(gain);
+      gain.connect(ac.destination);
+
+      if (type === 'whoosh') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(520, now + 0.18);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.35);
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.28, now + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+        osc.start(now); osc.stop(now + 0.36);
+      } else if (type === 'pop') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+      } else if (type === 'ding') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.5, now);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc.start(now); osc.stop(now + 0.6);
+      } else if (type === 'bass') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.45);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+        osc.start(now); osc.stop(now + 0.48);
+      }
+    }
+
+    function formatSize(bytes) {
+      if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function handleRawVideoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('rawVideoName').innerText = file.name;
+      document.getElementById('rawVideoMeta').innerText = `Dung lượng: ${formatSize(file.size)} • Zero-Limit Local Stream`;
+      const url = URL.createObjectURL(file);
+      state.isDemoMode = false;
+      state.hasVideo = true;
+      document.getElementById('emptyCanvasOverlay').classList.add('hidden');
+
+      video.src = url;
+      video.onloadedmetadata = () => {
+        state.duration = video.duration || 10;
+        state.trimStart = 0;
+        state.trimEnd = state.duration;
+        state.currentTime = 0;
+        syncTrimSliders();
+        resizeCanvas();
+      };
+    }
+
+    function handleRefVideoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('refVideoName').innerText = file.name;
+      const tempVid = document.createElement('video');
+      tempVid.src = URL.createObjectURL(file);
+      tempVid.onloadedmetadata = () => {
+        const isVertical = tempVid.videoHeight > tempVid.videoWidth;
+        setAspectRatio(isVertical ? '9:16' : '16:9');
+        document.getElementById('refVideoMeta').innerText = `Đã học khung ${isVertical ? '9:16' : '16:9'} (${formatSize(file.size)})`;
+      };
+    }
+
+    function handleBgmUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('bgmName').innerText = file.name;
+      bgm.src = URL.createObjectURL(file);
+      bgm.volume = document.getElementById('bgmVolSlider').value / 100;
+    }
+
+    function loadDemoVideo() {
+      state.isDemoMode = true;
+      state.hasVideo = true;
+      state.duration = 12.0;
+      state.trimStart = 0;
+      state.trimEnd = 12.0;
+      state.currentTime = 0;
+      document.getElementById('rawVideoName').innerText = 'Demo_Product_Showcase_4K.mp4';
+      document.getElementById('rawVideoMeta').innerText = '1.42 GB • Zero-Limit Local Stream';
+      document.getElementById('emptyCanvasOverlay').classList.add('hidden');
+      syncTrimSliders();
+      resizeCanvas();
+      if (!state.isPlaying) togglePlay();
+    }
+
+    function applyPresetPrompt(type) {
+      const box = document.getElementById('aiPromptInput');
+      if (type === 'luxury') {
+        box.value = 'Dựng phong cách review sản phẩm sang trọng, giữ nguyên màu ánh kim sáng nét tự nhiên, cắt gọn 1 giây đầu thừa, zoom chuyển động mượt mà và chèn tiếng ding tinh tế.';
+      } else if (type === 'tiktok') {
+        box.value = 'Edit video TikTok viral nhịp nhanh, bật chạy chữ động bắt mắt từng từ, cắt ngắn gọn gàng và chèn tiếng whoosh + pop liên tục theo nhịp.';
+      } else if (type === 'vlog') {
+        box.value = 'Cắt bỏ khoảng lặng thừa, chỉnh màu ấm áp tự nhiên, tốc độ 1.1x năng động kèm phụ đề nổi bật.';
+      } else if (type === 'cinematic') {
+        box.value = 'Đổi sang khung ngang 16:9 điện ảnh, chỉnh màu sâu lắng, tốc độ chậm 0.85x mượt mà và thêm tiếng bass drop mở đầu.';
+      }
+    }
+
+    function handleQuickChatCommand() {
+      const cmd = document.getElementById('quickChatCommand').value.trim();
+      if (!cmd) return;
+      document.getElementById('aiPromptInput').value = cmd;
+      document.getElementById('quickChatCommand').value = '';
+      runSmartAutoEdit();
+    }
+
+    async function runSmartAutoEdit() {
+      const perms = getActivePermissions();
+      if (!perms.autoEdit) {
+        return alert('Tài khoản con của bạn chưa được Chủ Sở Hữu bật quyền Auto-Edit AI. Vui lòng liên hệ Owner!');
+      }
+
+      if (!state.hasVideo) loadDemoVideo();
+      const prompt = document.getElementById('aiPromptInput').value.trim() || 'Tự động dựng video chuyên nghiệp, cắt gọn đoạn thừa, tăng độ sáng nét và chèn hiệu ứng âm thanh';
+      const statusBox = document.getElementById('aiStatusBox');
+      const progressBar = document.getElementById('aiProgressBar');
+      const percentText = document.getElementById('aiProgressPercent');
+      const logList = document.getElementById('aiLogList');
+
+      statusBox.classList.remove('hidden');
+      logList.innerHTML = '';
+
+      const steps = [
+        { p: 25, msg: 'AI Agent đang đọc ý định & phân tích khung hình...' },
+        { p: 55, msg: 'Tự động cắt gọn đoạn thừa & cân chỉnh ánh sáng...' },
+        { p: 80, msg: 'Khởi tạo Kinetic Captions & đồng bộ Beat-Sync SFX...' },
+        { p: 100, msg: 'Hoàn tất dựng tự động 100% theo ý tưởng!' }
+      ];
+
+      for (const s of steps) {
+        progressBar.style.width = s.p + '%';
+        percentText.innerText = s.p + '%';
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i>${s.msg}`;
+        logList.appendChild(li);
+        await new Promise(r => setTimeout(r, 320));
+      }
+
+      const lower = prompt.toLowerCase();
+
+      // Natural language intent mapping
+      if (lower.includes('sang') || lower.includes('bạc') || lower.includes('kim loại') || lower.includes('nguyên bản')) {
+        applyColorPreset('silver');
+        state.text.content = 'CHẤT LIỆU BẠC XI BẠCH KIM';
+        state.text.bgColor = '#3f3f46';
+      } else if (lower.includes('tiktok') || lower.includes('viral') || lower.includes('bắt mắt')) {
+        applyColorPreset('vivid');
+        state.text.content = 'XU HƯỚNG HOT NHẤT 2026 🔥';
+        state.text.bgColor = '#db2777';
+      } else if (lower.includes('cinematic') || lower.includes('phim') || lower.includes('16:9')) {
+        setAspectRatio('16:9');
+        applyColorPreset('cinematic');
+        state.text.content = 'CINEMATIC EDITION';
+      } else {
+        applyColorPreset('silver');
+      }
+
+      if (lower.includes('vàng')) state.text.color = '#facc15';
+      if (lower.includes('tăng sáng')) {
+        state.filters.brightness = 120;
+        document.getElementById('brightSlider').value = 120;
+        document.getElementById('brightVal').innerText = '120%';
+      }
+
+      // Smart trim
+      if (state.duration > 4) {
+        state.trimStart = Number((state.duration * 0.08).toFixed(1));
+        state.trimEnd = Number((state.duration * 0.92).toFixed(1));
+        syncTrimSliders();
+      }
+
+      state.autoZoom = !lower.includes('tắt zoom');
+      document.getElementById('autoZoomToggle').checked = state.autoZoom;
+      state.text.kinetic = document.getElementById('trendKinetic').checked;
+      document.getElementById('kineticTextToggle').checked = state.text.kinetic;
+      document.getElementById('overlayTextInput').value = state.text.content;
+      updateTextOverlay();
+
+      // Auto-populate SFX
+      state.sfxEvents = [
+        { time: state.trimStart + 0.2, type: 'whoosh', label: 'Whoosh' },
+        { time: Number(((state.trimStart + state.trimEnd) / 2).toFixed(1)), type: 'ding', label: 'Ding ✨' }
+      ];
+      renderSfxMarkers();
+
+      state.currentTime = state.trimStart;
+      if (!state.isDemoMode) video.currentTime = state.trimStart;
+      if (!state.isPlaying) togglePlay();
+    }
+
+    // =========================================================================
+    // 3. CANVAS RENDERER, TIMELINE & VISUAL CONTROLS
+    // =========================================================================
+    function setAspectRatio(ratio) {
+      state.aspectRatio = ratio;
+      document.querySelectorAll('.ratio-btn').forEach(btn => {
+        const active = btn.dataset.ratio === ratio;
+        btn.className = active
+          ? 'ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-indigo-600 text-white'
+          : 'ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-400 hover:text-white';
+      });
+      resizeCanvas();
+      updateExportPixelLabel();
+    }
+
+    function resizeCanvas() {
+      const container = document.getElementById('viewportContainer');
+      const maxH = Math.max(260, container.clientHeight - 32);
+      const maxW = Math.max(220, container.clientWidth - 32);
+
+      let ratioVal = 9 / 16;
+      if (state.aspectRatio === '16:9') ratioVal = 16 / 9;
+      if (state.aspectRatio === '1:1') ratioVal = 1;
+      if (state.aspectRatio === '4:5') ratioVal = 4 / 5;
+
+      let h = maxH;
+      let w = h * ratioVal;
+      if (w > maxW) {
+        w = maxW;
+        h = w / ratioVal;
+      }
+      canvas.width = Math.round(w);
+      canvas.height = Math.round(h);
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function togglePlay() {
+      if (!state.hasVideo) return;
+      state.isPlaying = !state.isPlaying;
+      const btn = document.getElementById('playPauseBtn');
+      btn.innerHTML = state.isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
+
+      if (state.isPlaying) {
+        if (!state.isDemoMode) {
+          if (video.currentTime < state.trimStart || video.currentTime >= state.trimEnd) {
+            video.currentTime = state.trimStart;
+          }
+          video.play();
+        }
+        if (bgm.src) bgm.play().catch(() => {});
+      } else {
+        if (!state.isDemoMode) video.pause();
+        if (bgm.src) bgm.pause();
+      }
+    }
+
+    function skipToStart() {
+      state.currentTime = state.trimStart;
+      state.lastTriggeredSfxIndex = -1;
+      if (!state.isDemoMode) video.currentTime = state.trimStart;
+    }
+
+    function seekTimeline(e) {
+      const rect = document.getElementById('scrubberTrack').getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+      state.currentTime = pct * state.duration;
+      state.lastTriggeredSfxIndex = -1;
+      if (!state.isDemoMode) video.currentTime = state.currentTime;
+    }
+
+    function syncTrimSliders() {
+      const s = document.getElementById('trimStartSlider');
+      const e = document.getElementById('trimEndSlider');
+      s.max = state.duration; e.max = state.duration;
+      s.value = state.trimStart; e.value = state.trimEnd;
+      document.getElementById('trimStartVal').innerText = state.trimStart.toFixed(1) + 's';
+      document.getElementById('trimEndVal').innerText = state.trimEnd.toFixed(1) + 's';
+      document.getElementById('trimRangeLabel').innerText = `${state.trimStart.toFixed(1)}s - ${state.trimEnd.toFixed(1)}s`;
+      document.getElementById('totalDurationDisplay').innerText = formatTime(state.duration);
+
+      const leftPct = (state.trimStart / state.duration) * 100;
+      const widthPct = ((state.trimEnd - state.trimStart) / state.duration) * 100;
+      const hl = document.getElementById('trimHighlight');
+      hl.style.left = leftPct + '%';
+      hl.style.width = widthPct + '%';
+    }
+
+    function updateTrim() {
+      let s = parseFloat(document.getElementById('trimStartSlider').value);
+      let e = parseFloat(document.getElementById('trimEndSlider').value);
+      if (s >= e - 0.3) s = Math.max(0, e - 0.3);
+      state.trimStart = s; state.trimEnd = e;
+      syncTrimSliders();
+    }
+
+    function resetTrim() {
+      state.trimStart = 0; state.trimEnd = state.duration;
+      syncTrimSliders();
+    }
+
+    function updateTransform() {
+      const z = document.getElementById('zoomSlider').value;
+      state.zoom = z / 100;
+      document.getElementById('zoomVal').innerText = z + '%';
+    }
+
+    function updateSpeed() {
+      const sp = parseFloat(document.getElementById('speedSlider').value);
+      state.speed = sp;
+      if (!state.isDemoMode) video.playbackRate = sp;
+      document.getElementById('speedVal').innerText = sp.toFixed(1) + 'x';
+    }
+
+    function applyColorPreset(preset) {
+      let b = 100, c = 100, s = 100;
+      if (preset === 'silver') { b = 108; c = 114; s = 96; }
+      if (preset === 'vivid') { b = 105; c = 115; s = 135; }
+      if (preset === 'cinematic') { b = 95; c = 122; s = 88; }
+      state.filters = { brightness: b, contrast: c, saturate: s };
+      document.getElementById('brightSlider').value = b;
+      document.getElementById('contrastSlider').value = c;
+      document.getElementById('saturateSlider').value = s;
+      updateFilters();
+    }
+
+    function updateFilters() {
+      state.filters.brightness = document.getElementById('brightSlider').value;
+      state.filters.contrast = document.getElementById('contrastSlider').value;
+      state.filters.saturate = document.getElementById('saturateSlider').value;
+      document.getElementById('brightVal').innerText = state.filters.brightness + '%';
+      document.getElementById('contrastVal').innerText = state.filters.contrast + '%';
+      document.getElementById('saturateVal').innerText = state.filters.saturate + '%';
+    }
+
+    function updateTextOverlay() {
+      state.text.content = document.getElementById('overlayTextInput').value;
+      state.text.color = document.getElementById('textColorPicker').value;
+      state.text.bgColor = document.getElementById('textBgPicker').value;
+      state.text.size = parseInt(document.getElementById('fontSizeSlider').value);
+      document.getElementById('fontSizeVal').innerText = state.text.size + 'px';
+      document.getElementById('timelineTextPreview').innerText = state.text.content || '(Trống)';
+    }
+
+    function updateAudioVolumes() {
+      const ov = document.getElementById('origVolSlider').value;
+      const bv = document.getElementById('bgmVolSlider').value;
+      video.volume = ov / 100;
+      bgm.volume = bv / 100;
+      document.getElementById('origVolVal').innerText = ov + '%';
+      document.getElementById('bgmVolVal').innerText = bv + '%';
+    }
+
+    function triggerAndAddSfx(type) {
+      playSynthSfx(type);
+      const labels = { whoosh: 'Whoosh', pop: 'Pop!', ding: 'Ding ✨', bass: 'Bass Drop' };
+      state.sfxEvents.push({ time: Number(state.currentTime.toFixed(1)), type, label: labels[type] });
+      renderSfxMarkers();
+    }
+
+    function clearAllSfx() {
+      state.sfxEvents = [];
+      renderSfxMarkers();
+    }
+
+    function renderSfxMarkers() {
+      const container = document.getElementById('sfxMarkersContainer');
+      if (state.sfxEvents.length === 0) {
+        container.innerHTML = '<span class="text-[10px] text-zinc-600 italic">Chưa có hiệu ứng âm thanh</span>';
+        return;
+      }
+      container.innerHTML = state.sfxEvents.map((s) => `
+        <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-medium shrink-0">
+          ${s.label} @ ${s.time}s
+        </span>
+      `).join('');
+    }
+
+    // Canvas Drag Text
+    canvas.addEventListener('mousedown', (e) => {
+      if (!state.text.visible) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      if (Math.abs(x - state.text.xRatio) < 0.35 && Math.abs(y - state.text.yRatio) < 0.15) {
+        state.isDraggingText = true;
+      }
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!state.isDraggingText) return;
+      const rect = canvas.getBoundingClientRect();
+      state.text.xRatio = Math.max(0.1, Math.min(0.9, (e.clientX - rect.left) / rect.width));
+      state.text.yRatio = Math.max(0.1, Math.min(0.92, (e.clientY - rect.top) / rect.height));
+    });
+    window.addEventListener('mouseup', () => { state.isDraggingText = false; });
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = (sec % 60).toFixed(1);
+      return `${String(m).padStart(2, '0')}:${s.padStart(4, '0')}`;
+    }
+
+    // Main Render Loop
+    let lastFrameTime = performance.now();
+    function renderLoop(now) {
+      const dt = (now - lastFrameTime) / 1000;
+      lastFrameTime = now;
+
+      if (state.hasVideo) {
+        if (state.isPlaying) {
+          if (state.isDemoMode) {
+            state.currentTime += dt * state.speed;
+            if (state.currentTime >= state.trimEnd) {
+              state.currentTime = state.trimStart;
+              state.lastTriggeredSfxIndex = -1;
+            }
+          } else {
+            state.currentTime = video.currentTime;
+            if (state.currentTime >= state.trimEnd) {
+              video.currentTime = state.trimStart;
+              state.lastTriggeredSfxIndex = -1;
+            }
+          }
+
+          // Trigger SFX on timeline
+          state.sfxEvents.forEach((ev, idx) => {
+            if (Math.abs(state.currentTime - ev.time) < 0.08 && state.lastTriggeredSfxIndex !== idx) {
+              playSynthSfx(ev.type);
+              state.lastTriggeredSfxIndex = idx;
+            }
+          });
+        }
+
+        document.getElementById('currentTimeDisplay').innerText = formatTime(state.currentTime);
+        const pct = Math.min(100, (state.currentTime / state.duration) * 100);
+        document.getElementById('playhead').style.left = pct + '%';
+
+        drawFrame(ctx, canvas.width, canvas.height);
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    function drawFrame(targetCtx, w, h) {
+      targetCtx.save();
+      targetCtx.fillStyle = '#000';
+      targetCtx.fillRect(0, 0, w, h);
+
+      targetCtx.filter = `brightness(${state.filters.brightness}%) contrast(${state.filters.contrast}%) saturate(${state.filters.saturate}%)`;
+
+      const pulseZoom = state.autoZoom ? (1 + Math.sin(state.currentTime * 3) * 0.04) : 1;
+      const totalZoom = state.zoom * pulseZoom;
+
+      targetCtx.translate(w / 2, h / 2);
+      targetCtx.scale(totalZoom, totalZoom);
+      targetCtx.translate(-w / 2, -h / 2);
+
+      if (state.isDemoMode) {
+        const grad = targetCtx.createLinearGradient(0, 0, w, h);
+        grad.addColorStop(0, '#18181b');
+        grad.addColorStop(0.5, '#27272a');
+        grad.addColorStop(1, '#09090b');
+        targetCtx.fillStyle = grad;
+        targetCtx.fillRect(0, 0, w, h);
+
+        // Simulated metallic silver ring/product showcase
+        const cx = w / 2;
+        const cy = h * 0.44 + Math.sin(state.currentTime * 2) * 8;
+        const radius = Math.min(w, h) * 0.22;
+
+        const ringGrad = targetCtx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+        ringGrad.addColorStop(0, '#f4f4f5');
+        ringGrad.addColorStop(0.35, '#a1a1aa');
+        ringGrad.addColorStop(0.55, '#ffffff');
+        ringGrad.addColorStop(1, '#71717a');
+
+        targetCtx.strokeStyle = ringGrad;
+        targetCtx.lineWidth = radius * 0.24;
+        targetCtx.beginPath();
+        targetCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+        targetCtx.stroke();
+
+        // Sparkle glint
+        const glintAngle = state.currentTime * 2.5;
+        const gx = cx + Math.cos(glintAngle) * radius;
+        const gy = cy + Math.sin(glintAngle) * radius;
+        targetCtx.fillStyle = 'rgba(255,255,255,0.9)';
+        targetCtx.beginPath();
+        targetCtx.arc(gx, gy, 5, 0, Math.PI * 2);
+        targetCtx.fill();
+      } else if (video.readyState >= 2) {
+        const vw = video.videoWidth;
+        const vh = video.videoHeight;
+        const scale = Math.max(w / vw, h / vh);
+        const dw = vw * scale;
+        const dh = vh * scale;
+        targetCtx.drawImage(video, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      }
+
+      targetCtx.restore();
+
+      // Draw Text / Kinetic Captions
+      if (state.text.visible && state.text.content.trim()) {
+        targetCtx.save();
+        const scaleRatio = w / 360;
+        const fontSize = Math.round(state.text.size * scaleRatio);
+        targetCtx.font = `800 ${fontSize}px Inter, sans-serif`;
+        targetCtx.textAlign = 'center';
+        targetCtx.textBaseline = 'middle';
+
+        let displayStr = state.text.content;
+        if (state.text.kinetic) {
+          const words = displayStr.split(' ');
+          const activeIdx = Math.floor(state.currentTime * 3) % words.length;
+          displayStr = words.map((word, i) => i === activeIdx ? `[ ${word} ]` : word).join(' ');
+        }
+
+        const tx = w * state.text.xRatio;
+        const ty = h * state.text.yRatio;
+        const metrics = targetCtx.measureText(displayStr);
+        const padX = 14 * scaleRatio;
+        const padY = 8 * scaleRatio;
+        const boxW = metrics.width + padX * 2;
+        const boxH = fontSize + padY * 2;
+
+        targetCtx.fillStyle = state.text.bgColor;
+        targetCtx.beginPath();
+        targetCtx.roundRect(tx - boxW / 2, ty - boxH / 2, boxW, boxH, 8 * scaleRatio);
+        targetCtx.fill();
+
+        targetCtx.fillStyle = state.text.color;
+        targetCtx.fillText(displayStr, tx, ty);
+        targetCtx.restore();
+      }
+    }
+
+    // =========================================================================
+    // 4. 4-TIER EXPORT ENGINE (720P / 1080P / 2K / 4K)
+    // =========================================================================
+    function openExportModal() {
+      if (!state.hasVideo) return alert('Vui lòng nạp video thô hoặc bấm "Tạo Video Mẫu Thử Nghiệm" trước khi xuất!');
+      document.getElementById('exportModal').classList.remove('hidden');
+      document.getElementById('exportDurationInfo').innerText = (state.trimEnd - state.trimStart).toFixed(1) + 's';
+      selectExportQuality(state.exportQuality);
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.add('hidden');
+    }
+
+    function selectExportQuality(q) {
+      const perms = getActivePermissions();
+      if ((q === '2k' || q === '4k') && !perms.export4k) {
+        alert('Chức năng xuất 2K / 4K yêu cầu quyền từ Chủ Sở Hữu! Tài khoản hiện tại chỉ hỗ trợ tối đa 1080p Full HD.');
+        q = '1080p';
+      }
+
+      state.exportQuality = q;
+      document.querySelectorAll('.q-btn').forEach(btn => {
+        btn.className = 'q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-indigo-500 text-left transition';
+      });
+      const activeBtn = document.getElementById(`q-btn-${q}`);
+      activeBtn.className = 'q-btn p-3 rounded-xl bg-indigo-950/40 border-2 border-indigo-500 text-left transition';
+      document.getElementById('outputResIndicator').innerText = QUALITY_SPECS[q].label;
+      updateExportPixelLabel();
+    }
+
+    function updateExportPixelLabel() {
+      const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
+      let ew = shortSide, eh = Math.round(shortSide * 16 / 9);
+      if (state.aspectRatio === '16:9') { ew = Math.round(shortSide * 16 / 9); eh = shortSide; }
+      if (state.aspectRatio === '1:1') { ew = shortSide; eh = shortSide; }
+      if (state.aspectRatio === '4:5') { ew = shortSide; eh = Math.round(shortSide * 5 / 4); }
+      document.getElementById('exportExactPixel').innerText = `${ew} × ${eh} px (${state.aspectRatio})`;
+    }
+
+    async function startVideoExport() {
+      const progSec = document.getElementById('exportProgressSection');
+      const progBar = document.getElementById('exportProgressBar');
+      const progTxt = document.getElementById('exportPercentText');
+      const renderBtn = document.getElementById('startRenderBtn');
+
+      progSec.classList.remove('hidden');
+      renderBtn.disabled = true;
+      renderBtn.classList.add('opacity-50');
+
+      const stream = canvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm',
+        videoBitsPerSecond: QUALITY_SPECS[state.exportQuality].bitrate
+      });
+
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `AutoCut_Studio_${state.exportQuality.toUpperCase()}_${Date.now()}.webm`;
+        a.click();
+
+        progSec.classList.add('hidden');
+        renderBtn.disabled = false;
+        renderBtn.classList.remove('opacity-50');
+        closeExportModal();
+      };
+
+      const renderDurationMs = Math.min(8000, Math.max(2500, (state.trimEnd - state.trimStart) * 1000));
+      state.currentTime = state.trimStart;
+      if (!state.isDemoMode) video.currentTime = state.trimStart;
+      if (!state.isPlaying) togglePlay();
+
+      recorder.start();
+      const startTime = performance.now();
+
+      const timer = setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const pct = Math.min(100, Math.round((elapsed / renderDurationMs) * 100));
+        progBar.style.width = pct + '%';
+        progTxt.innerText = pct + '%';
+        if (elapsed >= renderDurationMs) {
+          clearInterval(timer);
+          recorder.stop();
+        }
+      }, 100);
+    }
+
+    // UI Helpers
+    function switchInspectorTab(tab) {
+      document.querySelectorAll('.ins-tab').forEach(b => {
+        b.classList.remove('text-indigo-400', 'border-b-2', 'border-indigo-500');
+        b.classList.add('text-zinc-400');
+      });
+      document.getElementById(`ins-tab-${tab}`).classList.add('text-indigo-400', 'border-b-2', 'border-indigo-500');
+      document.getElementById(`ins-tab-${tab}`).classList.remove('text-zinc-400');
+
+      document.querySelectorAll('.ins-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`ins-panel-${tab}`).classList.remove('hidden');
+    }
+
+    function switchWorkspaceMode(mode) {
+      const isAuto = mode === 'auto';
+      document.getElementById('tabAutoBtn').className = isAuto
+        ? 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow'
+        : 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all text-zinc-400 hover:text-white';
+      document.getElementById('tabEditorBtn').className = !isAuto
+        ? 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white shadow'
+        : 'px-4 py-1.5 rounded-lg text-xs font-semibold transition-all text-zinc-400 hover:text-white';
+    }
+
+    // Initialize App
+    refreshAccountUI();
+    resizeCanvas();
+    requestAnimationFrame(renderLoop);
+  </script>
+</body>
+</html>
