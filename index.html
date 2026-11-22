@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v4.0 — Multimodal Gemini Vision & Cloud SaaS</title>
+  <title>AutoCut Studio AI v6.0 — Zero-Bug Production Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -32,12 +32,9 @@
       border-radius: 50%;
       background: #6366f1;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
     .glass-panel {
-      background: rgba(24, 24, 27, 0.92);
+      background: rgba(24, 24, 27, 0.95);
       backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
@@ -54,11 +51,6 @@
       mask-composite: exclude;
       pointer-events: none;
     }
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.25); }
-      50% { box-shadow: 0 0 28px rgba(236, 72, 153, 0.45); }
-    }
-    .ai-glow { animation: pulseGlow 3s infinite; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col select-none">
@@ -71,13 +63,13 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-pink-400 font-mono">v4.0</span></h1>
-          <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH (FREE)</span>
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v6.0</span></h1>
+          <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
-          <span id="geminiStatusDot" class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Gemini API: Chưa gắn key</span>
+          <span id="geminiStatusDot" class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Gemini API: Chưa gắn</span>
           <span>•</span>
-          <span id="cloudStatusDot" class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Cloud Sync: Local</span>
+          <span id="cloudStatusDot" class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Cloud: Local</span>
         </div>
       </div>
     </div>
@@ -85,19 +77,18 @@
     <!-- Center Quick Pro Tools -->
     <div class="hidden xl:flex items-center gap-2 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-[11px]">
       <button onclick="openAiConfigModal()" class="px-3 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-semibold border border-indigo-500/30 transition flex items-center gap-1.5">
-        <i class="fa-solid fa-key"></i> Kết Nối Gemini API Thật
+        <i class="fa-solid fa-key"></i> Gắn Gemini API Key
       </button>
       <button onclick="toggleSafeZones()" id="safeZoneBtn" class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5">
         <i class="fa-solid fa-border-all"></i> Khung An Toàn TikTok
       </button>
-      <button onclick="openShortcutsHelp()" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition" title="Phím tắt dựng phim">
+      <button onclick="openShortcutsHelp()" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition">
         <i class="fa-solid fa-keyboard"></i> Phím Tắt
       </button>
     </div>
 
     <!-- Account & Export Actions -->
     <div class="flex items-center gap-2">
-      <!-- Current Logged-in User Display -->
       <div id="loggedUserChip" class="hidden sm:flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg">
         <div id="userAvatarBadge" class="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-bold">G</div>
         <div class="text-[11px] leading-tight">
@@ -106,20 +97,17 @@
         </div>
       </div>
 
-      <!-- Auth Button -->
-      <button id="authActionBtn" onclick="openAuthModal('login')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white border border-zinc-700 transition flex items-center gap-1.5">
+      <button onclick="openAuthModal('login')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white border border-zinc-700 transition flex items-center gap-1.5">
         <i class="fa-solid fa-user-circle text-indigo-400"></i>
         <span id="authBtnLabel">Đăng Nhập</span>
       </button>
 
-      <!-- Owner Control Panel Button -->
-      <button id="ownerAdminBtn" onclick="openOwnerDashboard()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-400 border border-amber-500/30 transition flex items-center gap-1.5">
+      <button onclick="openOwnerDashboard()" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-400 border border-amber-500/30 transition flex items-center gap-1.5">
         <i class="fa-solid fa-crown"></i>
         <span class="hidden lg:inline">Quản Trị Cloud</span>
       </button>
 
-      <!-- Export Button -->
-      <button onclick="openExportModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-semibold text-white shadow-lg shadow-indigo-600/25 transition flex items-center gap-1.5">
+      <button onclick="openExportModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-semibold text-white shadow-lg transition flex items-center gap-1.5">
         <i class="fa-solid fa-film"></i> Xuất Video
       </button>
     </div>
@@ -128,10 +116,9 @@
   <!-- MAIN WORKSPACE -->
   <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
-    <!-- LEFT PANEL: MEDIA INPUTS & MULTIMODAL GEMINI AGENT -->
-    <aside id="leftSidebar" class="w-full lg:w-[390px] border-r border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto p-3.5 gap-3.5">
+    <!-- LEFT PANEL -->
+    <aside class="w-full lg:w-[390px] border-r border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto p-3.5 gap-3.5">
       
-      <!-- Permission & API Quick Bar -->
       <div class="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 min-w-0">
           <i class="fa-solid fa-shield-halved text-indigo-400 shrink-0"></i>
@@ -140,7 +127,7 @@
         <button onclick="openAiConfigModal()" class="text-pink-400 hover:underline font-semibold shrink-0 ml-2">Cài API Key</button>
       </div>
 
-      <!-- Step 1: Unlimited Media & Brand Logo Upload -->
+      <!-- Step 1: Media & Logo -->
       <div class="glass-panel rounded-xl p-3 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
@@ -152,7 +139,6 @@
           </button>
         </div>
 
-        <!-- Raw Video Input -->
         <label class="block border border-dashed border-zinc-700 hover:border-indigo-500 rounded-lg p-2.5 cursor-pointer transition bg-zinc-900/50 group">
           <input type="file" id="rawVideoInput" accept="video/*" class="hidden" onchange="handleRawVideoUpload(event)" />
           <div class="flex items-center gap-2.5">
@@ -167,21 +153,18 @@
         </label>
 
         <div class="grid grid-cols-3 gap-1.5">
-          <!-- Reference Video Input -->
           <label class="block border border-dashed border-zinc-700 hover:border-pink-500 rounded-lg p-2 cursor-pointer transition bg-zinc-900/50 text-center">
             <input type="file" id="refVideoInput" accept="video/*" class="hidden" onchange="handleRefVideoUpload(event)" />
             <i class="fa-solid fa-clapperboard text-pink-400 text-xs block mb-1"></i>
             <p id="refVideoName" class="text-[10px] font-medium text-zinc-300 truncate">Video Mẫu</p>
           </label>
 
-          <!-- Background Music Input -->
           <label class="block border border-dashed border-zinc-700 hover:border-emerald-500 rounded-lg p-2 cursor-pointer transition bg-zinc-900/50 text-center">
             <input type="file" id="bgmInput" accept="audio/*" class="hidden" onchange="handleBgmUpload(event)" />
             <i class="fa-solid fa-music text-emerald-400 text-xs block mb-1"></i>
             <p id="bgmName" class="text-[10px] font-medium text-zinc-300 truncate">Nhạc Nền</p>
           </label>
 
-          <!-- Brand Logo / Watermark Input -->
           <label class="block border border-dashed border-zinc-700 hover:border-amber-500 rounded-lg p-2 cursor-pointer transition bg-zinc-900/50 text-center">
             <input type="file" id="logoInput" accept="image/*" class="hidden" onchange="handleLogoUpload(event)" />
             <i class="fa-solid fa-stamp text-amber-400 text-xs block mb-1"></i>
@@ -190,7 +173,7 @@
         </div>
       </div>
 
-      <!-- Step 2: Real Gemini Multimodal AI Agent -->
+      <!-- Step 2: AI Auto-Edit -->
       <div class="glass-panel rounded-xl p-3 space-y-2.5 gradient-border">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
@@ -202,7 +185,6 @@
           </button>
         </div>
 
-        <!-- Quick Prompt Chips -->
         <div class="grid grid-cols-2 gap-1.5">
           <button onclick="applyPresetPrompt('luxury')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-indigo-500/50 transition">
             <div class="text-[11px] font-semibold text-indigo-300"><i class="fa-solid fa-gem mr-1"></i>Review Sản Phẩm</div>
@@ -214,16 +196,14 @@
           </button>
         </div>
 
-        <!-- Natural Language Prompt Box -->
-        <textarea id="aiPromptInput" rows="3" placeholder="Viết yêu cầu tự nhiên... Khi bấm dựng, Gemini AI sẽ tự động chụp khung hình trong video để xem nội dung thật và biên tập chuẩn xác!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
+        <textarea id="aiPromptInput" rows="3" placeholder="Viết yêu cầu tự nhiên... AI sẽ đọc khung hình trong video để tự động chỉnh màu, viết tiêu đề và rải hiệu ứng âm thanh!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
 
-        <!-- AI Trend Hub 2026 Toggles -->
         <div class="bg-zinc-900/80 border border-zinc-800 rounded-lg p-2 space-y-1.5">
           <div class="flex items-center justify-between">
             <span class="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
               <i class="fa-solid fa-satellite-dish text-emerald-400 mr-1"></i>AI Trend Hub (2026)
             </span>
-            <span id="trendLockTag" class="text-[9px] text-emerald-400 font-semibold">Sẵn sàng</span>
+            <span class="text-[9px] text-emerald-400 font-semibold">Sẵn sàng</span>
           </div>
           <div class="grid grid-cols-2 gap-1 text-[10px]">
             <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
@@ -245,31 +225,28 @@
           </div>
         </div>
 
-        <!-- Execute AI Auto-Edit Button -->
-        <button id="runAutoEditBtn" onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2 ai-glow">
+        <button onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>AI Đọc Nội Dung Video & Tự Dựng</span>
         </button>
 
-        <!-- AI Execution & Vision Analysis Report -->
         <div id="aiStatusBox" class="hidden rounded-lg bg-zinc-900 border border-indigo-500/30 p-2.5 space-y-1.5">
           <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-300">
-            <span id="aiStatusTitle"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Đang quét khung hình...</span>
+            <span id="aiStatusTitle"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Đang xử lý...</span>
             <span id="aiProgressPercent">0%</span>
           </div>
           <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
             <div id="aiProgressBar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
           </div>
           <div id="aiVisionInsightBox" class="hidden text-[10px] bg-indigo-950/50 border border-indigo-500/30 rounded p-2 text-indigo-200 leading-relaxed"></div>
-          <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-0.5 max-h-24 overflow-y-auto"></ul>
+          <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-0.5 max-h-28 overflow-y-auto"></ul>
         </div>
       </div>
     </aside>
 
-    <!-- CENTER STAGE: VISUAL PREVIEW & PRO NLE TIMELINE -->
+    <!-- CENTER STAGE: VISUAL PREVIEW & TIMELINE -->
     <section class="flex-1 flex flex-col bg-[#0c0c0e] relative overflow-hidden">
       
-      <!-- Top Canvas Toolbar -->
       <div class="h-11 border-b border-zinc-800/80 px-4 flex items-center justify-between bg-zinc-950/60">
         <div class="flex items-center gap-1.5">
           <span class="text-[11px] text-zinc-400 mr-1">Khung:</span>
@@ -290,18 +267,17 @@
         </div>
       </div>
 
-      <!-- Canvas Preview Viewport -->
+      <!-- Canvas Viewport -->
       <div id="viewportContainer" class="flex-1 flex items-center justify-center p-4 overflow-hidden relative bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:16px_16px]">
         <div id="canvasWrapper" class="relative shadow-2xl shadow-black/90 rounded-lg overflow-hidden border border-zinc-800 bg-black flex items-center justify-center">
-          <canvas id="previewCanvas" class="block cursor-move"></canvas>
+          <canvas id="previewCanvas" class="block cursor-move touch-none"></canvas>
           
-          <!-- Empty State Overlay -->
           <div id="emptyCanvasOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950/90 text-center p-6">
             <div class="w-14 h-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3 text-indigo-400">
               <i class="fa-solid fa-film text-2xl"></i>
             </div>
             <h3 class="text-sm font-bold text-white mb-1">Chưa có video nào được nạp</h3>
-            <p class="text-xs text-zinc-400 max-w-xs mb-4">Tải video thô dung lượng bất kỳ ở cột bên trái hoặc bấm nút dưới để chạy thử ngay.</p>
+            <p class="text-xs text-zinc-400 max-w-xs mb-4">Tải video thô ở cột bên trái hoặc bấm nút dưới để chạy thử ngay.</p>
             <button onclick="loadDemoVideo()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
               <i class="fa-solid fa-play mr-1.5"></i>Tạo Video Mẫu Thử Nghiệm
             </button>
@@ -309,39 +285,37 @@
         </div>
       </div>
 
-      <!-- Instant AI Chat Command Bar -->
+      <!-- Instant Chat Command Bar -->
       <div class="px-4 py-2 bg-zinc-950 border-t border-zinc-800/80 flex items-center gap-2">
         <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs shrink-0">
           <i class="fa-solid fa-comment-dots"></i>
         </div>
-        <input type="text" id="quickChatCommand" onkeydown="if(event.key==='Enter') handleQuickChatCommand()" placeholder="Chat ra lệnh chỉnh sửa nhanh (VD: 'Tăng sáng thêm', 'Đổi chữ sang màu vàng', 'Thêm fade mượt')..." class="flex-1 bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none" />
+        <input type="text" id="quickChatCommand" onkeydown="if(event.key==='Enter') handleQuickChatCommand()" placeholder="Ra lệnh nhanh (VD: 'Tăng sáng thêm', 'Đổi chữ sang màu vàng', 'Thêm fade mượt')..." class="flex-1 bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-lg px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none" />
         <button onclick="handleQuickChatCommand()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-indigo-600 text-xs font-semibold text-zinc-200 hover:text-white transition">
           Gửi Lệnh
         </button>
       </div>
 
-      <!-- BOTTOM PRO NLE TIMELINE -->
+      <!-- BOTTOM TIMELINE -->
       <div class="h-48 border-t border-zinc-800 bg-zinc-950 flex flex-col">
-        <!-- Pro Transport & Cut Toolbar -->
         <div class="h-10 px-4 border-b border-zinc-900 flex items-center justify-between">
           <div class="flex items-center gap-2.5">
-            <button onclick="skipToStart()" title="Về đầu đoạn cắt" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-backward-step"></i></button>
-            <button onclick="stepFrame(-0.5)" title="Lùi 0.5s (Phím mũi tên trái)" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-backward"></i></button>
-            <button id="playPauseBtn" onclick="togglePlay()" title="Phát / Dừng (Phím Space)" class="w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-xs shadow">
+            <button onclick="skipToStart()" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-backward-step"></i></button>
+            <button onclick="stepFrame(-0.5)" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-backward"></i></button>
+            <button id="playPauseBtn" onclick="togglePlay()" class="w-7 h-7 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center text-xs shadow">
               <i class="fa-solid fa-play"></i>
             </button>
-            <button onclick="stepFrame(0.5)" title="Tiến 0.5s (Phím mũi tên phải)" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-forward"></i></button>
+            <button onclick="stepFrame(0.5)" class="text-zinc-400 hover:text-white text-xs px-1.5 py-1 rounded hover:bg-zinc-800"><i class="fa-solid fa-forward"></i></button>
             <span class="text-xs font-mono text-zinc-300 ml-1">
               <span id="currentTimeDisplay">00:00.0</span> <span class="text-zinc-600">/</span> <span id="totalDurationDisplay" class="text-zinc-500">00:00.0</span>
             </span>
           </div>
 
-          <!-- Quick Mark In / Mark Out Buttons -->
           <div class="flex items-center gap-2 text-[11px]">
-            <button onclick="markInAtPlayhead()" title="Đặt điểm bắt đầu tại vị trí kim phát (Phím I)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-indigo-600/30 border border-zinc-700 hover:border-indigo-500 text-zinc-300 font-mono">
+            <button onclick="markInAtPlayhead()" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-indigo-600/30 border border-zinc-700 hover:border-indigo-500 text-zinc-300 font-mono">
               [ I: Cắt Đầu
             </button>
-            <button onclick="markOutAtPlayhead()" title="Đặt điểm kết thúc tại vị trí kim phát (Phím O)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-indigo-600/30 border border-zinc-700 hover:border-indigo-500 text-zinc-300 font-mono">
+            <button onclick="markOutAtPlayhead()" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-indigo-600/30 border border-zinc-700 hover:border-indigo-500 text-zinc-300 font-mono">
               O: Cắt Cuối ]
             </button>
             <span class="hidden md:inline text-zinc-500 ml-1">Đoạn chọn: <b id="trimRangeLabel" class="text-indigo-400">0.0s - 10.0s</b></span>
@@ -349,22 +323,19 @@
           </div>
         </div>
 
-        <!-- Visual Multi-Track Timeline -->
-        <div class="flex-1 p-2.5 overflow-x-auto flex flex-col justify-center gap-1.5 relative" id="timelineArea">
-          <!-- Track 1: Main Video + Scrubber -->
+        <div class="flex-1 p-2.5 overflow-x-auto flex flex-col justify-center gap-1.5 relative">
           <div class="relative h-7 bg-zinc-900 rounded-md border border-zinc-800 cursor-pointer flex items-center px-2" id="scrubberTrack" onmousedown="startScrubbing(event)">
             <div id="trimHighlight" class="absolute top-0 bottom-0 bg-indigo-500/20 border-x-2 border-indigo-500 pointer-events-none" style="left: 0%; width: 100%;"></div>
             <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-pink-500 z-10 pointer-events-none" style="left: 0%;">
               <div class="w-2.5 h-2.5 rounded-full bg-pink-500 -ml-1 -mt-1 shadow"></div>
             </div>
-            <span class="text-[10px] text-zinc-400 z-0"><i class="fa-solid fa-film mr-1 text-indigo-400"></i>V1: Video Track (Kéo chuột trên thanh này để tua nhanh)</span>
+            <span class="text-[10px] text-zinc-400 z-0"><i class="fa-solid fa-film mr-1 text-indigo-400"></i>V1: Video Track (Kéo chuột để tua nhanh)</span>
           </div>
 
-          <!-- Track 2: Text & Brand Logo -->
           <div class="grid grid-cols-2 gap-1.5">
             <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 justify-between">
               <span class="text-[10px] text-purple-400 truncate"><i class="fa-solid fa-font mr-1"></i>T1: <b id="timelineTextPreview">AUTOCUT STUDIO AI</b></span>
-              <span id="kineticBadge" class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 rounded">Kinetic</span>
+              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 rounded">Kinetic</span>
             </div>
             <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 justify-between">
               <span class="text-[10px] text-amber-400 truncate"><i class="fa-solid fa-stamp mr-1"></i>L1: <b id="timelineLogoPreview">Chưa gắn Logo</b></span>
@@ -372,8 +343,7 @@
             </div>
           </div>
 
-          <!-- Track 3: Audio & SFX -->
-          <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 gap-2 overflow-hidden" id="sfxTimelineTrack">
+          <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 gap-2 overflow-hidden">
             <span class="text-[10px] text-emerald-400 shrink-0"><i class="fa-solid fa-waveform-lines mr-1"></i>A1 Audio/SFX:</span>
             <div id="sfxMarkersContainer" class="flex items-center gap-1.5 overflow-x-auto">
               <span class="text-[10px] text-zinc-600 italic">Chưa có hiệu ứng âm thanh</span>
@@ -383,10 +353,8 @@
       </div>
     </section>
 
-    <!-- RIGHT PANEL: PRO STUDIO INSPECTOR (5 TABS) -->
-    <aside id="rightSidebar" class="w-full lg:w-[330px] border-l border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
-      
-      <!-- 5 Inspector Tabs -->
+    <!-- RIGHT PANEL: 5-TAB INSPECTOR -->
+    <aside class="w-full lg:w-[330px] border-l border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
       <div class="grid grid-cols-5 border-b border-zinc-800 bg-zinc-950 text-[10px] font-semibold">
         <button onclick="switchInspectorTab('transform')" id="ins-tab-transform" class="ins-tab py-2.5 text-indigo-400 border-b-2 border-indigo-500">Cắt/Hiệu Ứng</button>
         <button onclick="switchInspectorTab('color')" id="ins-tab-color" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Màu Sắc</button>
@@ -396,7 +364,7 @@
       </div>
 
       <div class="p-4 space-y-4">
-        <!-- TAB 1: TRANSFORM, TRIM & TRANSITIONS -->
+        <!-- TAB 1 -->
         <div id="ins-panel-transform" class="ins-panel space-y-3.5">
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
@@ -439,7 +407,6 @@
 
           <hr class="border-zinc-800" />
 
-          <!-- Pro Transitions -->
           <div class="space-y-2">
             <label class="text-[11px] font-semibold text-zinc-400 uppercase block">Hiệu Ứng Chuyển Cảnh Đầu/Cuối</label>
             <select id="transitionSelect" onchange="updateTransition(this.value)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white">
@@ -450,7 +417,7 @@
           </div>
         </div>
 
-        <!-- TAB 2: COLOR & FILTERS -->
+        <!-- TAB 2 -->
         <div id="ins-panel-color" class="ins-panel hidden space-y-3.5">
           <div>
             <label class="text-[11px] font-semibold text-zinc-400 uppercase block mb-2">Bộ Lọc Màu Chuyên Nghiệp</label>
@@ -487,7 +454,7 @@
           </div>
         </div>
 
-        <!-- TAB 3: TEXT & KINETIC CAPTIONS -->
+        <!-- TAB 3 -->
         <div id="ins-panel-text" class="ins-panel hidden space-y-3.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-zinc-200">Hiển thị lớp chữ</span>
@@ -524,7 +491,7 @@
           </div>
         </div>
 
-        <!-- TAB 4: BRAND LOGO & WATERMARK -->
+        <!-- TAB 4 -->
         <div id="ins-panel-logo" class="ins-panel hidden space-y-3.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-zinc-200">Hiển thị Logo Thương Hiệu</span>
@@ -560,10 +527,9 @@
             <button onclick="snapLogoCorner('bl')" class="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px]">Góc Trái Dưới</button>
             <button onclick="snapLogoCorner('br')" class="p-1.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px]">Góc Phải Dưới</button>
           </div>
-          <p class="text-[10px] text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1 text-amber-400"></i>Bạn có thể dùng chuột kéo thả trực tiếp Logo trên màn hình video.</p>
         </div>
 
-        <!-- TAB 5: AUDIO & SFX SYNTHESIZER -->
+        <!-- TAB 5 -->
         <div id="ins-panel-audio" class="ins-panel hidden space-y-3.5">
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
@@ -609,9 +575,7 @@
     </aside>
   </main>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 1: CẤU HÌNH API GEMINI THẬT (REAL MULTIMODAL VISION API)        -->
-  <!-- ===================================================================== -->
+  <!-- MODAL 1: GEMINI API KEY -->
   <div id="aiConfigModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -621,7 +585,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Kết Nối API Gemini Thật (Đọc Nội Dung Video)</h3>
-            <p class="text-[11px] text-zinc-400">AI sẽ trực tiếp quét hình ảnh trong video để tự biên tập</p>
+            <p class="text-[11px] text-zinc-400">Tự động nhận diện khung hình thật bằng Gemini Vision</p>
           </div>
         </div>
         <button onclick="closeAiConfigModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -631,8 +595,7 @@
         <label class="text-xs font-semibold text-zinc-300 block">Dán Gemini API Key của bạn:</label>
         <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono focus:border-indigo-500 focus:outline-none" />
         <p class="text-[11px] text-zinc-400 leading-relaxed">
-          • Bạn có thể lấy mã API miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 underline">Google AI Studio</a>.<br/>
-          • Nếu bạn là <b>Owner</b> và lưu Key trong mục <i>Quản Trị Cloud</i>, các tài khoản con của bạn cũng có thể sử dụng chung sức mạnh AI này.
+          • Lấy API Key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 underline">Google AI Studio</a>.
         </p>
       </div>
 
@@ -644,9 +607,7 @@
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 2: ĐĂNG NHẬP & ĐĂNG KÝ TÀI KHOẢN (CLOUD SYNCED)                 -->
-  <!-- ===================================================================== -->
+  <!-- MODAL 2: AUTH -->
   <div id="authModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -656,7 +617,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Cổng Tài Khoản AutoCut Studio</h3>
-            <p class="text-[11px] text-zinc-400">Hỗ trợ đồng bộ đa thiết bị qua Cloud</p>
+            <p class="text-[11px] text-zinc-400">Đăng nhập Owner hoặc Tài khoản con</p>
           </div>
         </div>
         <button onclick="closeAuthModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -667,11 +628,10 @@
         <button id="authSwitchRegister" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-zinc-400 hover:text-white transition">Đăng Ký Tài Khoản Con</button>
       </div>
 
-      <!-- LOGIN FORM -->
       <div id="loginFormPanel" class="space-y-3">
         <div>
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email đăng nhập</label>
-          <input type="email" id="loginEmailInput" placeholder="VD: admin@autocut.vn hoặc email của bạn" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+          <input type="email" id="loginEmailInput" placeholder="VD: admin@autocut.vn" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
         </div>
         <div>
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Mật khẩu / Mã Chủ Sở Hữu</label>
@@ -684,17 +644,16 @@
 
         <div class="pt-2 border-t border-zinc-800 flex items-center justify-between">
           <button onclick="quickOwnerLogin()" class="text-[11px] text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
-            <i class="fa-solid fa-crown"></i> Đăng Nhập Quyền Chủ Sở Hữu
+            <i class="fa-solid fa-crown"></i> Vào Nhanh Quyền Owner
           </button>
           <button onclick="logoutAccount()" class="text-[11px] text-zinc-500 hover:text-red-400">Đăng xuất</button>
         </div>
       </div>
 
-      <!-- REGISTER FORM -->
       <div id="registerFormPanel" class="hidden space-y-3">
         <div>
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Họ và Tên / Tên Shop</label>
-          <input type="text" id="regNameInput" placeholder="VD: Nguyễn Văn A - Studio Bạc" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+          <input type="text" id="regNameInput" placeholder="VD: Nguyễn Văn A" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
         </div>
         <div>
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Email tài khoản mới</label>
@@ -702,7 +661,7 @@
         </div>
         <div>
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Tạo mật khẩu</label>
-          <input type="password" id="regPasswordInput" placeholder="Nhập mật khẩu tự chọn..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
+          <input type="password" id="regPasswordInput" placeholder="Nhập mật khẩu..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
         </div>
         <button onclick="handleRegisterSubmit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white transition">
           Tạo Tài Khoản Con Mới
@@ -711,13 +670,9 @@
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 3: BẢNG QUẢN TRỊ CHỦ SỞ HỮU & ĐỒNG BỘ ĐÁM MÂY (CLOUD SAAS)      -->
-  <!-- ===================================================================== -->
+  <!-- MODAL 3: OWNER CLOUD DASHBOARD -->
   <div id="ownerDashboardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
-      
-      <!-- Header -->
       <div class="px-6 py-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
@@ -725,13 +680,12 @@
           </div>
           <div>
             <h2 class="text-sm font-bold text-white">Cổng Chủ Sở Hữu — Quản Trị Tài Khoản Con & Cloud Sync</h2>
-            <p class="text-[11px] text-zinc-400">Quản lý từ xa trên mọi thiết bị • Cấp quyền theo năm • Cấu hình Gemini API</p>
+            <p class="text-[11px] text-zinc-400">Quản lý từ xa đa thiết bị • Cấp quyền theo năm • Cấu hình Gemini API</p>
           </div>
         </div>
         <button onclick="closeOwnerDashboard()" class="text-zinc-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Owner Verification Gate -->
       <div id="ownerAuthGate" class="p-8 flex flex-col items-center justify-center text-center space-y-4">
         <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl">
           <i class="fa-solid fa-lock"></i>
@@ -748,7 +702,6 @@
         </div>
       </div>
 
-      <!-- Authenticated Owner Workspace -->
       <div id="ownerControlContent" class="hidden flex-1 flex flex-col overflow-hidden">
         <div class="flex border-b border-zinc-800 bg-zinc-950/60 px-6 text-xs font-semibold overflow-x-auto">
           <button onclick="switchOwnerTab('subaccounts')" id="own-tab-subaccounts" class="own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400 shrink-0">
@@ -758,19 +711,18 @@
             <i class="fa-solid fa-calendar-check mr-1.5"></i>2. Lịch Gia Hạn Năm
           </button>
           <button onclick="switchOwnerTab('cloud')" id="own-tab-cloud" class="own-tab py-3 px-4 text-zinc-400 hover:text-white shrink-0">
-            <i class="fa-solid fa-cloud mr-1.5"></i>3. Đồng Bộ Đám Mây (Firebase) & API Key
+            <i class="fa-solid fa-cloud mr-1.5"></i>3. Đồng Bộ Cloud (Firebase) & API Key
           </button>
         </div>
 
         <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          
-          <!-- TAB 1: SUB-ACCOUNTS -->
+          <!-- TAB 1 -->
           <div id="own-panel-subaccounts" class="own-panel space-y-5">
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tạo & Cấp Quyền Tài Khoản Con Mới</h4>
-                <button onclick="syncFromCloud()" class="text-[11px] text-indigo-400 hover:underline flex items-center gap-1">
-                  <i class="fa-solid fa-rotate"></i> Làm mới dữ liệu từ Cloud
+                <button onclick="syncFromCloud(true)" class="text-[11px] text-indigo-400 hover:underline flex items-center gap-1">
+                  <i class="fa-solid fa-rotate"></i> Đồng bộ ngay từ Cloud
                 </button>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-5 gap-2.5">
@@ -791,7 +743,7 @@
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
               <div class="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
                 <span class="text-xs font-bold text-zinc-200">Danh Sách Tài Khoản Con (<span id="subAccountCount">0</span>)</span>
-                <span class="text-[11px] text-zinc-400">Mọi thay đổi quyền sẽ tự đẩy lên Cloud ngay lập tức</span>
+                <span class="text-[11px] text-zinc-400">Tích chọn để bật/tắt quyền trực tiếp</span>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -813,7 +765,7 @@
             </div>
           </div>
 
-          <!-- TAB 2: ANNUAL SCHEDULE -->
+          <!-- TAB 2 -->
           <div id="own-panel-schedule" class="own-panel hidden space-y-5">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4">
@@ -836,38 +788,32 @@
             </div>
           </div>
 
-          <!-- TAB 3: CLOUD DATABASE SYNC & GLOBAL API KEY -->
+          <!-- TAB 3 -->
           <div id="own-panel-cloud" class="own-panel hidden space-y-5">
-            <!-- Firebase Realtime Database Sync -->
             <div class="bg-zinc-950 border border-indigo-500/30 rounded-xl p-4 space-y-3">
               <div class="flex items-center justify-between">
                 <h4 class="text-xs font-bold text-indigo-400 uppercase flex items-center gap-2">
                   <i class="fa-solid fa-database"></i> Kết Nối Cơ Sở Dữ Liệu Đám Mây (Firebase Realtime Database)
                 </h4>
-                <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">Quản lý từ xa đa thiết bị</span>
+                <span id="firebaseTestStatus" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">Chưa kiểm tra</span>
               </div>
               <p class="text-[11px] text-zinc-400 leading-relaxed">
-                Để bạn tạo hoặc khóa tài khoản con trên máy tính của mình và tài khoản đó có hiệu lực ngay lập tức trên máy của khách hàng ở nơi khác, hãy dán đường dẫn <b>Firebase Realtime Database URL</b> miễn phí của bạn vào đây:
+                Dán đường dẫn <b>Firebase Realtime Database URL</b> (chọn chế độ Test Mode) vào đây để đồng bộ tài khoản con và quyền truy cập trên mọi thiết bị:
               </p>
               <div class="flex gap-2">
-                <input type="text" id="firebaseUrlInput" placeholder="https://ten-du-an-cua-ban-default-rtdb.firebaseio.com" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
-                <button onclick="saveFirebaseConfig()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white">Kết Nối Cloud</button>
-              </div>
-              <div class="text-[10px] text-zinc-500">
-                * Cách tạo miễn phí 1 phút: Vào <a href="https://console.firebase.google.com" target="_blank" class="text-indigo-400 underline">console.firebase.google.com</a> → Tạo Project → Build → Realtime Database → Create Database (chọn chế độ <b>Test Mode</b>) → Copy đường dẫn <code class="text-zinc-300">https://...firebaseio.com</code> dán vào ô trên.
+                <input type="text" id="firebaseUrlInput" placeholder="https://ten-du-an-default-rtdb.firebaseio.com" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
+                <button onclick="saveFirebaseConfig()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white">Kết Nối & Test</button>
               </div>
             </div>
 
-            <!-- Shared Gemini API Key for Sub-Accounts -->
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <h4 class="text-xs font-bold text-pink-400 uppercase">Gemini API Key Hệ Thống (Dùng Chung Cho Các Tài Khoản Con)</h4>
+              <h4 class="text-xs font-bold text-pink-400 uppercase">Gemini API Key Hệ Thống (Dùng Chung Cho Tài Khoản Con)</h4>
               <div class="flex gap-2">
                 <input type="password" id="ownerGeminiKeyInput" placeholder="AIzaSy..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white font-mono" />
                 <button onclick="saveOwnerGeminiKey()" class="px-4 py-2 rounded-lg bg-pink-600 hover:bg-pink-500 text-xs font-bold text-white">Lưu Key Lên Cloud</button>
               </div>
             </div>
 
-            <!-- GitHub Pages Link & Master Pass -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2.5">
                 <h4 class="text-xs font-bold text-white uppercase">Link Web GitHub Pages Của Bạn</h4>
@@ -885,23 +831,20 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===================================================================== -->
-  <!-- MODAL 4: XUẤT VIDEO 4 CHUẨN CHẤT LƯỢNG (720P / 1080P / 2K / 4K)       -->
-  <!-- ===================================================================== -->
+  <!-- MODAL 4: HIGH-RES 4-TIER EXPORT -->
   <div id="exportModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Thành Phẩm
+            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Chuẩn Pixel & Trộn Âm Thanh
           </h3>
-          <p class="text-[11px] text-zinc-400">Chọn độ phân giải đầu ra chuẩn Studio</p>
+          <p class="text-[11px] text-zinc-400">Render đúng kích thước thật (Offscreen HD/2K/4K Engine)</p>
         </div>
         <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -912,7 +855,7 @@
             <span class="text-sm font-bold text-white">720p HD</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">Nhanh</span>
           </div>
-          <div class="text-[10px] text-zinc-500 mt-1">1280×720 • 6 Mbps • Mọi tài khoản</div>
+          <div class="text-[10px] text-zinc-500 mt-1">1280×720 • 6 Mbps</div>
         </button>
 
         <button onclick="selectExportQuality('1080p')" id="q-btn-1080p" class="q-btn p-3 rounded-xl bg-indigo-950/40 border-2 border-indigo-500 text-left transition">
@@ -920,7 +863,7 @@
             <span class="text-sm font-bold text-white">1080p Full HD</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Chuẩn</span>
           </div>
-          <div class="text-[10px] text-zinc-400 mt-1">1920×1080 • 12 Mbps • TikTok/Reels</div>
+          <div class="text-[10px] text-zinc-400 mt-1">1920×1080 • 12 Mbps</div>
         </button>
 
         <button onclick="selectExportQuality('2k')" id="q-btn-2k" class="q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-purple-500 text-left transition">
@@ -928,7 +871,7 @@
             <span class="text-sm font-bold text-purple-300">2K QHD</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">Pro</span>
           </div>
-          <div class="text-[10px] text-zinc-500 mt-1">2560×1440 • 22 Mbps • Siêu nét</div>
+          <div class="text-[10px] text-zinc-500 mt-1">2560×1440 • 22 Mbps</div>
         </button>
 
         <button onclick="selectExportQuality('4k')" id="q-btn-4k" class="q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-amber-500 text-left transition">
@@ -936,13 +879,13 @@
             <span class="text-sm font-bold text-amber-400">4K Ultra HD</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Master</span>
           </div>
-          <div class="text-[10px] text-zinc-500 mt-1">3840×2160 • 35 Mbps • Cao cấp nhất</div>
+          <div class="text-[10px] text-zinc-500 mt-1">3840×2160 • 35 Mbps</div>
         </button>
       </div>
 
       <div class="bg-zinc-950 rounded-xl p-3 border border-zinc-800 text-xs space-y-1.5">
         <div class="flex justify-between">
-          <span class="text-zinc-400">Độ phân giải xuất thực tế:</span>
+          <span class="text-zinc-400">Độ phân giải xuất thật:</span>
           <span id="exportExactPixel" class="text-indigo-400 font-mono font-bold">1080 × 1920 px (9:16)</span>
         </div>
         <div class="flex justify-between">
@@ -953,7 +896,7 @@
 
       <div id="exportProgressSection" class="hidden space-y-2">
         <div class="flex justify-between text-xs">
-          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang kết xuất video...</span>
+          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang render hình ảnh & âm thanh...</span>
           <span id="exportPercentText" class="font-mono text-white">0%</span>
         </div>
         <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -961,21 +904,21 @@
         </div>
       </div>
 
-      <button id="startRenderBtn" onclick="startVideoExport()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg transition">
+      <button id="startRenderBtn" onclick="startTrueResolutionExport()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white shadow-lg transition">
         Bắt Đầu Xuất & Tải Video Về Máy
       </button>
     </div>
   </div>
 
-  <!-- Hidden Media Elements -->
-  <video id="sourceVideo" class="hidden" playsinline crossorigin="anonymous"></video>
-  <audio id="bgmAudio" class="hidden" loop crossorigin="anonymous"></audio>
+  <!-- Hidden Media Elements (NO crossorigin attribute for local blob files to prevent Tainted Canvas error) -->
+  <video id="sourceVideo" class="hidden" playsinline></video>
+  <audio id="bgmAudio" class="hidden" loop></audio>
 
   <script>
     // =========================================================================
-    // 1. CLOUD DATABASE SYNC (FIREBASE) & MULTI-ACCOUNT SAAS ENGINE
+    // 1. CLOUD DATABASE SYNC & MULTI-ACCOUNT ENGINE
     // =========================================================================
-    const STORAGE_KEY = 'autocut_enterprise_saas_v4';
+    const STORAGE_KEY = 'autocut_enterprise_saas_v6';
 
     function getDefaultSystemData() {
       const now = new Date();
@@ -1005,7 +948,10 @@
     }
 
     let sysData = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || getDefaultSystemData();
-    let isOwnerUnlocked = false;
+
+    function isOwnerActive() {
+      return sysData.currentSession && sysData.currentSession.role === 'owner';
+    }
 
     async function saveSystemData(pushCloud = true) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(sysData));
@@ -1013,8 +959,8 @@
 
       if (pushCloud && sysData.firebaseUrl) {
         try {
-          const cleanUrl = sysData.firebaseUrl.replace(/\/$/, '');
-          await fetch(`${cleanUrl}/autocut_saas.json`, {
+          const cleanUrl = sysData.firebaseUrl.replace(/\/+$/, '');
+          const res = await fetch(`${cleanUrl}/autocut_saas.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1024,38 +970,46 @@
               subAccounts: sysData.subAccounts
             })
           });
+          return res.ok;
         } catch (err) {
-          console.warn('Cloud push warning:', err);
+          console.warn('Cloud push error:', err);
+          return false;
         }
       }
+      return true;
     }
 
-    async function syncFromCloud() {
-      if (!sysData.firebaseUrl) return;
+    async function syncFromCloud(showAlert = false) {
+      if (!sysData.firebaseUrl) return false;
       try {
-        const cleanUrl = sysData.firebaseUrl.replace(/\/$/, '');
+        const cleanUrl = sysData.firebaseUrl.replace(/\/+$/, '');
         const res = await fetch(`${cleanUrl}/autocut_saas.json`);
-        if (!res.ok) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = await res.json();
         if (remote) {
-          if (remote.subAccounts) sysData.subAccounts = remote.subAccounts;
+          if (Array.isArray(remote.subAccounts) && remote.subAccounts.length > 0) {
+            sysData.subAccounts = remote.subAccounts;
+          }
           if (remote.geminiApiKey) sysData.geminiApiKey = remote.geminiApiKey;
           if (remote.githubUrl) sysData.githubUrl = remote.githubUrl;
           if (remote.ownerMasterPass) sysData.ownerMasterPass = remote.ownerMasterPass;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(sysData));
           refreshAccountUI();
-          if (isOwnerUnlocked) {
+          if (isOwnerActive()) {
             renderSubAccountsTable();
             renderAnnualCalendar();
           }
         }
+        if (showAlert) alert('Đồng bộ thành công với Firebase Cloud!');
+        return true;
       } catch (err) {
-        console.warn('Cloud sync warning:', err);
+        if (showAlert) alert('Lỗi kết nối Firebase: ' + err.message + '. Hãy đảm bảo Realtime Database đang bật chế độ Test Mode.');
+        return false;
       }
     }
 
     function getActivePermissions() {
-      if (sysData.currentSession?.role === 'owner') {
+      if (isOwnerActive()) {
         return { role: 'owner', name: 'Chủ Sở Hữu (Master)', autoEdit: true, export4k: true, trendHub: true, expiresAt: null };
       }
       if (sysData.currentSession?.role === 'sub') {
@@ -1088,21 +1042,16 @@
       userNameEl.innerText = perms.name;
       avatarEl.innerText = perms.name.charAt(0).toUpperCase();
 
-      // Update API & Cloud Status Dots
-      if (sysData.geminiApiKey) {
-        geminiDot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span class="text-emerald-400">Gemini Vision: Đã kết nối</span>`;
-      } else {
-        geminiDot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Gemini API: Chưa gắn key`;
-      }
+      geminiDot.innerHTML = sysData.geminiApiKey
+        ? `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span class="text-emerald-400">Gemini API: Đã gắn</span>`
+        : `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Gemini API: Chưa gắn`;
 
-      if (sysData.firebaseUrl) {
-        cloudDot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><span class="text-indigo-400">Cloud Sync: Đang bật</span>`;
-      } else {
-        cloudDot.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Cloud Sync: Local`;
-      }
+      cloudDot.innerHTML = sysData.firebaseUrl
+        ? `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span><span class="text-indigo-400">Cloud: Đã nối</span>`
+        : `<span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>Cloud: Local`;
 
       if (perms.role === 'owner') {
-        roleBadge.innerText = 'CHỦ SỞ HỮU (MASTER)';
+        roleBadge.innerText = 'CHỦ SỞ HỮU';
         roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400';
         userExpEl.innerText = 'Toàn quyền vĩnh viễn';
         permNotice.innerHTML = 'Quyền Chủ Sở Hữu: Mở khóa <b>100% tính năng & Xuất 4K</b>.';
@@ -1115,7 +1064,7 @@
         permNotice.innerHTML = `Quyền: AI (${perms.autoEdit ? '✓' : '✕'}) • 2K/4K (${perms.export4k ? '✓' : '✕'})`;
         authBtnLabel.innerText = 'Đổi Tài Khoản';
       } else {
-        roleBadge.innerText = 'KHÁCH (FREE)';
+        roleBadge.innerText = 'KHÁCH';
         roleBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300';
         userExpEl.innerText = 'Chưa đăng nhập';
         permNotice.innerHTML = 'Chế độ Khách: Xuất tối đa 1080p.';
@@ -1123,7 +1072,6 @@
       }
     }
 
-    // GEMINI API CONFIG MODAL
     function openAiConfigModal() {
       document.getElementById('geminiApiKeyInput').value = sysData.geminiApiKey || '';
       document.getElementById('aiConfigModal').classList.remove('hidden');
@@ -1132,16 +1080,13 @@
       document.getElementById('aiConfigModal').classList.add('hidden');
     }
     function saveGeminiApiKey() {
-      const key = document.getElementById('geminiApiKeyInput').value.trim();
-      sysData.geminiApiKey = key;
-      saveSystemData(isOwnerUnlocked);
+      sysData.geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
+      saveSystemData(isOwnerActive());
       closeAiConfigModal();
-      alert(key ? 'Đã kết nối Gemini API Key thật! Giờ đây AI có thể nhìn thấy và phân tích nội dung video của bạn.' : 'Đã xóa API Key.');
     }
 
-    // AUTH MODAL
     function openAuthModal(tab = 'login') {
-      syncFromCloud();
+      syncFromCloud(false);
       document.getElementById('authModal').classList.remove('hidden');
       switchAuthTab(tab);
     }
@@ -1157,7 +1102,7 @@
     }
 
     async function handleLoginSubmit() {
-      await syncFromCloud();
+      await syncFromCloud(false);
       const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
       const pass = document.getElementById('loginPasswordInput').value.trim();
 
@@ -1165,10 +1110,8 @@
 
       if ((email === sysData.ownerEmail || email === 'owner') && pass === sysData.ownerMasterPass) {
         sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
-        isOwnerUnlocked = true;
         saveSystemData(false);
         closeAuthModal();
-        alert('Chào mừng Chủ Sở Hữu! Toàn bộ quyền quản trị Cloud và xuất 4K đã kích hoạt.');
         return;
       }
 
@@ -1181,25 +1124,22 @@
       sysData.currentSession = { role: 'sub', email: sub.email };
       saveSystemData(false);
       closeAuthModal();
-      alert(`Đăng nhập thành công! Xin chào ${sub.name}.`);
     }
 
     function quickOwnerLogin() {
       sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
-      isOwnerUnlocked = true;
       saveSystemData(false);
       closeAuthModal();
     }
 
     function logoutAccount() {
       sysData.currentSession = null;
-      isOwnerUnlocked = false;
       saveSystemData(false);
       closeAuthModal();
     }
 
     async function handleRegisterSubmit() {
-      await syncFromCloud();
+      await syncFromCloud(false);
       const name = document.getElementById('regNameInput').value.trim();
       const email = document.getElementById('regEmailInput').value.trim().toLowerCase();
       const password = document.getElementById('regPasswordInput').value.trim();
@@ -1225,15 +1165,14 @@
       });
 
       await saveSystemData(true);
-      alert('Đăng ký thành công! Yêu cầu của bạn đã được đồng bộ lên hệ thống để Chủ Sở Hữu duyệt.');
+      alert('Đăng ký thành công! Tài khoản đã gửi tới Chủ Sở Hữu để duyệt.');
       switchAuthTab('login');
       document.getElementById('loginEmailInput').value = email;
     }
 
-    // OWNER DASHBOARD
     function openOwnerDashboard() {
       document.getElementById('ownerDashboardModal').classList.remove('hidden');
-      if (sysData.currentSession?.role === 'owner' || isOwnerUnlocked) {
+      if (isOwnerActive()) {
         showOwnerUnlockedView();
       } else {
         document.getElementById('ownerAuthGate').classList.remove('hidden');
@@ -1246,7 +1185,6 @@
     function verifyOwnerMaster() {
       const val = document.getElementById('ownerMasterPassInput').value.trim();
       if (val === sysData.ownerMasterPass) {
-        isOwnerUnlocked = true;
         sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
         saveSystemData(false);
         showOwnerUnlockedView();
@@ -1332,7 +1270,6 @@
       await saveSystemData(true);
       renderSubAccountsTable();
       renderAnnualCalendar();
-      alert(`Đã gia hạn +1 Năm và đồng bộ Cloud cho: ${sub.name}`);
     }
 
     async function deleteSubAccount(id) {
@@ -1416,15 +1353,29 @@
     }
 
     async function saveFirebaseConfig() {
-      const url = document.getElementById('firebaseUrlInput').value.trim();
-      sysData.firebaseUrl = url;
-      await saveSystemData(true);
-      alert(url ? 'Đã kết nối Cơ sở dữ liệu đám mây Firebase! Danh sách tài khoản con sẽ đồng bộ trên mọi thiết bị.' : 'Đã ngắt kết nối Cloud.');
+      const rawUrl = document.getElementById('firebaseUrlInput').value.trim();
+      const statusEl = document.getElementById('firebaseTestStatus');
+      sysData.firebaseUrl = rawUrl;
+      if (!rawUrl) {
+        await saveSystemData(false);
+        statusEl.innerText = 'Đã ngắt kết nối';
+        return;
+      }
+      statusEl.innerText = 'Đang kiểm tra...';
+      const ok = await saveSystemData(true);
+      if (ok) {
+        statusEl.innerText = 'Kết nối thành công ✓';
+        statusEl.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold';
+        alert('Kết nối Firebase Cloud thành công! Dữ liệu tài khoản con đã đồng bộ.');
+      } else {
+        statusEl.innerText = 'Lỗi kết nối ✕';
+        statusEl.className = 'text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold';
+        alert('Không thể ghi dữ liệu lên Firebase. Hãy kiểm tra lại đường dẫn URL hoặc bật Rules (read: true, write: true) trên Firebase!');
+      }
     }
 
     async function saveOwnerGeminiKey() {
-      const key = document.getElementById('ownerGeminiKeyInput').value.trim();
-      sysData.geminiApiKey = key;
+      sysData.geminiApiKey = document.getElementById('ownerGeminiKeyInput').value.trim();
       await saveSystemData(true);
       alert('Đã lưu Gemini API Key lên hệ thống!');
     }
@@ -1445,7 +1396,7 @@
     }
 
     // =========================================================================
-    // 2. VIDEO EDITOR ENGINE, BRAND LOGO & REAL GEMINI VISION ANALYSIS
+    // 2. VIDEO EDITOR ENGINE & SAFE GEMINI VISION CALLER
     // =========================================================================
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
@@ -1488,7 +1439,7 @@
       },
       sfxEvents: [],
       lastTriggeredSfxIndex: -1,
-      dragTarget: null // 'text' | 'logo'
+      dragTarget: null
     };
 
     const QUALITY_SPECS = {
@@ -1498,21 +1449,51 @@
       '4k':    { label: '4K Ultra HD', shortDim: 2160, bitrate: 35000000 }
     };
 
-    // Web Audio SFX Synthesizer
+    // Single-init Web Audio Graph (Prevents InvalidStateError)
     let audioCtx = null;
-    function getAudioContext() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+    let audioDest = null;
+    let isAudioGraphInitialized = false;
+    let videoGainNode = null;
+    let bgmGainNode = null;
+
+    function initAudioGraph() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContextClass();
+        audioDest = audioCtx.createMediaStreamDestination();
+      }
+      if (!isAudioGraphInitialized) {
+        isAudioGraphInitialized = true;
+        try {
+          videoGainNode = audioCtx.createGain();
+          videoGainNode.connect(audioCtx.destination);
+          videoGainNode.connect(audioDest);
+          const vSrc = audioCtx.createMediaElementSource(video);
+          vSrc.connect(videoGainNode);
+        } catch (e) {}
+
+        try {
+          bgmGainNode = audioCtx.createGain();
+          bgmGainNode.connect(audioCtx.destination);
+          bgmGainNode.connect(audioDest);
+          const bSrc = audioCtx.createMediaElementSource(bgm);
+          bSrc.connect(bgmGainNode);
+        } catch (e) {}
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
       return audioCtx;
     }
 
     function playSynthSfx(type) {
-      const ac = getAudioContext();
+      const ac = initAudioGraph();
       const now = ac.currentTime;
       const osc = ac.createOscillator();
       const gain = ac.createGain();
       osc.connect(gain);
       gain.connect(ac.destination);
+      if (audioDest) gain.connect(audioDest);
 
       if (type === 'whoosh') {
         osc.type = 'sine';
@@ -1555,18 +1536,20 @@
       const file = e.target.files[0];
       if (!file) return;
       document.getElementById('rawVideoName').innerText = file.name;
-      document.getElementById('rawVideoMeta').innerText = `Dung lượng: ${formatSize(file.size)} • Zero-Limit Local Stream`;
+      document.getElementById('rawVideoMeta').innerText = `Dung lượng: ${formatSize(file.size)} • Sẵn sàng`;
       const url = URL.createObjectURL(file);
       state.isDemoMode = false;
       state.hasVideo = true;
       document.getElementById('emptyCanvasOverlay').classList.add('hidden');
 
       video.src = url;
+      video.load();
       video.onloadedmetadata = () => {
         state.duration = video.duration || 10;
         state.trimStart = 0;
         state.trimEnd = state.duration;
-        state.currentTime = 0;
+        state.currentTime = 0.05;
+        video.currentTime = 0.05;
         syncTrimSliders();
         resizeCanvas();
       };
@@ -1589,7 +1572,7 @@
       if (!file) return;
       document.getElementById('bgmName').innerText = file.name;
       bgm.src = URL.createObjectURL(file);
-      bgm.volume = document.getElementById('bgmVolSlider').value / 100;
+      updateAudioVolumes();
     }
 
     function handleLogoUpload(e) {
@@ -1628,7 +1611,7 @@
       state.trimEnd = 12.0;
       state.currentTime = 0;
       document.getElementById('rawVideoName').innerText = 'Demo_Silver_Ring_Showcase_4K.mp4';
-      document.getElementById('rawVideoMeta').innerText = '1.42 GB • Zero-Limit Local Stream';
+      document.getElementById('rawVideoMeta').innerText = '1.42 GB • Sẵn sàng';
       document.getElementById('emptyCanvasOverlay').classList.add('hidden');
       syncTrimSliders();
       resizeCanvas();
@@ -1640,7 +1623,7 @@
       if (type === 'luxury') {
         box.value = 'Phân tích nội dung sản phẩm trong video, giữ nguyên màu ánh kim sáng bóng tự nhiên không ám vàng, viết tiêu đề sang trọng và chèn tiếng ding tinh tế.';
       } else if (type === 'tiktok') {
-        box.value = 'Xem nội dung video và tạo hook giật gân 3-5 chữ bắt mắt, bật chạy chữ động theo nhịp và chèn hiệu ứng whoosh + pop.';
+        box.value = 'Xem nội dung video và tạo hook 3-5 chữ bắt mắt, bật chạy chữ động theo nhịp và chèn hiệu ứng whoosh + pop.';
       }
     }
 
@@ -1652,26 +1635,58 @@
       runRealGeminiAutoEdit();
     }
 
-    // Capture current canvas frame as Base64 JPEG for real Gemini Multimodal analysis
     function captureVideoFrameBase64() {
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 480;
-      tempCanvas.height = Math.round(480 * (canvas.height / canvas.width));
-      const tctx = tempCanvas.getContext('2d');
-      if (state.isDemoMode) {
+      try {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 480;
+        tempCanvas.height = Math.max(270, Math.round(480 * (canvas.height / canvas.width)));
+        const tctx = tempCanvas.getContext('2d');
         drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
-      } else if (video.readyState >= 2) {
-        tctx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+        return tempCanvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+      } catch (err) {
+        console.warn('Frame capture fallback:', err);
+        return null;
       }
-      return tempCanvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+    }
+
+    async function callGeminiWithDiagnostics(apiKey, promptText, frameBase64) {
+      const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+      let lastErrorMsg = '';
+
+      for (const model of models) {
+        try {
+          const parts = [{ text: promptText }];
+          if (frameBase64) {
+            parts.push({ inline_data: { mime_type: 'image/jpeg', data: frameBase64 } });
+          }
+
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts }] })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            lastErrorMsg = data?.error?.message || `HTTP ${res.status}`;
+            continue;
+          }
+
+          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            return { plan: JSON.parse(jsonMatch[0]), error: null };
+          }
+        } catch (e) {
+          lastErrorMsg = e.message;
+        }
+      }
+      return { plan: null, error: lastErrorMsg || 'Không nhận được phản hồi từ Google API' };
     }
 
     async function runRealGeminiAutoEdit() {
       const perms = getActivePermissions();
-      if (!perms.autoEdit) {
-        return alert('Tài khoản con của bạn chưa được Chủ Sở Hữu bật quyền Auto-Edit AI!');
-      }
-
+      if (!perms.autoEdit) return alert('Tài khoản con của bạn chưa được Chủ Sở Hữu bật quyền Auto-Edit AI!');
       if (!state.hasVideo) loadDemoVideo();
 
       const prompt = document.getElementById('aiPromptInput').value.trim() || 'Phân tích nội dung video và tự động dựng đẹp mắt, chuyên nghiệp';
@@ -1685,69 +1700,52 @@
       insightBox.classList.add('hidden');
       logList.innerHTML = '';
 
-      const addLog = (msg) => {
+      const addLog = (msg, isWarn = false) => {
         const li = document.createElement('li');
-        li.innerHTML = `<i class="fa-solid fa-check text-emerald-400 mr-1"></i>${msg}`;
+        li.innerHTML = isWarn
+          ? `<i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i><span class="text-amber-300">${msg}</span>`
+          : `<i class="fa-solid fa-check text-emerald-400 mr-1"></i>${msg}`;
         logList.appendChild(li);
       };
 
-      progressBar.style.width = '25%';
-      percentText.innerText = '25%';
-      addLog('Trích xuất khung hình thực tế từ video...');
+      progressBar.style.width = '30%';
+      percentText.innerText = '30%';
+      addLog('Trích xuất khung hình từ video...');
 
       const frameBase64 = captureVideoFrameBase64();
       let aiPlan = null;
 
-      // CALL REAL GEMINI API IF KEY IS CONFIGURED
       if (sysData.geminiApiKey) {
-        try {
-          progressBar.style.width = '55%';
-          percentText.innerText = '55%';
-          addLog('Đang gửi khung hình tới Gemini 2.5 Flash Vision...');
+        progressBar.style.width = '65%';
+        percentText.innerText = '65%';
+        addLog('Đang gửi hình ảnh tới Gemini Vision...');
 
-          const systemInstruction = `Bạn là đạo diễn dựng phim AI chuyên nghiệp. Hãy quan sát khung hình video đính kèm và đọc yêu cầu của người dùng: "${prompt}".
-Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo cấu trúc:
+        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát ảnh đính kèm và đọc yêu cầu: "${prompt}".
+Trả về DUY NHẤT JSON hợp lệ:
 {
-  "sceneSummary": "Mô tả ngắn gọn 1 câu những gì AI nhìn thấy trong video",
-  "captionText": "Tiêu đề ngắn gọn 3-6 từ tiếng Việt cực thu hút phù hợp nội dung video",
+  "sceneSummary": "Mô tả 1 câu nội dung thấy trong video",
+  "captionText": "Tiêu đề ngắn 3-6 từ tiếng Việt cực thu hút",
   "colorPreset": "original" hoặc "silver" hoặc "vivid" hoặc "cinematic",
   "textColor": "#ffffff" hoặc "#facc15",
   "bgColor": "#4f46e5" hoặc "#db2777" hoặc "#27272a",
-  "autoZoom": true hoặc false,
-  "transition": "fade" hoặc "flash" hoặc "none",
-  "sfxType": "whoosh" hoặc "ding" hoặc "pop" hoặc "bass"
+  "autoZoom": true,
+  "transition": "fade",
+  "sfxType": "whoosh"
 }`;
-
-          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${sysData.geminiApiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: systemInstruction },
-                  { inline_data: { mime_type: 'image/jpeg', data: frameBase64 } }
-                ]
-              }]
-            })
-          });
-
-          const data = await response.json();
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            aiPlan = JSON.parse(jsonMatch[0]);
-            addLog('Gemini Vision đã đọc xong nội dung hình ảnh!');
-          }
-        } catch (err) {
-          addLog('Chuyển sang chế độ phân tích cục bộ (kiểm tra lại API Key nếu cần).');
+        const result = await callGeminiWithDiagnostics(sysData.geminiApiKey, systemInstruction, frameBase64);
+        if (result.plan) {
+          aiPlan = result.plan;
+          addLog('Gemini Vision đã đọc xong nội dung hình ảnh!');
+        } else {
+          addLog(`Lỗi Gemini API (${result.error}) → Tự chuyển sang AI cục bộ.`, true);
         }
       } else {
-        await new Promise(r => setTimeout(r, 400));
-        addLog('Đang dùng bộ phân tích cục bộ (Gắn Gemini API Key để AI đọc hình ảnh thật).');
+        await new Promise(r => setTimeout(r, 250));
+        addLog('Đang dùng bộ phân tích cục bộ (Chưa gắn Gemini API Key).');
       }
 
-      progressBar.style.width = '90%';
-      percentText.innerText = '90%';
+      progressBar.style.width = '100%';
+      percentText.innerText = '100%';
 
       if (aiPlan) {
         insightBox.classList.remove('hidden');
@@ -1758,9 +1756,7 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
         state.text.bgColor = aiPlan.bgColor || '#4f46e5';
         state.autoZoom = Boolean(aiPlan.autoZoom);
         updateTransition(aiPlan.transition || 'fade');
-        state.sfxEvents = [
-          { time: state.trimStart + 0.2, type: aiPlan.sfxType || 'whoosh', label: 'AI SFX' }
-        ];
+        state.sfxEvents = [{ time: Number((state.trimStart + 0.2).toFixed(1)), type: aiPlan.sfxType || 'whoosh', label: 'AI SFX' }];
       } else {
         const lower = prompt.toLowerCase();
         if (lower.includes('sang') || lower.includes('bạc') || lower.includes('nguyên bản')) {
@@ -1781,10 +1777,9 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
         }
         state.autoZoom = true;
         updateTransition('fade');
-        state.sfxEvents = [{ time: state.trimStart + 0.2, type: 'whoosh', label: 'Whoosh' }];
+        state.sfxEvents = [{ time: Number((state.trimStart + 0.2).toFixed(1)), type: 'whoosh', label: 'Whoosh' }];
       }
 
-      // Apply UI updates
       document.getElementById('autoZoomToggle').checked = state.autoZoom;
       document.getElementById('overlayTextInput').value = state.text.content;
       document.getElementById('textColorPicker').value = state.text.color;
@@ -1792,23 +1787,13 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
       updateTextOverlay();
       renderSfxMarkers();
 
-      if (state.duration > 4) {
-        state.trimStart = Number((state.duration * 0.06).toFixed(1));
-        state.trimEnd = Number((state.duration * 0.94).toFixed(1));
-        syncTrimSliders();
-      }
-
-      progressBar.style.width = '100%';
-      percentText.innerText = '100%';
-      addLog('Hoàn tất dựng tự động!');
-
       state.currentTime = state.trimStart;
       if (!state.isDemoMode) video.currentTime = state.trimStart;
       if (!state.isPlaying) togglePlay();
     }
 
     // =========================================================================
-    // 3. PRO CANVAS RENDERER, KEYBOARD SHORTCUTS & INTERACTIVE DRAG
+    // 3. PRO CANVAS RENDERER, TOUCH + MOUSE DRAG & SHORTCUTS
     // =========================================================================
     function setAspectRatio(ratio) {
       state.aspectRatio = ratio;
@@ -1833,7 +1818,7 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
     }
 
     function openShortcutsHelp() {
-      alert('PHÍM TẮT DỰNG PHIM CHUYÊN NGHIỆP:\n\n• Phím Space (Cách): Phát / Tạm dừng video\n• Phím I: Cắt điểm bắt đầu ngay tại kim phát\n• Phím O: Cắt điểm kết thúc ngay tại kim phát\n• Mũi tên Trái / Phải: Tua lùi / tiến từng 0.5 giây');
+      alert('PHÍM TẮT DỰNG PHIM:\n\n• Space: Phát / Dừng\n• Phím I: Cắt điểm đầu tại kim phát\n• Phím O: Cắt điểm cuối tại kim phát\n• Mũi tên Trái / Phải: Tua từng 0.5 giây');
     }
 
     window.addEventListener('keydown', (e) => {
@@ -1866,12 +1851,13 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
 
     function togglePlay() {
       if (!state.hasVideo) return;
+      initAudioGraph();
       state.isPlaying = !state.isPlaying;
       document.getElementById('playPauseBtn').innerHTML = state.isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
       if (state.isPlaying) {
         if (!state.isDemoMode) {
           if (video.currentTime < state.trimStart || video.currentTime >= state.trimEnd) video.currentTime = state.trimStart;
-          video.play();
+          video.play().catch(() => {});
         }
         if (bgm.src) bgm.play().catch(() => {});
       } else {
@@ -1918,9 +1904,7 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
       state.lastTriggeredSfxIndex = -1;
       if (!state.isDemoMode) video.currentTime = state.currentTime;
     }
-    window.addEventListener('mousemove', (e) => {
-      if (isScrubbingTimeline) updateScrubPosition(e);
-    });
+    window.addEventListener('mousemove', (e) => { if (isScrubbingTimeline) updateScrubPosition(e); });
     window.addEventListener('mouseup', () => { isScrubbingTimeline = false; });
 
     function syncTrimSliders() {
@@ -2003,12 +1987,14 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
     }
 
     function updateAudioVolumes() {
-      const ov = document.getElementById('origVolSlider').value;
-      const bv = document.getElementById('bgmVolSlider').value;
-      video.volume = ov / 100;
-      bgm.volume = bv / 100;
-      document.getElementById('origVolVal').innerText = ov + '%';
-      document.getElementById('bgmVolVal').innerText = bv + '%';
+      const ov = document.getElementById('origVolSlider').value / 100;
+      const bv = document.getElementById('bgmVolSlider').value / 100;
+      video.volume = ov;
+      bgm.volume = bv;
+      if (videoGainNode) videoGainNode.gain.value = ov;
+      if (bgmGainNode) bgmGainNode.gain.value = bv;
+      document.getElementById('origVolVal').innerText = Math.round(ov * 100) + '%';
+      document.getElementById('bgmVolVal').innerText = Math.round(bv * 100) + '%';
     }
 
     function triggerAndAddSfx(type) {
@@ -2036,42 +2022,45 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
       `).join('');
     }
 
-    // Interactive Dragging for both Brand Logo & Text Overlay
-    canvas.addEventListener('mousedown', (e) => {
+    // Unified Pointer Drag (Mouse + Touch)
+    function handlePointerDown(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
+      const x = (clientX - rect.left) / rect.width;
+      const y = (clientY - rect.top) / rect.height;
 
-      // Check Logo hit first
       if (state.logo.visible && state.logo.img) {
-        if (Math.abs(x - state.logo.xRatio) < 0.16 && Math.abs(y - state.logo.yRatio) < 0.16) {
+        if (Math.abs(x - state.logo.xRatio) < 0.18 && Math.abs(y - state.logo.yRatio) < 0.18) {
           state.dragTarget = 'logo';
           return;
         }
       }
-      // Check Text hit
       if (state.text.visible) {
-        if (Math.abs(x - state.text.xRatio) < 0.35 && Math.abs(y - state.text.yRatio) < 0.15) {
+        if (Math.abs(x - state.text.xRatio) < 0.38 && Math.abs(y - state.text.yRatio) < 0.16) {
           state.dragTarget = 'text';
         }
       }
-    });
+    }
 
-    window.addEventListener('mousemove', (e) => {
+    function handlePointerMove(clientX, clientY) {
       if (!state.dragTarget) return;
       const rect = canvas.getBoundingClientRect();
-      const nx = Math.max(0.08, Math.min(0.92, (e.clientX - rect.left) / rect.width));
-      const ny = Math.max(0.08, Math.min(0.92, (e.clientY - rect.top) / rect.height));
-      if (state.dragTarget === 'logo') {
-        state.logo.xRatio = nx;
-        state.logo.yRatio = ny;
-      } else if (state.dragTarget === 'text') {
-        state.text.xRatio = nx;
-        state.text.yRatio = ny;
-      }
-    });
+      const nx = Math.max(0.08, Math.min(0.92, (clientX - rect.left) / rect.width));
+      const ny = Math.max(0.08, Math.min(0.92, (clientY - rect.top) / rect.height));
+      if (state.dragTarget === 'logo') { state.logo.xRatio = nx; state.logo.yRatio = ny; }
+      else if (state.dragTarget === 'text') { state.text.xRatio = nx; state.text.yRatio = ny; }
+    }
 
+    canvas.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
     window.addEventListener('mouseup', () => { state.dragTarget = null; });
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchmove', (e) => {
+      if (state.dragTarget && e.touches.length > 0) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchend', () => { state.dragTarget = null; });
 
     function formatTime(sec) {
       const m = Math.floor(sec / 60);
@@ -2183,7 +2172,7 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
         targetCtx.fillRect(0, 0, w, h);
       }
 
-      // Brand Logo / Watermark Layer
+      // Brand Logo Layer
       if (state.logo.visible && state.logo.img) {
         targetCtx.save();
         targetCtx.globalAlpha = state.logo.opacity;
@@ -2229,14 +2218,14 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
         targetCtx.restore();
       }
 
-      // Social Media Safe Zone Guides (Preview only, hidden when exporting)
+      // Safe Zone Guides (Preview only)
       if (state.showSafeZones && !isExportOrCapture) {
         targetCtx.save();
-        targetCtx.strokeStyle = 'rgba(236, 72, 153, 0.55)';
+        targetCtx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
         targetCtx.setLineDash([5, 5]);
         targetCtx.lineWidth = 1;
         targetCtx.strokeRect(w * 0.06, h * 0.12, w * 0.78, h * 0.68);
-        targetCtx.fillStyle = 'rgba(236, 72, 153, 0.8)';
+        targetCtx.fillStyle = 'rgba(236, 72, 153, 0.85)';
         targetCtx.font = '10px Inter, sans-serif';
         targetCtx.fillText('Vùng An Toàn TikTok/Reels', w * 0.08, h * 0.11);
         targetCtx.restore();
@@ -2244,8 +2233,17 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
     }
 
     // =========================================================================
-    // 4. 4-TIER EXPORT ENGINE (720P / 1080P / 2K / 4K)
+    // 4. TRUE RESOLUTION OFFSCREEN RENDER & AUDIO MIXER EXPORT ENGINE
     // =========================================================================
+    function getTargetExportDimensions() {
+      const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
+      let ew = shortSide, eh = Math.round(shortSide * 16 / 9);
+      if (state.aspectRatio === '16:9') { ew = Math.round(shortSide * 16 / 9); eh = shortSide; }
+      if (state.aspectRatio === '1:1') { ew = shortSide; eh = shortSide; }
+      if (state.aspectRatio === '4:5') { ew = shortSide; eh = Math.round(shortSide * 5 / 4); }
+      return { width: ew, height: eh };
+    }
+
     function openExportModal() {
       if (!state.hasVideo) return alert('Vui lòng nạp video trước khi xuất!');
       document.getElementById('exportModal').classList.remove('hidden');
@@ -2270,60 +2268,96 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
       updateExportPixelLabel();
     }
     function updateExportPixelLabel() {
-      const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
-      let ew = shortSide, eh = Math.round(shortSide * 16 / 9);
-      if (state.aspectRatio === '16:9') { ew = Math.round(shortSide * 16 / 9); eh = shortSide; }
-      if (state.aspectRatio === '1:1') { ew = shortSide; eh = shortSide; }
-      if (state.aspectRatio === '4:5') { ew = shortSide; eh = Math.round(shortSide * 5 / 4); }
-      document.getElementById('exportExactPixel').innerText = `${ew} × ${eh} px (${state.aspectRatio})`;
+      const dims = getTargetExportDimensions();
+      document.getElementById('exportExactPixel').innerText = `${dims.width} × ${dims.height} px (${state.aspectRatio})`;
     }
 
-    async function startVideoExport() {
-      const progSec = document.getElementById('exportProgressSection');
-      const progBar = document.getElementById('exportProgressBar');
-      const progTxt = document.getElementById('exportPercentText');
-      const renderBtn = document.getElementById('startRenderBtn');
+    async function startTrueResolutionExport() {
+      try {
+        initAudioGraph();
+        const progSec = document.getElementById('exportProgressSection');
+        const progBar = document.getElementById('exportProgressBar');
+        const progTxt = document.getElementById('exportPercentText');
+        const renderBtn = document.getElementById('startRenderBtn');
 
-      progSec.classList.remove('hidden');
-      renderBtn.disabled = true;
+        progSec.classList.remove('hidden');
+        renderBtn.disabled = true;
 
-      const stream = canvas.captureStream(30);
-      const recorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm',
-        videoBitsPerSecond: QUALITY_SPECS[state.exportQuality].bitrate
-      });
+        const dims = getTargetExportDimensions();
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = dims.width;
+        exportCanvas.height = dims.height;
+        const exportCtx = exportCanvas.getContext('2d');
 
-      const chunks = [];
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `AutoCut_v4_${state.exportQuality.toUpperCase()}_${Date.now()}.webm`;
-        a.click();
+        // Draw initial frame before starting captureStream
+        drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
 
-        progSec.classList.add('hidden');
-        renderBtn.disabled = false;
-        closeExportModal();
-      };
-
-      const renderDurationMs = Math.min(8000, Math.max(2500, (state.trimEnd - state.trimStart) * 1000));
-      state.currentTime = state.trimStart;
-      if (!state.isDemoMode) video.currentTime = state.trimStart;
-      if (!state.isPlaying) togglePlay();
-
-      recorder.start();
-      const startTime = performance.now();
-      const timer = setInterval(() => {
-        const elapsed = performance.now() - startTime;
-        const pct = Math.min(100, Math.round((elapsed / renderDurationMs) * 100));
-        progBar.style.width = pct + '%';
-        progTxt.innerText = pct + '%';
-        if (elapsed >= renderDurationMs) {
-          clearInterval(timer);
-          recorder.stop();
+        const videoStream = exportCanvas.captureStream(30);
+        const combinedStream = new MediaStream();
+        videoStream.getVideoTracks().forEach(t => combinedStream.addTrack(t));
+        if (audioDest && audioDest.stream) {
+          audioDest.stream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
         }
-      }, 100);
+
+        // Prefer MP4 if supported by browser, fallback to WebM
+        let mimeType = 'video/webm';
+        let ext = 'webm';
+        if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+          ext = 'mp4';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+          mimeType = 'video/webm;codecs=vp9,opus';
+        }
+
+        const recorder = new MediaRecorder(combinedStream, {
+          mimeType,
+          videoBitsPerSecond: QUALITY_SPECS[state.exportQuality].bitrate
+        });
+
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+          clearInterval(exportRenderInterval);
+          const blob = new Blob(chunks, { type: mimeType });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `AutoCut_${state.exportQuality.toUpperCase()}_${dims.width}x${dims.height}_${Date.now()}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          progSec.classList.add('hidden');
+          renderBtn.disabled = false;
+          closeExportModal();
+        };
+
+        const renderDurationMs = Math.min(15000, Math.max(2500, ((state.trimEnd - state.trimStart) / state.speed) * 1000));
+        state.currentTime = state.trimStart;
+        state.lastTriggeredSfxIndex = -1;
+        if (!state.isDemoMode) video.currentTime = state.trimStart;
+        if (!state.isPlaying) togglePlay();
+
+        const exportRenderInterval = setInterval(() => {
+          drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
+        }, 33);
+
+        recorder.start(250);
+        const startTime = performance.now();
+        const timer = setInterval(() => {
+          const elapsed = performance.now() - startTime;
+          const pct = Math.min(100, Math.round((elapsed / renderDurationMs) * 100));
+          progBar.style.width = pct + '%';
+          progTxt.innerText = pct + '%';
+          if (elapsed >= renderDurationMs) {
+            clearInterval(timer);
+            if (recorder.state !== 'inactive') recorder.stop();
+          }
+        }, 100);
+      } catch (err) {
+        alert('Lỗi xuất video: ' + err.message);
+        document.getElementById('exportProgressSection').classList.add('hidden');
+        document.getElementById('startRenderBtn').disabled = false;
+      }
     }
 
     function switchInspectorTab(tab) {
@@ -2340,7 +2374,7 @@ Trả về DUY NHẤT một chuỗi JSON hợp lệ (không bọc markdown) theo
 
     // Boot Application
     refreshAccountUI();
-    syncFromCloud();
+    syncFromCloud(false);
     resizeCanvas();
     requestAnimationFrame(renderLoop);
   </script>
