@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v8.0 — Clean Core Edition</title>
+  <title>AutoCut Studio AI v10.0 — Final Verified Release</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -63,7 +63,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v8.0</span></h1>
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v10.0</span></h1>
           <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
@@ -74,16 +74,16 @@
       </div>
     </div>
 
-    <!-- Center Quick Pro Tools -->
-    <div class="hidden xl:flex items-center gap-2 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-[11px]">
-      <button onclick="openAiConfigModal()" class="px-3 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-semibold border border-indigo-500/30 transition flex items-center gap-1.5">
-        <i class="fa-solid fa-key"></i> Gắn Gemini API Key
+    <!-- Center Quick Pro Tools (Visible on all laptops md+) -->
+    <div class="hidden md:flex items-center gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-[11px]">
+      <button onclick="openAiConfigModal()" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-semibold border border-indigo-500/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-key"></i> Gắn Gemini API
       </button>
-      <button onclick="toggleSafeZones()" id="safeZoneBtn" class="px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5">
-        <i class="fa-solid fa-border-all"></i> Khung An Toàn TikTok
+      <button onclick="toggleSafeZones()" id="safeZoneBtn" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-border-all"></i> Safe Zone
       </button>
-      <button onclick="openShortcutsHelp()" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition">
-        <i class="fa-solid fa-keyboard"></i> Phím Tắt
+      <button onclick="openShortcutsHelp()" class="px-2 py-1 rounded-lg text-zinc-400 hover:text-white transition" title="Phím tắt">
+        <i class="fa-solid fa-keyboard"></i>
       </button>
     </div>
 
@@ -117,7 +117,7 @@
   <main class="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
     <!-- LEFT PANEL -->
-    <aside class="w-full lg:w-[390px] border-r border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto p-3.5 gap-3.5">
+    <aside class="w-full lg:w-[410px] border-r border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto p-3.5 gap-3.5">
       
       <div class="p-2.5 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between text-[11px]">
         <div class="flex items-center gap-2 min-w-0">
@@ -173,30 +173,69 @@
         </div>
       </div>
 
-      <!-- Step 2: AI Auto-Edit -->
+      <!-- Step 2: AI Auto-Edit & 10 Diverse Prompt Templates -->
       <div class="glass-panel rounded-xl p-3 space-y-2.5 gradient-border">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
             <span class="w-4 h-4 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-[10px]">2</span>
-            Gemini AI Đọc Video & Tự Dựng
+            Gemini AI Quét 3 Khung Hình & Dựng
           </span>
           <button onclick="openAiConfigModal()" class="text-[10px] bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 transition">
-            <i class="fa-solid fa-eye mr-1"></i>Vision AI
+            <i class="fa-solid fa-eye mr-1"></i>3-Frame Vision
           </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-1.5">
-          <button onclick="applyPresetPrompt('luxury')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-indigo-500/50 transition">
-            <div class="text-[11px] font-semibold text-indigo-300"><i class="fa-solid fa-gem mr-1"></i>Review Sản Phẩm</div>
-            <div class="text-[9px] text-zinc-500 truncate">Giữ màu gốc sáng nét, zoom mượt</div>
-          </button>
-          <button onclick="applyPresetPrompt('tiktok')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-pink-500/50 transition">
-            <div class="text-[11px] font-semibold text-pink-300"><i class="fa-solid fa-bolt mr-1"></i>TikTok Trend 2026</div>
-            <div class="text-[9px] text-zinc-500 truncate">Chạy chữ động + SFX dồn dập</div>
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-semibold text-zinc-400 uppercase">Kho 10 Mẫu Kịch Bản Dựng Nhanh:</span>
+          <button onclick="pickRandomPromptTemplate()" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-semibold">
+            <i class="fa-solid fa-shuffle mr-1"></i>Gợi ý ngẫu nhiên
           </button>
         </div>
 
-        <textarea id="aiPromptInput" rows="3" placeholder="Viết yêu cầu tự nhiên... AI sẽ đọc khung hình trong video để tự động chỉnh màu, viết tiêu đề và rải hiệu ứng âm thanh!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
+        <div class="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1" id="presetTemplatesGrid">
+          <button onclick="applyPresetPrompt('jewelry')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-indigo-500/60 transition">
+            <div class="text-[11px] font-semibold text-indigo-300">💎 Trang Sức / Bạc</div>
+            <div class="text-[9px] text-zinc-500 truncate">Giữ màu ánh kim gốc sáng nét</div>
+          </button>
+          <button onclick="applyPresetPrompt('tiktok')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-pink-500/60 transition">
+            <div class="text-[11px] font-semibold text-pink-300">⚡ TikTok Viral 2026</div>
+            <div class="text-[9px] text-zinc-500 truncate">Hook nhanh + chạy chữ động</div>
+          </button>
+          <button onclick="applyPresetPrompt('sales')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/60 transition">
+            <div class="text-[11px] font-semibold text-amber-300">🛍️ Chốt Đơn / Sale</div>
+            <div class="text-[9px] text-zinc-500 truncate">Chữ vàng nổi bật, nhịp dồn dập</div>
+          </button>
+          <button onclick="applyPresetPrompt('cinematic')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-purple-500/60 transition">
+            <div class="text-[11px] font-semibold text-purple-300">🎬 Cinematic 16:9</div>
+            <div class="text-[9px] text-zinc-500 truncate">Màu phim sâu lắng, slow-mo nhẹ</div>
+          </button>
+          <button onclick="applyPresetPrompt('food')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-orange-500/60 transition">
+            <div class="text-[11px] font-semibold text-orange-300">🍜 Review Ẩm Thực</div>
+            <div class="text-[9px] text-zinc-500 truncate">Tăng rực rỡ màu món ăn hấp dẫn</div>
+          </button>
+          <button onclick="applyPresetPrompt('fashion')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-rose-500/60 transition">
+            <div class="text-[11px] font-semibold text-rose-300">👗 Thời Trang / OOTD</div>
+            <div class="text-[9px] text-zinc-500 truncate">Sáng trong trẻo, flash mở đầu</div>
+          </button>
+          <button onclick="applyPresetPrompt('podcast')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-cyan-500/60 transition">
+            <div class="text-[11px] font-semibold text-cyan-300">🎙️ Podcast / Chia Sẻ</div>
+            <div class="text-[9px] text-zinc-500 truncate">Cắt đoạn thừa, phụ đề rõ nét</div>
+          </button>
+          <button onclick="applyPresetPrompt('realestate')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-emerald-500/60 transition">
+            <div class="text-[11px] font-semibold text-emerald-300">🏠 Bất Động Sản / Decor</div>
+            <div class="text-[9px] text-zinc-500 truncate">Góc sang trọng, zoom mượt mà</div>
+          </button>
+          <button onclick="applyPresetPrompt('travel')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-sky-500/60 transition">
+            <div class="text-[11px] font-semibold text-sky-300">✈️ Travel / Du Lịch</div>
+            <div class="text-[9px] text-zinc-500 truncate">Màu trời rực rỡ, năng động</div>
+          </button>
+          <button onclick="applyPresetPrompt('tech')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-violet-500/60 transition">
+            <div class="text-[11px] font-semibold text-violet-300">🚗 Công Nghệ / Review Xe</div>
+            <div class="text-[9px] text-zinc-500 truncate">Tương phản sắc nét, bass drop</div>
+          </button>
+        </div>
+
+        <textarea id="aiPromptInput" rows="3" placeholder="Chọn 1 mẫu gợi ý ở trên hoặc tự nhập ý tưởng của bạn... Gemini AI sẽ quét 3 mốc thời gian (Đầu - Giữa - Cuối) trong video để hiểu trọn nội dung và tự dựng!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
 
         <div class="bg-zinc-900/80 border border-zinc-800 rounded-lg p-2 space-y-1.5">
           <div class="flex items-center justify-between">
@@ -227,18 +266,18 @@
 
         <button onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span>AI Đọc Nội Dung Video & Tự Dựng</span>
+          <span>AI Quét Video (3 Khung Hình) & Tự Dựng</span>
         </button>
 
         <div id="aiStatusBox" class="hidden rounded-lg bg-zinc-900 border border-indigo-500/30 p-2.5 space-y-1.5">
           <div class="flex items-center justify-between text-[11px] font-semibold text-indigo-300">
-            <span id="aiStatusTitle"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Đang xử lý...</span>
+            <span id="aiStatusTitle"><i class="fa-solid fa-circle-notch fa-spin mr-1.5"></i>Đang quét video...</span>
             <span id="aiProgressPercent">0%</span>
           </div>
           <div class="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
             <div id="aiProgressBar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
           </div>
-          <div id="aiVisionInsightBox" class="hidden text-[10px] bg-indigo-950/50 border border-indigo-500/30 rounded p-2 text-indigo-200 leading-relaxed"></div>
+          <div id="aiVisionInsightBox" class="hidden text-[10px] bg-indigo-950/60 border border-indigo-500/40 rounded p-2 text-indigo-200 leading-relaxed space-y-1"></div>
           <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-0.5 max-h-28 overflow-y-auto"></ul>
         </div>
       </div>
@@ -257,7 +296,7 @@
         </div>
 
         <div class="flex items-center gap-2 text-[11px]">
-          <button onclick="toggleSafeZones()" class="xl:hidden px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[10px]">
+          <button onclick="toggleSafeZones()" class="md:hidden px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[10px]">
             <i class="fa-solid fa-border-all"></i> Safe Zone
           </button>
           <span id="outputResIndicator" class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-semibold">
@@ -575,7 +614,7 @@
     </aside>
   </main>
 
-  <!-- MODAL 1: GEMINI API KEY -->
+  <!-- MODAL 1: GEMINI API KEY WITH INSTANT TEST BUTTON -->
   <div id="aiConfigModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -584,8 +623,8 @@
             <i class="fa-solid fa-brain"></i>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-white">Kết Nối API Gemini Thật (Đọc Nội Dung Video)</h3>
-            <p class="text-[11px] text-zinc-400">Tự động nhận diện khung hình thật bằng Gemini Vision</p>
+            <h3 class="text-sm font-bold text-white">Kết Nối API Gemini Thật (Đọc 3 Khung Hình Video)</h3>
+            <p class="text-[11px] text-zinc-400">Tự động nhận diện toàn bộ diễn biến Đầu - Giữa - Cuối video</p>
           </div>
         </div>
         <button onclick="closeAiConfigModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -594,12 +633,16 @@
       <div class="space-y-2">
         <label class="text-xs font-semibold text-zinc-300 block">Dán Gemini API Key của bạn:</label>
         <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono focus:border-indigo-500 focus:outline-none" />
+        <div id="apiKeyTestResult" class="hidden text-[11px] p-2 rounded-lg border"></div>
         <p class="text-[11px] text-zinc-400 leading-relaxed">
           • Lấy API Key miễn phí tại <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-indigo-400 underline">Google AI Studio</a>.
         </p>
       </div>
 
       <div class="flex gap-2 pt-2">
+        <button onclick="testGeminiApiKeyNow()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 border border-zinc-700 transition">
+          Kiểm Tra Key
+        </button>
         <button onclick="saveGeminiApiKey()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">
           Lưu & Kích Hoạt Gemini Vision
         </button>
@@ -918,23 +961,14 @@
     // =========================================================================
     // 1. SAFE STORAGE & CLOUD SYNC ENGINE
     // =========================================================================
-    const STORAGE_KEY = 'autocut_enterprise_saas_v8';
+    const STORAGE_KEY = 'autocut_enterprise_saas_v10';
     let memoryFallbackStorage = {};
 
     function safeStorageGet(key) {
-      try {
-        return localStorage.getItem(key);
-      } catch (e) {
-        return memoryFallbackStorage[key] || null;
-      }
+      try { return localStorage.getItem(key); } catch (e) { return memoryFallbackStorage[key] || null; }
     }
-
     function safeStorageSet(key, val) {
-      try {
-        localStorage.setItem(key, val);
-      } catch (e) {
-        memoryFallbackStorage[key] = val;
-      }
+      try { localStorage.setItem(key, val); } catch (e) { memoryFallbackStorage[key] = val; }
     }
 
     function getDefaultSystemData() {
@@ -1105,11 +1139,46 @@
 
     function openAiConfigModal() {
       document.getElementById('geminiApiKeyInput').value = sysData.geminiApiKey || '';
+      document.getElementById('apiKeyTestResult').classList.add('hidden');
       document.getElementById('aiConfigModal').classList.remove('hidden');
     }
     function closeAiConfigModal() {
       document.getElementById('aiConfigModal').classList.add('hidden');
     }
+
+    async function testGeminiApiKeyNow() {
+      const key = document.getElementById('geminiApiKeyInput').value.trim();
+      const box = document.getElementById('apiKeyTestResult');
+      if (!key) return alert('Vui lòng dán Gemini API Key trước khi kiểm tra!');
+
+      box.classList.remove('hidden');
+      box.className = 'text-[11px] p-2 rounded-lg border bg-zinc-950 border-zinc-700 text-zinc-300';
+      box.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Đang kiểm tra kết nối tới Google AI...';
+
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest'];
+      for (const m of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: 'Xin chào' }] }] })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            box.className = 'text-[11px] p-2 rounded-lg border bg-emerald-950/50 border-emerald-500/40 text-emerald-300';
+            box.innerHTML = `<i class="fa-solid fa-check-circle mr-1"></i>Kết nối thành công! API Key hoạt động tốt với model <b>${m}</b>.`;
+            return;
+          } else {
+            box.className = 'text-[11px] p-2 rounded-lg border bg-red-950/50 border-red-500/40 text-red-300';
+            box.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i>Lỗi từ Google: ${data?.error?.message || res.status}`;
+          }
+        } catch (err) {
+          box.className = 'text-[11px] p-2 rounded-lg border bg-red-950/50 border-red-500/40 text-red-300';
+          box.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i>Lỗi mạng: ${err.message}`;
+        }
+      }
+    }
+
     function saveGeminiApiKey() {
       sysData.geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
       saveSystemData(isOwnerActive());
@@ -1429,7 +1498,7 @@
     }
 
     // =========================================================================
-    // 2. VIDEO EDITOR ENGINE & CROSS-BROWSER CANVAS HELPERS
+    // 2. VIDEO EDITOR ENGINE & 10 DIVERSE PROMPT TEMPLATES
     // =========================================================================
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
@@ -1477,6 +1546,64 @@
       dragOffsetY: 0
     };
 
+    const PROMPT_TEMPLATES = {
+      jewelry: {
+        prompt: 'Phân tích chi tiết trang sức trong video, giữ nguyên màu bạc xi bạch kim sáng bóng tự nhiên tuyệt đối không ám vàng, tăng độ sắc nét chi tiết, chuyển động zoom mượt sang trọng và chèn tiếng ding tinh tế.',
+        preset: 'silver', caption: 'BẠC CAO CẤP XI BẠCH KIM ✨', textColor: '#ffffff', bgColor: '#27272a', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'fade', sfx: 'ding'
+      },
+      tiktok: {
+        prompt: 'Quét nội dung video và tạo câu hook 3-5 chữ cực cuốn cho TikTok/Reels, bật chạy chữ động từng từ theo nhịp, tốc độ 1.1x năng động và chèn hiệu ứng whoosh + pop bắt tai.',
+        preset: 'vivid', caption: 'XEM HẾT VIDEO NÀY NGAY 🔥', textColor: '#ffffff', bgColor: '#db2777', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+      },
+      sales: {
+        prompt: 'Dựng video bán hàng chốt đơn livestream tốc độ cao, chữ vàng nổi bật thu hút mắt nhìn, tăng sáng rõ sản phẩm và rải hiệu ứng âm thanh kích thích mua hàng.',
+        preset: 'vivid', caption: 'ƯU ĐÃI ĐỘC QUYỀN HÔM NAY ⚡', textColor: '#facc15', bgColor: '#b91c1c', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'pop'
+      },
+      cinematic: {
+        prompt: 'Chuyển sang khung ngang 16:9 điện ảnh, chỉnh tông màu phim sâu lắng nghệ thuật, giảm tốc độ xuống 0.85x mượt mà và thêm chuyển cảnh fade êm ái.',
+        preset: 'cinematic', caption: 'CINEMATIC STORYTELLING', textColor: '#f4f4f5', bgColor: '#18181b', ratio: '16:9', speed: 0.85, autoZoom: true, trans: 'fade', sfx: 'bass'
+      },
+      food: {
+        prompt: 'Phân tích món ăn trong video, tăng độ rực rỡ và độ tương phản để món ăn trông nóng hổi hấp dẫn, viết tiêu đề kích thích vị giác kèm tiếng pop vui nhộn.',
+        preset: 'vivid', caption: 'NGON KHÓ CƯỠNG TỪ MIẾNG ĐẦU 🤤', textColor: '#facc15', bgColor: '#c2410c', ratio: '9:16', speed: 1.05, autoZoom: true, trans: 'none', sfx: 'pop'
+      },
+      fashion: {
+        prompt: 'Dựng video lookbook thời trang OOTD phong cách Hàn Quốc sáng trong trẻo, hiệu ứng flash chuyển cảnh mở đầu ấn tượng và tiêu đề thanh lịch.',
+        preset: 'silver', caption: 'OUTFIT CHUẨN GU MÙA MỚI ✨', textColor: '#ffffff', bgColor: '#be185d', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+      },
+      podcast: {
+        prompt: 'Biên tập video chia sẻ kiến thức / podcast chuyên nghiệp, giữ màu sắc chân thực tự nhiên, phụ đề to rõ dễ đọc ở giữa dưới và âm thanh sạch sẽ.',
+        preset: 'original', caption: 'BÍ QUYẾT THỰC CHIẾN 2026 💡', textColor: '#ffffff', bgColor: '#1d4ed8', ratio: '9:16', speed: 1.0, autoZoom: false, trans: 'fade', sfx: 'ding'
+      },
+      realestate: {
+        prompt: 'Dựng video giới thiệu không gian bất động sản / nội thất cao cấp, khung hình cân đối sang trọng, chuyển động zoom nhẹ nhàng và fade mượt.',
+        preset: 'silver', caption: 'KHÔNG GIAN SỐNG ĐẲNG CẤP 🏡', textColor: '#facc15', bgColor: '#065f46', ratio: '16:9', speed: 0.95, autoZoom: true, trans: 'fade', sfx: 'ding'
+      },
+      travel: {
+        prompt: 'Dựng travel vlog du lịch khám phá đầy năng lượng, màu sắc bầu trời và cảnh quan tươi sáng rực rỡ, nhịp cắt nhanh cuốn hút.',
+        preset: 'vivid', caption: 'HÀNH TRÌNH ĐÁNG NHỚ 🌍✈️', textColor: '#ffffff', bgColor: '#0369a1', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+      },
+      tech: {
+        prompt: 'Review sản phẩm công nghệ / ô tô sắc nét, tăng độ tương phản góc cạnh mạnh mẽ, thêm tiếng bass drop uy lực ngay giây đầu tiên.',
+        preset: 'cinematic', caption: 'ĐÁNH GIÁ CHI TIẾT SIÊU PHẨM 🚀', textColor: '#38bdf8', bgColor: '#0f172a', ratio: '16:9', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'bass'
+      }
+    };
+
+    let lastAppliedTemplateKey = 'jewelry';
+
+    function applyPresetPrompt(key) {
+      lastAppliedTemplateKey = key;
+      const tpl = PROMPT_TEMPLATES[key];
+      if (!tpl) return;
+      document.getElementById('aiPromptInput').value = tpl.prompt;
+    }
+
+    function pickRandomPromptTemplate() {
+      const keys = Object.keys(PROMPT_TEMPLATES);
+      const randKey = keys[Math.floor(Math.random() * keys.length)];
+      applyPresetPrompt(randKey);
+    }
+
     const QUALITY_SPECS = {
       '720p':  { label: '720p HD', shortDim: 720, bitrate: 5000000 },
       '1080p': { label: '1080p Full HD', shortDim: 1080, bitrate: 10000000 },
@@ -1484,7 +1611,6 @@
       '4k':    { label: '4K Ultra HD', shortDim: 2160, bitrate: 28000000 }
     };
 
-    // Universal Rounded Rect Helper (Replaces ctx.roundRect which crashes older browsers)
     function drawRoundedRect(c, x, y, width, height, radius) {
       const r = Math.min(radius, width / 2, height / 2);
       c.beginPath();
@@ -1496,22 +1622,13 @@
       c.closePath();
     }
 
-    // Safe Web Audio SFX Synthesizer (Does NOT hijack <video> element audio)
     let audioCtx = null;
-    let audioDest = null;
 
     function initSfxAudio() {
       try {
         if (!audioCtx) {
           const AC = window.AudioContext || window.webkitAudioContext;
           audioCtx = new AC();
-          audioDest = audioCtx.createMediaStreamDestination();
-          const silentOsc = audioCtx.createOscillator();
-          const silentGain = audioCtx.createGain();
-          silentGain.gain.value = 0.0001;
-          silentOsc.connect(silentGain);
-          silentGain.connect(audioDest);
-          silentOsc.start();
         }
         if (audioCtx.state === 'suspended') audioCtx.resume();
       } catch (e) {}
@@ -1526,7 +1643,6 @@
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        if (audioDest) gain.connect(audioDest);
 
         if (type === 'whoosh') {
           osc.type = 'sine';
@@ -1655,15 +1771,6 @@
       if (!state.isPlaying) togglePlay();
     }
 
-    function applyPresetPrompt(type) {
-      const box = document.getElementById('aiPromptInput');
-      if (type === 'luxury') {
-        box.value = 'Phân tích nội dung sản phẩm trong video, giữ nguyên màu ánh kim sáng bóng tự nhiên không ám vàng, viết tiêu đề sang trọng và chèn tiếng ding tinh tế.';
-      } else if (type === 'tiktok') {
-        box.value = 'Xem nội dung video và tạo hook 3-5 chữ bắt mắt, bật chạy chữ động theo nhịp và chèn hiệu ứng whoosh + pop.';
-      }
-    }
-
     function handleQuickChatCommand() {
       const cmd = document.getElementById('quickChatCommand').value.trim();
       if (!cmd) return;
@@ -1672,32 +1779,71 @@
       runRealGeminiAutoEdit();
     }
 
-    function captureVideoFrameBase64() {
-      try {
-        if (!state.isDemoMode && video.readyState < 2) return null;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = 480;
-        tempCanvas.height = Math.max(270, Math.round(480 * (canvas.height / canvas.width)));
-        const tctx = tempCanvas.getContext('2d');
-        drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
-        const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.75);
-        const base64 = dataUrl.split(',')[1];
-        return (base64 && base64.length > 100) ? base64 : null;
-      } catch (err) {
-        return null;
+    // Fast 3-Keyframe Sampler (320px lightweight Base64)
+    async function captureMultiKeyframes() {
+      const frames = [];
+      const ratios = [0.15, 0.5, 0.85];
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 320;
+      tempCanvas.height = Math.max(180, Math.round(320 * (canvas.height / canvas.width)));
+      const tctx = tempCanvas.getContext('2d');
+
+      if (state.isDemoMode) {
+        for (const r of ratios) {
+          state.currentTime = state.duration * r;
+          drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
+          const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
+          if (b64) frames.push(b64);
+        }
+        return frames;
       }
+
+      if (video.readyState < 2) return frames;
+      const savedTime = video.currentTime;
+      const wasPlaying = state.isPlaying;
+      if (wasPlaying) video.pause();
+
+      for (const r of ratios) {
+        const targetT = Math.min(state.duration - 0.1, Math.max(0.1, state.duration * r));
+        await new Promise((resolve) => {
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            video.removeEventListener('seeked', finish);
+            try {
+              drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
+              const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
+              if (b64 && b64.length > 100) frames.push(b64);
+            } catch (e) {}
+            resolve();
+          };
+          video.addEventListener('seeked', finish);
+          video.currentTime = targetT;
+          setTimeout(finish, 450);
+        });
+      }
+
+      video.currentTime = savedTime;
+      if (wasPlaying) video.play().catch(() => {});
+      return frames;
     }
 
-    async function callGeminiWithDiagnostics(apiKey, promptText, frameBase64) {
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
+    // Verified Gemini Models Fallback Chain
+    async function callGeminiVisionVerified(apiKey, promptText, base64Frames) {
+      const models = [
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash-latest'
+      ];
       let lastErrorMsg = '';
 
       for (const model of models) {
         try {
           const parts = [{ text: promptText }];
-          if (frameBase64) {
-            parts.push({ inline_data: { mime_type: 'image/jpeg', data: frameBase64 } });
-          }
+          base64Frames.forEach((b64) => {
+            parts.push({ inline_data: { mime_type: 'image/jpeg', data: b64 } });
+          });
 
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -1714,13 +1860,13 @@
           const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
           const jsonMatch = rawText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
-            return { plan: JSON.parse(jsonMatch[0]), error: null };
+            return { plan: JSON.parse(jsonMatch[0]), modelUsed: model, error: null };
           }
         } catch (e) {
           lastErrorMsg = e.message;
         }
       }
-      return { plan: null, error: lastErrorMsg || 'Không nhận được phản hồi từ Google API' };
+      return { plan: null, modelUsed: null, error: lastErrorMsg || 'Không nhận được phản hồi từ Google API' };
     }
 
     async function runRealGeminiAutoEdit() {
@@ -1728,7 +1874,7 @@
       if (!perms.autoEdit) return alert('Tài khoản con của bạn chưa được Chủ Sở Hữu bật quyền Auto-Edit AI!');
       if (!state.hasVideo) loadDemoVideo();
 
-      const prompt = document.getElementById('aiPromptInput').value.trim() || 'Phân tích nội dung video và tự động dựng đẹp mắt, chuyên nghiệp';
+      const prompt = document.getElementById('aiPromptInput').value.trim() || PROMPT_TEMPLATES[lastAppliedTemplateKey].prompt;
       const statusBox = document.getElementById('aiStatusBox');
       const progressBar = document.getElementById('aiProgressBar');
       const percentText = document.getElementById('aiProgressPercent');
@@ -1749,38 +1895,43 @@
 
       progressBar.style.width = '30%';
       percentText.innerText = '30%';
-      addLog('Trích xuất khung hình từ video...');
+      addLog('Quét 3 mốc khung hình (Đầu - Giữa - Cuối video)...');
 
-      const frameBase64 = captureVideoFrameBase64();
+      const frames = await captureMultiKeyframes();
       let aiPlan = null;
+      let modelUsed = '';
 
       if (sysData.geminiApiKey) {
         progressBar.style.width = '65%';
         percentText.innerText = '65%';
-        addLog('Đang gửi dữ liệu tới Gemini Vision...');
+        addLog(`Gửi ${frames.length} khung hình tới Gemini Vision...`);
 
-        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát hình ảnh (nếu có) và đọc yêu cầu: "${prompt}".
-Trả về DUY NHẤT JSON hợp lệ:
+        const systemInstruction = `Bạn là đạo diễn dựng phim AI chuyên nghiệp. Hãy quan sát ${frames.length} khung hình được trích xuất từ Đầu, Giữa và Cuối video đính kèm, kết hợp với yêu cầu của người dùng: "${prompt}".
+Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) theo cấu trúc sau:
 {
-  "sceneSummary": "Mô tả 1 câu nội dung thấy trong video",
-  "captionText": "Tiêu đề ngắn 3-6 từ tiếng Việt cực thu hút",
+  "sceneSummary": "Tóm tắt 1-2 câu chính xác những gì xuất hiện xuyên suốt từ đầu đến cuối video",
+  "editStrategy": "Giải thích ngắn gọn cách AI cắt ghép, chỉnh màu và đặt nhịp cho video này",
+  "captionText": "Tiêu đề ngắn 3-6 từ tiếng Việt cực thu hút đúng với nội dung trong video",
   "colorPreset": "original" hoặc "silver" hoặc "vivid" hoặc "cinematic",
+  "aspectRatio": "9:16" hoặc "16:9" hoặc "1:1" hoặc "4:5",
+  "speed": 1.0,
   "textColor": "#ffffff" hoặc "#facc15",
   "bgColor": "#4f46e5" hoặc "#db2777" hoặc "#27272a",
   "autoZoom": true,
-  "transition": "fade",
-  "sfxType": "whoosh"
+  "transition": "fade" hoặc "flash" hoặc "none",
+  "sfxType": "whoosh" hoặc "ding" hoặc "pop" hoặc "bass"
 }`;
-        const result = await callGeminiWithDiagnostics(sysData.geminiApiKey, systemInstruction, frameBase64);
+        const result = await callGeminiVisionVerified(sysData.geminiApiKey, systemInstruction, frames);
         if (result.plan) {
           aiPlan = result.plan;
-          addLog('Gemini Vision đã đọc xong nội dung!');
+          modelUsed = result.modelUsed;
+          addLog(`Đã phân tích xong bằng ${modelUsed}!`);
         } else {
-          addLog(`Lỗi Gemini API (${result.error}) → Tự chuyển sang AI cục bộ.`, true);
+          addLog(`Lỗi Gemini API (${result.error}) → Áp dụng kịch bản thông minh cục bộ.`, true);
         }
       } else {
         await new Promise(r => setTimeout(r, 250));
-        addLog('Đang dùng bộ phân tích cục bộ (Chưa gắn Gemini API Key).');
+        addLog('Đang dùng bộ dựng cục bộ (Bấm "Cài API Key" để AI đọc hình ảnh thật).');
       }
 
       progressBar.style.width = '100%';
@@ -1788,35 +1939,49 @@ Trả về DUY NHẤT JSON hợp lệ:
 
       if (aiPlan) {
         insightBox.classList.remove('hidden');
-        insightBox.innerHTML = `<i class="fa-solid fa-eye text-pink-400 mr-1"></i><b>Gemini Vision nhận diện:</b> ${aiPlan.sceneSummary}`;
+        insightBox.innerHTML = `
+          <div><i class="fa-solid fa-eye text-pink-400 mr-1"></i><b>Nội dung AI đọc được:</b> ${aiPlan.sceneSummary}</div>
+          <div class="text-emerald-300 mt-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><b>Chiến lược dựng:</b> ${aiPlan.editStrategy || 'Tự động tối ưu ánh sáng, nhịp cắt và hiệu ứng âm thanh.'}</div>
+        `;
+        if (aiPlan.aspectRatio) setAspectRatio(aiPlan.aspectRatio);
         applyColorPreset(aiPlan.colorPreset || 'silver');
         state.text.content = aiPlan.captionText || 'AUTOCUT STUDIO AI';
         state.text.color = aiPlan.textColor || '#ffffff';
         state.text.bgColor = aiPlan.bgColor || '#4f46e5';
         state.autoZoom = Boolean(aiPlan.autoZoom);
+        if (aiPlan.speed) {
+          document.getElementById('speedSlider').value = aiPlan.speed;
+          updateSpeed();
+        }
         updateTransition(aiPlan.transition || 'fade');
-        state.sfxEvents = [{ time: Number((state.trimStart + 0.2).toFixed(1)), type: aiPlan.sfxType || 'whoosh', label: 'AI SFX' }];
+        state.sfxEvents = [
+          { time: Number((state.trimStart + 0.2).toFixed(1)), type: aiPlan.sfxType || 'whoosh', label: 'Mở đầu' },
+          { time: Number(((state.trimStart + state.trimEnd) / 2).toFixed(1)), type: 'ding', label: 'Điểm nhấn' }
+        ];
       } else {
+        const tpl = PROMPT_TEMPLATES[lastAppliedTemplateKey] || PROMPT_TEMPLATES.jewelry;
         const lower = prompt.toLowerCase();
-        if (lower.includes('sang') || lower.includes('bạc') || lower.includes('nguyên bản')) {
-          applyColorPreset('silver');
-          state.text.content = 'CHẤT LIỆU BẠC XI BẠCH KIM';
-        } else if (lower.includes('tiktok') || lower.includes('viral')) {
-          applyColorPreset('vivid');
-          state.text.content = 'XU HƯỚNG HOT 2026 🔥';
-          state.text.bgColor = '#db2777';
-        } else {
-          applyColorPreset('silver');
-        }
-        if (lower.includes('vàng')) state.text.color = '#facc15';
+
+        setAspectRatio(lower.includes('16:9') || lower.includes('ngang') ? '16:9' : tpl.ratio);
+        applyColorPreset(tpl.preset);
+        state.text.content = tpl.caption;
+        state.text.color = lower.includes('vàng') ? '#facc15' : tpl.textColor;
+        state.text.bgColor = tpl.bgColor;
+        state.autoZoom = tpl.autoZoom;
+        document.getElementById('speedSlider').value = tpl.speed;
+        updateSpeed();
+        updateTransition(tpl.trans);
+
         if (lower.includes('tăng sáng')) {
-          state.filters.brightness = 120;
-          document.getElementById('brightSlider').value = 120;
-          document.getElementById('brightVal').innerText = '120%';
+          state.filters.brightness = 122;
+          document.getElementById('brightSlider').value = 122;
+          document.getElementById('brightVal').innerText = '122%';
         }
-        state.autoZoom = true;
-        updateTransition('fade');
-        state.sfxEvents = [{ time: Number((state.trimStart + 0.2).toFixed(1)), type: 'whoosh', label: 'Whoosh' }];
+
+        state.sfxEvents = [
+          { time: Number((state.trimStart + 0.2).toFixed(1)), type: tpl.sfx, label: tpl.sfx.toUpperCase() },
+          { time: Number(((state.trimStart + state.trimEnd) / 2).toFixed(1)), type: 'ding', label: 'Highlight' }
+        ];
       }
 
       document.getElementById('autoZoomToggle').checked = state.autoZoom;
@@ -1835,6 +2000,7 @@ Trả về DUY NHẤT JSON hợp lệ:
     // 3. PRO CANVAS RENDERER, SMOOTH DRAG & SHORTCUTS
     // =========================================================================
     function setAspectRatio(ratio) {
+      if (!['9:16', '16:9', '1:1', '4:5'].includes(ratio)) ratio = '9:16';
       state.aspectRatio = ratio;
       document.querySelectorAll('.ratio-btn').forEach(btn => {
         const active = btn.dataset.ratio === ratio;
@@ -1851,8 +2017,8 @@ Trả về DUY NHẤT JSON hợp lệ:
       const btn = document.getElementById('safeZoneBtn');
       if (btn) {
         btn.className = state.showSafeZones
-          ? 'px-3 py-1 rounded-lg bg-pink-600/20 text-pink-300 border border-pink-500/40 font-semibold transition flex items-center gap-1.5'
-          : 'px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5';
+          ? 'px-2.5 py-1 rounded-lg bg-pink-600/20 text-pink-300 border border-pink-500/40 font-semibold transition flex items-center gap-1.5'
+          : 'px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5';
       }
     }
 
@@ -2059,7 +2225,6 @@ Trả về DUY NHẤT JSON hợp lệ:
       `).join('');
     }
 
-    // Offset-aware smooth Pointer Drag (Mouse + Touch)
     function handlePointerDown(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const x = (clientX - rect.left) / rect.width;
@@ -2229,7 +2394,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         targetCtx.restore();
       }
 
-      // Text / Kinetic Captions Layer (Uses universal drawRoundedRect)
+      // Text / Kinetic Captions Layer
       if (state.text.visible && state.text.content.trim()) {
         targetCtx.save();
         const scaleRatio = w / 360;
@@ -2262,7 +2427,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         targetCtx.restore();
       }
 
-      // Safe Zone Guides (Preview only)
+      // Safe Zone Guides
       if (state.showSafeZones && !isExportOrCapture) {
         targetCtx.save();
         targetCtx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
@@ -2277,7 +2442,7 @@ Trả về DUY NHẤT JSON hợp lệ:
     }
 
     // =========================================================================
-    // 4. STABLE OFFSCREEN EXPORT ENGINE (NO CORS OR CODEC CRASHES)
+    // 4. PURE VIDEO STREAM OFFSCREEN EXPORT ENGINE (100% RELIABLE)
     // =========================================================================
     function getTargetExportDimensions() {
       const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
@@ -2338,7 +2503,6 @@ Trả về DUY NHẤT JSON hợp lệ:
     async function startTrueResolutionExport() {
       if (isExportingNow) return;
       try {
-        initSfxAudio();
         isExportingNow = true;
 
         const progSec = document.getElementById('exportProgressSection');
@@ -2358,13 +2522,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
 
         const videoStream = exportCanvas.captureStream(30);
-        const combinedStream = new MediaStream();
-        videoStream.getVideoTracks().forEach(t => combinedStream.addTrack(t));
-        if (audioDest && audioDest.stream) {
-          audioDest.stream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
-        }
-
-        const { recorder, mimeType, ext } = createSafeMediaRecorder(combinedStream, QUALITY_SPECS[state.exportQuality].bitrate);
+        const { recorder, mimeType, ext } = createSafeMediaRecorder(videoStream, QUALITY_SPECS[state.exportQuality].bitrate);
 
         const chunks = [];
         recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
