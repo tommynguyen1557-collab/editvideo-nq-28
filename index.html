@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v6.0 — Zero-Bug Production Edition</title>
+  <title>AutoCut Studio AI v8.0 — Clean Core Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -63,7 +63,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v6.0</span></h1>
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v8.0</span></h1>
           <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
@@ -842,9 +842,9 @@
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Chuẩn Pixel & Trộn Âm Thanh
+            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Thành Phẩm
           </h3>
-          <p class="text-[11px] text-zinc-400">Render đúng kích thước thật (Offscreen HD/2K/4K Engine)</p>
+          <p class="text-[11px] text-zinc-400">Chọn độ phân giải đầu ra chuẩn Studio</p>
         </div>
         <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -896,7 +896,7 @@
 
       <div id="exportProgressSection" class="hidden space-y-2">
         <div class="flex justify-between text-xs">
-          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang render hình ảnh & âm thanh...</span>
+          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang kết xuất video...</span>
           <span id="exportPercentText" class="font-mono text-white">0%</span>
         </div>
         <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -910,15 +910,32 @@
     </div>
   </div>
 
-  <!-- Hidden Media Elements (NO crossorigin attribute for local blob files to prevent Tainted Canvas error) -->
+  <!-- Hidden Media Elements -->
   <video id="sourceVideo" class="hidden" playsinline></video>
   <audio id="bgmAudio" class="hidden" loop></audio>
 
   <script>
     // =========================================================================
-    // 1. CLOUD DATABASE SYNC & MULTI-ACCOUNT ENGINE
+    // 1. SAFE STORAGE & CLOUD SYNC ENGINE
     // =========================================================================
-    const STORAGE_KEY = 'autocut_enterprise_saas_v6';
+    const STORAGE_KEY = 'autocut_enterprise_saas_v8';
+    let memoryFallbackStorage = {};
+
+    function safeStorageGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (e) {
+        return memoryFallbackStorage[key] || null;
+      }
+    }
+
+    function safeStorageSet(key, val) {
+      try {
+        localStorage.setItem(key, val);
+      } catch (e) {
+        memoryFallbackStorage[key] = val;
+      }
+    }
 
     function getDefaultSystemData() {
       const now = new Date();
@@ -947,19 +964,32 @@
       };
     }
 
-    let sysData = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || getDefaultSystemData();
+    let sysData = null;
+    try {
+      const raw = safeStorageGet(STORAGE_KEY);
+      sysData = raw ? JSON.parse(raw) : getDefaultSystemData();
+    } catch (e) {
+      sysData = getDefaultSystemData();
+    }
 
     function isOwnerActive() {
-      return sysData.currentSession && sysData.currentSession.role === 'owner';
+      return Boolean(sysData.currentSession && sysData.currentSession.role === 'owner');
+    }
+
+    function normalizeFirebaseUrl(raw) {
+      if (!raw) return '';
+      let url = raw.trim().replace(/\/autocut_saas\.json.*$/i, '').replace(/\/+$/, '');
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+      return url;
     }
 
     async function saveSystemData(pushCloud = true) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sysData));
+      safeStorageSet(STORAGE_KEY, JSON.stringify(sysData));
       refreshAccountUI();
 
       if (pushCloud && sysData.firebaseUrl) {
         try {
-          const cleanUrl = sysData.firebaseUrl.replace(/\/+$/, '');
+          const cleanUrl = normalizeFirebaseUrl(sysData.firebaseUrl);
           const res = await fetch(`${cleanUrl}/autocut_saas.json`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -972,7 +1002,6 @@
           });
           return res.ok;
         } catch (err) {
-          console.warn('Cloud push error:', err);
           return false;
         }
       }
@@ -982,18 +1011,20 @@
     async function syncFromCloud(showAlert = false) {
       if (!sysData.firebaseUrl) return false;
       try {
-        const cleanUrl = sysData.firebaseUrl.replace(/\/+$/, '');
+        const cleanUrl = normalizeFirebaseUrl(sysData.firebaseUrl);
         const res = await fetch(`${cleanUrl}/autocut_saas.json`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const remote = await res.json();
-        if (remote) {
+        if (!remote) {
+          await saveSystemData(true);
+        } else {
           if (Array.isArray(remote.subAccounts) && remote.subAccounts.length > 0) {
             sysData.subAccounts = remote.subAccounts;
           }
           if (remote.geminiApiKey) sysData.geminiApiKey = remote.geminiApiKey;
           if (remote.githubUrl) sysData.githubUrl = remote.githubUrl;
           if (remote.ownerMasterPass) sysData.ownerMasterPass = remote.ownerMasterPass;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(sysData));
+          safeStorageSet(STORAGE_KEY, JSON.stringify(sysData));
           refreshAccountUI();
           if (isOwnerActive()) {
             renderSubAccountsTable();
@@ -1003,7 +1034,7 @@
         if (showAlert) alert('Đồng bộ thành công với Firebase Cloud!');
         return true;
       } catch (err) {
-        if (showAlert) alert('Lỗi kết nối Firebase: ' + err.message + '. Hãy đảm bảo Realtime Database đang bật chế độ Test Mode.');
+        if (showAlert) alert('Lỗi kết nối Firebase: ' + err.message + '. Hãy bật Test Mode trên Firebase!');
         return false;
       }
     }
@@ -1012,7 +1043,7 @@
       if (isOwnerActive()) {
         return { role: 'owner', name: 'Chủ Sở Hữu (Master)', autoEdit: true, export4k: true, trendHub: true, expiresAt: null };
       }
-      if (sysData.currentSession?.role === 'sub') {
+      if (sysData.currentSession && sysData.currentSession.role === 'sub') {
         const sub = sysData.subAccounts.find(u => u.email === sysData.currentSession.email);
         if (sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date()) {
           return {
@@ -1355,8 +1386,10 @@
     async function saveFirebaseConfig() {
       const rawUrl = document.getElementById('firebaseUrlInput').value.trim();
       const statusEl = document.getElementById('firebaseTestStatus');
-      sysData.firebaseUrl = rawUrl;
-      if (!rawUrl) {
+      sysData.firebaseUrl = normalizeFirebaseUrl(rawUrl);
+      document.getElementById('firebaseUrlInput').value = sysData.firebaseUrl;
+
+      if (!sysData.firebaseUrl) {
         await saveSystemData(false);
         statusEl.innerText = 'Đã ngắt kết nối';
         return;
@@ -1366,11 +1399,11 @@
       if (ok) {
         statusEl.innerText = 'Kết nối thành công ✓';
         statusEl.className = 'text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold';
-        alert('Kết nối Firebase Cloud thành công! Dữ liệu tài khoản con đã đồng bộ.');
+        alert('Kết nối Firebase Cloud thành công!');
       } else {
         statusEl.innerText = 'Lỗi kết nối ✕';
         statusEl.className = 'text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold';
-        alert('Không thể ghi dữ liệu lên Firebase. Hãy kiểm tra lại đường dẫn URL hoặc bật Rules (read: true, write: true) trên Firebase!');
+        alert('Không thể ghi dữ liệu lên Firebase. Hãy kiểm tra URL hoặc bật Test Mode!');
       }
     }
 
@@ -1396,7 +1429,7 @@
     }
 
     // =========================================================================
-    // 2. VIDEO EDITOR ENGINE & SAFE GEMINI VISION CALLER
+    // 2. VIDEO EDITOR ENGINE & CROSS-BROWSER CANVAS HELPERS
     // =========================================================================
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
@@ -1439,92 +1472,93 @@
       },
       sfxEvents: [],
       lastTriggeredSfxIndex: -1,
-      dragTarget: null
+      dragTarget: null,
+      dragOffsetX: 0,
+      dragOffsetY: 0
     };
 
     const QUALITY_SPECS = {
-      '720p':  { label: '720p HD', shortDim: 720, bitrate: 6000000 },
-      '1080p': { label: '1080p Full HD', shortDim: 1080, bitrate: 12000000 },
-      '2k':    { label: '2K QHD', shortDim: 1440, bitrate: 22000000 },
-      '4k':    { label: '4K Ultra HD', shortDim: 2160, bitrate: 35000000 }
+      '720p':  { label: '720p HD', shortDim: 720, bitrate: 5000000 },
+      '1080p': { label: '1080p Full HD', shortDim: 1080, bitrate: 10000000 },
+      '2k':    { label: '2K QHD', shortDim: 1440, bitrate: 18000000 },
+      '4k':    { label: '4K Ultra HD', shortDim: 2160, bitrate: 28000000 }
     };
 
-    // Single-init Web Audio Graph (Prevents InvalidStateError)
+    // Universal Rounded Rect Helper (Replaces ctx.roundRect which crashes older browsers)
+    function drawRoundedRect(c, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      c.beginPath();
+      c.moveTo(x + r, y);
+      c.arcTo(x + width, y, x + width, y + height, r);
+      c.arcTo(x + width, y + height, x, y + height, r);
+      c.arcTo(x, y + height, x, y, r);
+      c.arcTo(x, y, x + width, y, r);
+      c.closePath();
+    }
+
+    // Safe Web Audio SFX Synthesizer (Does NOT hijack <video> element audio)
     let audioCtx = null;
     let audioDest = null;
-    let isAudioGraphInitialized = false;
-    let videoGainNode = null;
-    let bgmGainNode = null;
 
-    function initAudioGraph() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContextClass();
-        audioDest = audioCtx.createMediaStreamDestination();
-      }
-      if (!isAudioGraphInitialized) {
-        isAudioGraphInitialized = true;
-        try {
-          videoGainNode = audioCtx.createGain();
-          videoGainNode.connect(audioCtx.destination);
-          videoGainNode.connect(audioDest);
-          const vSrc = audioCtx.createMediaElementSource(video);
-          vSrc.connect(videoGainNode);
-        } catch (e) {}
-
-        try {
-          bgmGainNode = audioCtx.createGain();
-          bgmGainNode.connect(audioCtx.destination);
-          bgmGainNode.connect(audioDest);
-          const bSrc = audioCtx.createMediaElementSource(bgm);
-          bSrc.connect(bgmGainNode);
-        } catch (e) {}
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-      return audioCtx;
+    function initSfxAudio() {
+      try {
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AC();
+          audioDest = audioCtx.createMediaStreamDestination();
+          const silentOsc = audioCtx.createOscillator();
+          const silentGain = audioCtx.createGain();
+          silentGain.gain.value = 0.0001;
+          silentOsc.connect(silentGain);
+          silentGain.connect(audioDest);
+          silentOsc.start();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
     }
 
     function playSynthSfx(type) {
-      const ac = initAudioGraph();
-      const now = ac.currentTime;
-      const osc = ac.createOscillator();
-      const gain = ac.createGain();
-      osc.connect(gain);
-      gain.connect(ac.destination);
-      if (audioDest) gain.connect(audioDest);
+      try {
+        initSfxAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (audioDest) gain.connect(audioDest);
 
-      if (type === 'whoosh') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(140, now);
-        osc.frequency.exponentialRampToValueAtTime(520, now + 0.18);
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.35);
-        gain.gain.setValueAtTime(0.01, now);
-        gain.gain.linearRampToValueAtTime(0.28, now + 0.15);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
-        osc.start(now); osc.stop(now + 0.36);
-      } else if (type === 'pop') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(320, now);
-        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
-      } else if (type === 'ding') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1046.5, now);
-        gain.gain.setValueAtTime(0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-        osc.start(now); osc.stop(now + 0.6);
-      } else if (type === 'bass') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(110, now);
-        osc.frequency.exponentialRampToValueAtTime(32, now + 0.45);
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
-        osc.start(now); osc.stop(now + 0.48);
-      }
+        if (type === 'whoosh') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.18);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.35);
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.28, now + 0.15);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.36);
+          osc.start(now); osc.stop(now + 0.36);
+        } else if (type === 'pop') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'ding') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1046.5, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          osc.start(now); osc.stop(now + 0.6);
+        } else if (type === 'bass') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(110, now);
+          osc.frequency.exponentialRampToValueAtTime(32, now + 0.45);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
+          osc.start(now); osc.stop(now + 0.48);
+        }
+      } catch (e) {}
     }
 
     function formatSize(bytes) {
@@ -1552,6 +1586,9 @@
         video.currentTime = 0.05;
         syncTrimSliders();
         resizeCanvas();
+      };
+      video.onseeked = () => {
+        if (!state.isPlaying) drawFrame(ctx, canvas.width, canvas.height, false);
       };
     }
 
@@ -1637,20 +1674,22 @@
 
     function captureVideoFrameBase64() {
       try {
+        if (!state.isDemoMode && video.readyState < 2) return null;
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = 480;
         tempCanvas.height = Math.max(270, Math.round(480 * (canvas.height / canvas.width)));
         const tctx = tempCanvas.getContext('2d');
         drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
-        return tempCanvas.toDataURL('image/jpeg', 0.75).split(',')[1];
+        const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.75);
+        const base64 = dataUrl.split(',')[1];
+        return (base64 && base64.length > 100) ? base64 : null;
       } catch (err) {
-        console.warn('Frame capture fallback:', err);
         return null;
       }
     }
 
     async function callGeminiWithDiagnostics(apiKey, promptText, frameBase64) {
-      const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+      const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
       let lastErrorMsg = '';
 
       for (const model of models) {
@@ -1718,9 +1757,9 @@
       if (sysData.geminiApiKey) {
         progressBar.style.width = '65%';
         percentText.innerText = '65%';
-        addLog('Đang gửi hình ảnh tới Gemini Vision...');
+        addLog('Đang gửi dữ liệu tới Gemini Vision...');
 
-        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát ảnh đính kèm và đọc yêu cầu: "${prompt}".
+        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát hình ảnh (nếu có) và đọc yêu cầu: "${prompt}".
 Trả về DUY NHẤT JSON hợp lệ:
 {
   "sceneSummary": "Mô tả 1 câu nội dung thấy trong video",
@@ -1735,7 +1774,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         const result = await callGeminiWithDiagnostics(sysData.geminiApiKey, systemInstruction, frameBase64);
         if (result.plan) {
           aiPlan = result.plan;
-          addLog('Gemini Vision đã đọc xong nội dung hình ảnh!');
+          addLog('Gemini Vision đã đọc xong nội dung!');
         } else {
           addLog(`Lỗi Gemini API (${result.error}) → Tự chuyển sang AI cục bộ.`, true);
         }
@@ -1793,7 +1832,7 @@ Trả về DUY NHẤT JSON hợp lệ:
     }
 
     // =========================================================================
-    // 3. PRO CANVAS RENDERER, TOUCH + MOUSE DRAG & SHORTCUTS
+    // 3. PRO CANVAS RENDERER, SMOOTH DRAG & SHORTCUTS
     // =========================================================================
     function setAspectRatio(ratio) {
       state.aspectRatio = ratio;
@@ -1851,7 +1890,7 @@ Trả về DUY NHẤT JSON hợp lệ:
 
     function togglePlay() {
       if (!state.hasVideo) return;
-      initAudioGraph();
+      initSfxAudio();
       state.isPlaying = !state.isPlaying;
       document.getElementById('playPauseBtn').innerHTML = state.isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
       if (state.isPlaying) {
@@ -1902,7 +1941,7 @@ Trả về DUY NHẤT JSON hợp lệ:
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       state.currentTime = pct * state.duration;
       state.lastTriggeredSfxIndex = -1;
-      if (!state.isDemoMode) video.currentTime = state.currentTime;
+      if (!state.isDemoMode && !video.seeking) video.currentTime = state.currentTime;
     }
     window.addEventListener('mousemove', (e) => { if (isScrubbingTimeline) updateScrubPosition(e); });
     window.addEventListener('mouseup', () => { isScrubbingTimeline = false; });
@@ -1991,8 +2030,6 @@ Trả về DUY NHẤT JSON hợp lệ:
       const bv = document.getElementById('bgmVolSlider').value / 100;
       video.volume = ov;
       bgm.volume = bv;
-      if (videoGainNode) videoGainNode.gain.value = ov;
-      if (bgmGainNode) bgmGainNode.gain.value = bv;
       document.getElementById('origVolVal').innerText = Math.round(ov * 100) + '%';
       document.getElementById('bgmVolVal').innerText = Math.round(bv * 100) + '%';
     }
@@ -2022,7 +2059,7 @@ Trả về DUY NHẤT JSON hợp lệ:
       `).join('');
     }
 
-    // Unified Pointer Drag (Mouse + Touch)
+    // Offset-aware smooth Pointer Drag (Mouse + Touch)
     function handlePointerDown(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       const x = (clientX - rect.left) / rect.width;
@@ -2031,12 +2068,16 @@ Trả về DUY NHẤT JSON hợp lệ:
       if (state.logo.visible && state.logo.img) {
         if (Math.abs(x - state.logo.xRatio) < 0.18 && Math.abs(y - state.logo.yRatio) < 0.18) {
           state.dragTarget = 'logo';
+          state.dragOffsetX = x - state.logo.xRatio;
+          state.dragOffsetY = y - state.logo.yRatio;
           return;
         }
       }
       if (state.text.visible) {
         if (Math.abs(x - state.text.xRatio) < 0.38 && Math.abs(y - state.text.yRatio) < 0.16) {
           state.dragTarget = 'text';
+          state.dragOffsetX = x - state.text.xRatio;
+          state.dragOffsetY = y - state.text.yRatio;
         }
       }
     }
@@ -2044,8 +2085,10 @@ Trả về DUY NHẤT JSON hợp lệ:
     function handlePointerMove(clientX, clientY) {
       if (!state.dragTarget) return;
       const rect = canvas.getBoundingClientRect();
-      const nx = Math.max(0.08, Math.min(0.92, (clientX - rect.left) / rect.width));
-      const ny = Math.max(0.08, Math.min(0.92, (clientY - rect.top) / rect.height));
+      const x = (clientX - rect.left) / rect.width - state.dragOffsetX;
+      const y = (clientY - rect.top) / rect.height - state.dragOffsetY;
+      const nx = Math.max(0.06, Math.min(0.94, x));
+      const ny = Math.max(0.06, Math.min(0.94, y));
       if (state.dragTarget === 'logo') { state.logo.xRatio = nx; state.logo.yRatio = ny; }
       else if (state.dragTarget === 'text') { state.text.xRatio = nx; state.text.yRatio = ny; }
     }
@@ -2068,7 +2111,9 @@ Trả về DUY NHẤT JSON hợp lệ:
       return `${String(m).padStart(2, '0')}:${s.padStart(4, '0')}`;
     }
 
+    let isExportingNow = false;
     let lastFrameTime = performance.now();
+
     function renderLoop(now) {
       const dt = (now - lastFrameTime) / 1000;
       lastFrameTime = now;
@@ -2077,13 +2122,13 @@ Trả về DUY NHẤT JSON hợp lệ:
         if (state.isPlaying) {
           if (state.isDemoMode) {
             state.currentTime += dt * state.speed;
-            if (state.currentTime >= state.trimEnd) {
+            if (!isExportingNow && state.currentTime >= state.trimEnd) {
               state.currentTime = state.trimStart;
               state.lastTriggeredSfxIndex = -1;
             }
           } else {
             state.currentTime = video.currentTime;
-            if (state.currentTime >= state.trimEnd) {
+            if (!isExportingNow && state.currentTime >= state.trimEnd && !video.seeking) {
               video.currentTime = state.trimStart;
               state.lastTriggeredSfxIndex = -1;
             }
@@ -2184,7 +2229,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         targetCtx.restore();
       }
 
-      // Text / Kinetic Captions Layer
+      // Text / Kinetic Captions Layer (Uses universal drawRoundedRect)
       if (state.text.visible && state.text.content.trim()) {
         targetCtx.save();
         const scaleRatio = w / 360;
@@ -2209,8 +2254,7 @@ Trả về DUY NHẤT JSON hợp lệ:
         const boxH = fontSize + padY * 2;
 
         targetCtx.fillStyle = state.text.bgColor;
-        targetCtx.beginPath();
-        targetCtx.roundRect(tx - boxW / 2, ty - boxH / 2, boxW, boxH, 8 * scaleRatio);
+        drawRoundedRect(targetCtx, tx - boxW / 2, ty - boxH / 2, boxW, boxH, 8 * scaleRatio);
         targetCtx.fill();
 
         targetCtx.fillStyle = state.text.color;
@@ -2233,7 +2277,7 @@ Trả về DUY NHẤT JSON hợp lệ:
     }
 
     // =========================================================================
-    // 4. TRUE RESOLUTION OFFSCREEN RENDER & AUDIO MIXER EXPORT ENGINE
+    // 4. STABLE OFFSCREEN EXPORT ENGINE (NO CORS OR CODEC CRASHES)
     // =========================================================================
     function getTargetExportDimensions() {
       const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
@@ -2251,6 +2295,7 @@ Trả về DUY NHẤT JSON hợp lệ:
       selectExportQuality(state.exportQuality);
     }
     function closeExportModal() {
+      if (isExportingNow) return;
       document.getElementById('exportModal').classList.add('hidden');
     }
     function selectExportQuality(q) {
@@ -2272,9 +2317,30 @@ Trả về DUY NHẤT JSON hợp lệ:
       document.getElementById('exportExactPixel').innerText = `${dims.width} × ${dims.height} px (${state.aspectRatio})`;
     }
 
+    function createSafeMediaRecorder(stream, bitrate) {
+      const candidates = [
+        { mimeType: 'video/webm;codecs=vp9', ext: 'webm' },
+        { mimeType: 'video/webm;codecs=vp8', ext: 'webm' },
+        { mimeType: 'video/webm', ext: 'webm' },
+        { mimeType: 'video/mp4', ext: 'mp4' }
+      ];
+      for (const c of candidates) {
+        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(c.mimeType)) {
+          try {
+            const rec = new MediaRecorder(stream, { mimeType: c.mimeType, videoBitsPerSecond: bitrate });
+            return { recorder: rec, mimeType: c.mimeType, ext: c.ext };
+          } catch (e) {}
+        }
+      }
+      return { recorder: new MediaRecorder(stream), mimeType: 'video/webm', ext: 'webm' };
+    }
+
     async function startTrueResolutionExport() {
+      if (isExportingNow) return;
       try {
-        initAudioGraph();
+        initSfxAudio();
+        isExportingNow = true;
+
         const progSec = document.getElementById('exportProgressSection');
         const progBar = document.getElementById('exportProgressBar');
         const progTxt = document.getElementById('exportPercentText');
@@ -2289,7 +2355,6 @@ Trả về DUY NHẤT JSON hợp lệ:
         exportCanvas.height = dims.height;
         const exportCtx = exportCanvas.getContext('2d');
 
-        // Draw initial frame before starting captureStream
         drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
 
         const videoStream = exportCanvas.captureStream(30);
@@ -2299,25 +2364,13 @@ Trả về DUY NHẤT JSON hợp lệ:
           audioDest.stream.getAudioTracks().forEach(t => combinedStream.addTrack(t));
         }
 
-        // Prefer MP4 if supported by browser, fallback to WebM
-        let mimeType = 'video/webm';
-        let ext = 'webm';
-        if (MediaRecorder.isTypeSupported('video/mp4')) {
-          mimeType = 'video/mp4';
-          ext = 'mp4';
-        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
-          mimeType = 'video/webm;codecs=vp9,opus';
-        }
-
-        const recorder = new MediaRecorder(combinedStream, {
-          mimeType,
-          videoBitsPerSecond: QUALITY_SPECS[state.exportQuality].bitrate
-        });
+        const { recorder, mimeType, ext } = createSafeMediaRecorder(combinedStream, QUALITY_SPECS[state.exportQuality].bitrate);
 
         const chunks = [];
         recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
         recorder.onstop = () => {
           clearInterval(exportRenderInterval);
+          isExportingNow = false;
           const blob = new Blob(chunks, { type: mimeType });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
@@ -2331,7 +2384,7 @@ Trả về DUY NHẤT JSON hợp lệ:
           closeExportModal();
         };
 
-        const renderDurationMs = Math.min(15000, Math.max(2500, ((state.trimEnd - state.trimStart) / state.speed) * 1000));
+        const exactDurationMs = Math.max(1500, ((state.trimEnd - state.trimStart) / state.speed) * 1000);
         state.currentTime = state.trimStart;
         state.lastTriggeredSfxIndex = -1;
         if (!state.isDemoMode) video.currentTime = state.trimStart;
@@ -2345,15 +2398,18 @@ Trả về DUY NHẤT JSON hợp lệ:
         const startTime = performance.now();
         const timer = setInterval(() => {
           const elapsed = performance.now() - startTime;
-          const pct = Math.min(100, Math.round((elapsed / renderDurationMs) * 100));
+          const pct = Math.min(100, Math.round((elapsed / exactDurationMs) * 100));
           progBar.style.width = pct + '%';
           progTxt.innerText = pct + '%';
-          if (elapsed >= renderDurationMs) {
+
+          const reachedEnd = (!state.isDemoMode && video.currentTime >= state.trimEnd - 0.05) || elapsed >= exactDurationMs;
+          if (reachedEnd) {
             clearInterval(timer);
             if (recorder.state !== 'inactive') recorder.stop();
           }
-        }, 100);
+        }, 80);
       } catch (err) {
+        isExportingNow = false;
         alert('Lỗi xuất video: ' + err.message);
         document.getElementById('exportProgressSection').classList.add('hidden');
         document.getElementById('startRenderBtn').disabled = false;
