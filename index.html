@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v13.0 — Dual-Buffer & Audio-Mixed MP4 Edition</title>
+  <title>AutoCut Studio AI v14.0 — Final Zero-Error Production</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>✨</text></svg>" />
   <script>
-    // Suppress non-critical Tailwind CDN production notice so Console stays clean
     (function() {
       const origWarn = console.warn;
       console.warn = function(...args) {
@@ -73,7 +73,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v13.0</span></h1>
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v14.0</span></h1>
           <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
@@ -263,7 +263,7 @@
 
         <textarea id="aiPromptInput" rows="3" placeholder="Chọn 1 mẫu gợi ý ở trên hoặc tự nhập ý tưởng... AI sẽ quét 3 mốc khung hình trong video để tự động viết phụ đề nhiều câu và cân chỉnh màu sắc!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
 
-        <button onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2">
+        <button id="aiRunActionBtn" onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
           <span>AI Quét Video (3 Khung Hình) & Tự Dựng</span>
         </button>
@@ -1042,7 +1042,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     </div>
   </div>
 
-  <!-- Dual-Buffer Hidden Video Elements for Zero-Flicker Seamless Multi-Clip Playback -->
+  <!-- Dual-Buffer Hidden Video Elements -->
   <video id="videoBufferA" class="hidden" playsinline></video>
   <video id="videoBufferB" class="hidden" playsinline></video>
   <audio id="bgmAudio" class="hidden" loop></audio>
@@ -1053,6 +1053,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     // =========================================================================
     const MASTER_STORAGE_KEY = 'AUTOCUT_MASTER_PERSISTENT_DB';
     const LEGACY_KEYS = [
+      'autocut_enterprise_saas_v13',
       'autocut_enterprise_saas_v12',
       'autocut_enterprise_saas_v11',
       'autocut_enterprise_saas_v10',
@@ -1706,6 +1707,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       hasVideo: false,
       isDemoMode: false,
       isPlaying: false,
+      isAiBusy: false,
       clips: [],
       activeClipIndex: 0,
       standbyClipIndex: -1,
@@ -1768,7 +1770,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       cinematic: {
         prompt: 'Chuyển sang khung ngang 16:9 điện ảnh, chỉnh tông màu phim sâu lắng nghệ thuật, giảm tốc độ xuống 0.85x mượt mà.',
         preset: 'cinematic',
-        lines: ['CINEMATIC STORYTELLING', 'MỖI KHOẢNH KHẮC LÀ MỖI TÁC PHẨM', 'EDITION 2026'],
+        lines: ['CINEMATIC STORYTELLING', 'MỖI KHOẢNH KHẮC LÀ MỘT TÁC PHẨM', 'EDITION 2026'],
         textColor: '#f4f4f5', bgColor: '#18181b', ratio: '16:9', speed: 0.85, autoZoom: true, trans: 'fade', sfx: 'bass'
       },
       food: {
@@ -1841,7 +1843,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       return lines[idx];
     }
 
-    // DUAL-BUFFER MULTI-CLIP SEQUENCER
     async function handleMultiVideoUpload(e) {
       const files = Array.from(e.target.files || []);
       if (files.length === 0) return;
@@ -1960,10 +1961,9 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       if (targetIdx === -1) targetIdx = state.clips.length - 1;
 
       const clip = state.clips[targetIdx];
-      const localTime = Math.max(0, Math.min(clip.duration - 0.05, globalTime - clip.startOffset));
+      const localTime = Math.max(0, Math.min(clip.duration - 0.03, globalTime - clip.startOffset));
 
       if (state.activeClipIndex !== targetIdx) {
-        // Swap buffers if standby already preloaded the target clip
         if (state.standbyClipIndex === targetIdx && standbyVideoEl.readyState >= 2) {
           activeVideoEl.pause();
           const tmp = activeVideoEl;
@@ -2058,7 +2058,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       });
     }
 
-    // Unified Web Audio Mixer (Mixes VideoA + VideoB + BGM + SFX for both Preview & Export)
     let audioCtx = null;
     let audioDest = null;
     let audioNodesConnected = false;
@@ -2106,7 +2105,9 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
             srcBgm.connect(bgmGain);
           } catch (e) {}
         }
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
       } catch (e) {}
     }
 
@@ -2134,435 +2135,4 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(320, now);
           osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
-          gain.gain.setValueAtTime(0.3, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-          osc.start(now); osc.stop(now + 0.1);
-        } else if (type === 'ding') {
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(1046.5, now);
-          gain.gain.setValueAtTime(0.25, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-          osc.start(now); osc.stop(now + 0.6);
-        } else if (type === 'bass') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(110, now);
-          osc.frequency.exponentialRampToValueAtTime(32, now + 0.45);
-          gain.gain.setValueAtTime(0.35, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
-          osc.start(now); osc.stop(now + 0.48);
-        }
-      } catch (e) {}
-    }
-
-    function formatSize(bytes) {
-      if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
-      return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    function handleRefVideoUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      document.getElementById('refVideoName').innerText = file.name;
-      const tempVid = document.createElement('video');
-      tempVid.src = URL.createObjectURL(file);
-      tempVid.onloadedmetadata = () => {
-        const isVertical = tempVid.videoHeight > tempVid.videoWidth;
-        setAspectRatio(isVertical ? '9:16' : '16:9');
-      };
-    }
-
-    function handleBgmUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      document.getElementById('bgmName').innerText = file.name;
-      bgm.src = URL.createObjectURL(file);
-      updateAudioVolumes();
-    }
-
-    function handleLogoUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      document.getElementById('logoName').innerText = file.name;
-      document.getElementById('timelineLogoPreview').innerText = file.name;
-      const img = new Image();
-      img.onload = () => {
-        state.logo.img = img;
-        state.logo.visible = true;
-        document.getElementById('showLogoToggle').checked = true;
-      };
-      img.src = URL.createObjectURL(file);
-    }
-
-    function updateLogoProps() {
-      state.logo.scalePct = parseInt(document.getElementById('logoScaleSlider').value);
-      state.logo.opacity = parseInt(document.getElementById('logoOpacitySlider').value) / 100;
-      document.getElementById('logoScaleVal').innerText = state.logo.scalePct + '%';
-      document.getElementById('logoOpacityVal').innerText = Math.round(state.logo.opacity * 100) + '%';
-    }
-
-    function snapLogoCorner(corner) {
-      if (corner === 'tl') { state.logo.xRatio = 0.16; state.logo.yRatio = 0.10; }
-      if (corner === 'tr') { state.logo.xRatio = 0.84; state.logo.yRatio = 0.10; }
-      if (corner === 'bl') { state.logo.xRatio = 0.16; state.logo.yRatio = 0.88; }
-      if (corner === 'br') { state.logo.xRatio = 0.84; state.logo.yRatio = 0.88; }
-    }
-
-    function loadDemoVideo() {
-      state.clips = [];
-      document.getElementById('clipSequenceContainer').classList.add('hidden');
-      state.isDemoMode = true;
-      state.hasVideo = true;
-      state.duration = 12.0;
-      state.trimStart = 0;
-      state.trimEnd = 12.0;
-      state.currentTime = 0;
-      document.getElementById('rawVideoName').innerText = 'Demo_Silver_Ring_Showcase_4K.mp4';
-      document.getElementById('rawVideoMeta').innerText = '1.42 GB • Sẵn sàng';
-      document.getElementById('emptyCanvasOverlay').classList.add('hidden');
-      syncTrimSliders();
-      resizeCanvas();
-      if (!state.isPlaying) togglePlay();
-    }
-
-    function handleQuickChatCommand() {
-      const cmd = document.getElementById('quickChatCommand').value.trim();
-      if (!cmd) return;
-      document.getElementById('aiPromptInput').value = cmd;
-      document.getElementById('quickChatCommand').value = '';
-      runRealGeminiAutoEdit();
-    }
-
-    async function captureThreeKeyframesAcrossTimeline() {
-      const frames = [];
-      const ratios = [0.15, 0.5, 0.85];
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 320;
-      tempCanvas.height = Math.max(180, Math.round(320 * (canvas.height / canvas.width)));
-      const tctx = tempCanvas.getContext('2d');
-
-      if (state.isDemoMode) {
-        const savedT = state.currentTime;
-        for (const r of ratios) {
-          state.currentTime = state.duration * r;
-          drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
-          const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
-          if (b64 && b64.length > 100) frames.push(b64);
-        }
-        state.currentTime = savedT;
-        return frames;
-      }
-
-      if (state.clips.length === 0) return frames;
-      const savedT = state.currentTime;
-      const wasPlaying = state.isPlaying;
-      if (wasPlaying) activeVideoEl.pause();
-
-      for (const r of ratios) {
-        const targetGlobal = Math.max(0.1, Math.min(state.duration - 0.1, state.duration * r));
-        await new Promise((resolve) => {
-          let done = false;
-          const finish = () => {
-            if (done) return;
-            done = true;
-            activeVideoEl.removeEventListener('seeked', finish);
-            try {
-              drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
-              const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
-              if (b64 && b64.length > 200) frames.push(b64);
-            } catch (e) {}
-            resolve();
-          };
-          activeVideoEl.addEventListener('seeked', finish);
-          switchActiveClipByGlobalTime(targetGlobal, false);
-          setTimeout(finish, 1100); // Extended timeout for heavy 4K files
-        });
-      }
-
-      switchActiveClipByGlobalTime(savedT, wasPlaying);
-      return frames;
-    }
-
-    async function callGeminiVisionVerified(apiKey, promptText, base64Frames) {
-      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
-      let lastErrorMsg = '';
-
-      for (const model of models) {
-        try {
-          const parts = [{ text: promptText }];
-          base64Frames.forEach((b64) => {
-            parts.push({ inline_data: { mime_type: 'image/jpeg', data: b64 } });
-          });
-
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts }] })
-          });
-
-          const data = await res.json();
-          if (!res.ok) {
-            lastErrorMsg = data?.error?.message || `HTTP ${res.status}`;
-            continue;
-          }
-
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            return { plan: JSON.parse(jsonMatch[0]), modelUsed: model, error: null };
-          }
-        } catch (e) {
-          lastErrorMsg = e.message;
-        }
-      }
-      return { plan: null, modelUsed: null, error: lastErrorMsg || 'Không nhận được phản hồi từ Google API' };
-    }
-
-    async function runRealGeminiAutoEdit() {
-      const perms = getActivePermissions();
-      if (!perms.autoEdit) return alert('Tài khoản con của bạn chưa được Chủ Sở Hữu bật quyền Auto-Edit AI!');
-      if (!state.hasVideo) loadDemoVideo();
-
-      const prompt = document.getElementById('aiPromptInput').value.trim() || PROMPT_TEMPLATES[lastAppliedTemplateKey].prompt;
-      const statusBox = document.getElementById('aiStatusBox');
-      const progressBar = document.getElementById('aiProgressBar');
-      const percentText = document.getElementById('aiProgressPercent');
-      const logList = document.getElementById('aiLogList');
-      const insightBox = document.getElementById('aiVisionInsightBox');
-
-      statusBox.classList.remove('hidden');
-      insightBox.classList.add('hidden');
-      logList.innerHTML = '';
-
-      const addLog = (msg, isWarn = false) => {
-        const li = document.createElement('li');
-        li.innerHTML = isWarn
-          ? `<i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i><span class="text-amber-300">${msg}</span>`
-          : `<i class="fa-solid fa-check text-emerald-400 mr-1"></i>${msg}`;
-        logList.appendChild(li);
-      };
-
-      progressBar.style.width = '30%';
-      percentText.innerText = '30%';
-      addLog('Quét 3 mốc khung hình (Đầu - Giữa - Cuối)...');
-
-      const frames = await captureThreeKeyframesAcrossTimeline();
-      let aiPlan = null;
-
-      if (sysData.geminiApiKey) {
-        progressBar.style.width = '65%';
-        percentText.innerText = '65%';
-        addLog(`Gửi ${frames.length} khung hình tới Gemini Vision...`);
-
-        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát ${frames.length} khung hình đính kèm (Đầu, Giữa, Cuối video) và đọc yêu cầu: "${prompt}".
-Trả về DUY NHẤT JSON hợp lệ (không markdown):
-{
-  "sceneSummary": "Tóm tắt 1-2 câu nội dung thấy xuyên suốt trong video",
-  "editStrategy": "Giải thích ngắn gọn cách AI chỉnh màu, nhịp và phụ đề",
-  "subtitleLines": ["Câu phụ đề 1 ngắn gọn", "Câu phụ đề 2 thu hút", "Câu phụ đề 3 kêu gọi hành động"],
-  "colorPreset": "original" hoặc "silver" hoặc "vivid" hoặc "cinematic",
-  "aspectRatio": "9:16" hoặc "16:9" hoặc "1:1" hoặc "4:5",
-  "speed": 1.0,
-  "textColor": "#ffffff" hoặc "#facc15",
-  "bgColor": "#4f46e5" hoặc "#db2777" hoặc "#27272a",
-  "autoZoom": true,
-  "transition": "fade" hoặc "flash" hoặc "none",
-  "sfxType": "whoosh" hoặc "ding" hoặc "pop" hoặc "bass"
-}`;
-        const result = await callGeminiVisionVerified(sysData.geminiApiKey, systemInstruction, frames);
-        if (result.plan) {
-          aiPlan = result.plan;
-          addLog(`Hoàn tất phân tích bằng ${result.modelUsed}!`);
-        } else {
-          addLog(`Lỗi Gemini API (${result.error}) → Áp dụng kịch bản thông minh cục bộ.`, true);
-        }
-      } else {
-        await new Promise(r => setTimeout(r, 250));
-        addLog('Đang dùng bộ dựng & Auto-Subtitle cục bộ.');
-      }
-
-      progressBar.style.width = '100%';
-      percentText.innerText = '100%';
-
-      if (aiPlan) {
-        insightBox.classList.remove('hidden');
-        insightBox.innerHTML = `
-          <div><i class="fa-solid fa-eye text-pink-400 mr-1"></i><b>Nội dung AI đọc được:</b> ${aiPlan.sceneSummary}</div>
-          <div class="text-emerald-300 mt-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><b>Chiến lược dựng:</b> ${aiPlan.editStrategy || 'Tự động tạo phụ đề nhiều câu & tối ưu màu sắc.'}</div>
-        `;
-        if (aiPlan.aspectRatio) setAspectRatio(aiPlan.aspectRatio);
-        applyColorPreset(aiPlan.colorPreset || 'silver');
-        if (Array.isArray(aiPlan.subtitleLines) && aiPlan.subtitleLines.length > 0) {
-          state.text.lines = aiPlan.subtitleLines;
-          document.getElementById('subtitleScriptInput').value = aiPlan.subtitleLines.join('\n');
-        }
-        state.text.color = aiPlan.textColor || '#ffffff';
-        state.text.bgColor = aiPlan.bgColor || '#4f46e5';
-        state.autoZoom = Boolean(aiPlan.autoZoom);
-        if (aiPlan.speed) {
-          document.getElementById('speedSlider').value = aiPlan.speed;
-          updateSpeed();
-        }
-        updateTransition(aiPlan.transition || 'fade');
-        state.sfxEvents = [
-          { time: Number((state.trimStart + 0.2).toFixed(1)), type: aiPlan.sfxType || 'whoosh', label: 'Mở đầu' },
-          { time: Number(((state.trimStart + state.trimEnd) / 2).toFixed(1)), type: 'ding', label: 'Điểm nhấn' }
-        ];
-      } else {
-        const tpl = PROMPT_TEMPLATES[lastAppliedTemplateKey] || PROMPT_TEMPLATES.jewelry;
-        const lower = prompt.toLowerCase();
-
-        setAspectRatio(lower.includes('16:9') || lower.includes('ngang') ? '16:9' : tpl.ratio);
-        applyColorPreset(tpl.preset);
-        state.text.lines = [...tpl.lines];
-        document.getElementById('subtitleScriptInput').value = tpl.lines.join('\n');
-        state.text.color = lower.includes('vàng') ? '#facc15' : tpl.textColor;
-        state.text.bgColor = tpl.bgColor;
-        state.autoZoom = tpl.autoZoom;
-        document.getElementById('speedSlider').value = tpl.speed;
-        updateSpeed();
-        updateTransition(tpl.trans);
-
-        if (lower.includes('tăng sáng')) {
-          state.filters.brightness = 122;
-          document.getElementById('brightSlider').value = 122;
-          document.getElementById('brightVal').innerText = '122%';
-        }
-
-        state.sfxEvents = [
-          { time: Number((state.trimStart + 0.2).toFixed(1)), type: tpl.sfx, label: tpl.sfx.toUpperCase() },
-          { time: Number(((state.trimStart + state.trimEnd) / 2).toFixed(1)), type: 'ding', label: 'Highlight' }
-        ];
-      }
-
-      document.getElementById('autoZoomToggle').checked = state.autoZoom;
-      document.getElementById('textColorPicker').value = state.text.color;
-      document.getElementById('textBgPicker').value = state.text.bgColor;
-      parseSubtitleScript();
-      renderSfxMarkers();
-
-      state.currentTime = state.trimStart;
-      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.trimStart, true);
-      if (!state.isPlaying) togglePlay();
-    }
-
-    // =========================================================================
-    // 3. PRO CANVAS RENDERER, SMOOTH DRAG & SHORTCUTS
-    // =========================================================================
-    function setAspectRatio(ratio) {
-      if (!['9:16', '16:9', '1:1', '4:5'].includes(ratio)) ratio = '9:16';
-      state.aspectRatio = ratio;
-      document.querySelectorAll('.ratio-btn').forEach(btn => {
-        const active = btn.dataset.ratio === ratio;
-        btn.className = active
-          ? 'ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-indigo-600 text-white'
-          : 'ratio-btn px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-400 hover:text-white';
-      });
-      resizeCanvas();
-      updateExportPixelLabel();
-    }
-
-    function toggleSafeZones() {
-      state.showSafeZones = !state.showSafeZones;
-      const btn = document.getElementById('safeZoneBtn');
-      if (btn) {
-        btn.className = state.showSafeZones
-          ? 'px-2.5 py-1 rounded-lg bg-pink-600/20 text-pink-300 border border-pink-500/40 font-semibold transition flex items-center gap-1.5'
-          : 'px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5';
-      }
-    }
-
-    function openShortcutsHelp() {
-      alert('PHÍM TẮT DỰNG PHIM:\n\n• Space: Phát / Dừng\n• Phím I: Cắt điểm đầu tại kim phát\n• Phím O: Cắt điểm cuối tại kim phát\n• Mũi tên Trái / Phải: Tua từng 0.5 giây');
-    }
-
-    window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-      if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-      if (e.key.toLowerCase() === 'i') markInAtPlayhead();
-      if (e.key.toLowerCase() === 'o') markOutAtPlayhead();
-      if (e.key === 'ArrowLeft') stepFrame(-0.5);
-      if (e.key === 'ArrowRight') stepFrame(0.5);
-    });
-
-    function resizeCanvas() {
-      const container = document.getElementById('viewportContainer');
-      const maxH = Math.max(260, container.clientHeight - 32);
-      const maxW = Math.max(220, container.clientWidth - 32);
-
-      let ratioVal = 9 / 16;
-      if (state.aspectRatio === '16:9') ratioVal = 16 / 9;
-      if (state.aspectRatio === '1:1') ratioVal = 1;
-      if (state.aspectRatio === '4:5') ratioVal = 4 / 5;
-
-      let h = maxH;
-      let w = h * ratioVal;
-      if (w > maxW) { w = maxW; h = w / ratioVal; }
-      canvas.width = Math.round(w);
-      canvas.height = Math.round(h);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-
-    function togglePlay() {
-      if (!state.hasVideo) return;
-      initAudioGraph();
-      state.isPlaying = !state.isPlaying;
-      document.getElementById('playPauseBtn').innerHTML = state.isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
-      if (state.isPlaying) {
-        if (!state.isDemoMode) {
-          if (state.currentTime < state.trimStart || state.currentTime >= state.trimEnd) state.currentTime = state.trimStart;
-          switchActiveClipByGlobalTime(state.currentTime, true);
-        }
-        if (bgm.src) bgm.play().catch(() => {});
-      } else {
-        if (!state.isDemoMode) activeVideoEl.pause();
-        if (bgm.src) bgm.pause();
-      }
-    }
-
-    function skipToStart() {
-      state.currentTime = state.trimStart;
-      state.lastTriggeredSfxIndex = -1;
-      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.trimStart, state.isPlaying);
-    }
-
-    function stepFrame(delta) {
-      if (!state.hasVideo) return;
-      state.currentTime = Math.max(0, Math.min(state.duration, state.currentTime + delta));
-      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.currentTime, state.isPlaying);
-    }
-
-    function markInAtPlayhead() {
-      if (state.currentTime < state.trimEnd - 0.3) {
-        state.trimStart = Number(state.currentTime.toFixed(1));
-        syncTrimSliders();
-      }
-    }
-
-    function markOutAtPlayhead() {
-      if (state.currentTime > state.trimStart + 0.3) {
-        state.trimEnd = Number(state.currentTime.toFixed(1));
-        syncTrimSliders();
-      }
-    }
-
-    let isScrubbingTimeline = false;
-    function startScrubbing(e) {
-      isScrubbingTimeline = true;
-      updateScrubPosition(e);
-    }
-    function updateScrubPosition(e) {
-      const rect = document.getElementById('scrubberTrack').getBoundingClientRect();
-      const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      state.currentTime = pct * state.duration;
-      state.lastTriggeredSfxIndex = -1;
-      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.currentTime, state.isPlaying);
-    }
-    window.addEventListener('mousemove', (e) => { if (isScrubbingTimeline) updateScrubPosition(e); });
-    window.addEventListener('mouseup', () => { isScrubbingTimeline = false; });
-
-    function syncTrimSliders() {
-      const s = document.getElementById('trimStartSlider');
-      const e = document.getElementById('trimEndSlider');
-      s.max = state.duration; e.max = state.duration;
-      s.value = state.trimStart;
+          gain
