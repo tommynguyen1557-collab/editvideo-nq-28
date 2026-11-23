@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v10.0 — Final Verified Release</title>
+  <title>AutoCut Studio AI v13.0 — Dual-Buffer & Audio-Mixed MP4 Edition</title>
+  <script>
+    // Suppress non-critical Tailwind CDN production notice so Console stays clean
+    (function() {
+      const origWarn = console.warn;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+        origWarn.apply(console, args);
+      };
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
@@ -63,7 +73,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v10.0</span></h1>
+          <h1 class="font-bold text-sm tracking-wide text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v13.0</span></h1>
           <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
@@ -74,10 +84,13 @@
       </div>
     </div>
 
-    <!-- Center Quick Pro Tools (Visible on all laptops md+) -->
+    <!-- Center Quick Pro & SaaS Tools -->
     <div class="hidden md:flex items-center gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-[11px]">
+      <button onclick="openPricingModal()" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 font-semibold border border-emerald-500/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-tags"></i> Bảng Giá & Gói Năm
+      </button>
       <button onclick="openAiConfigModal()" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 font-semibold border border-indigo-500/30 transition flex items-center gap-1.5">
-        <i class="fa-solid fa-key"></i> Gắn Gemini API
+        <i class="fa-solid fa-key"></i> Gemini API
       </button>
       <button onclick="toggleSafeZones()" id="safeZoneBtn" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white transition flex items-center gap-1.5">
         <i class="fa-solid fa-border-all"></i> Safe Zone
@@ -124,15 +137,19 @@
           <i class="fa-solid fa-shield-halved text-indigo-400 shrink-0"></i>
           <span id="permissionSummaryText" class="text-zinc-300 truncate">Chế độ Khách: Xuất tối đa 1080p.</span>
         </div>
-        <button onclick="openAiConfigModal()" class="text-pink-400 hover:underline font-semibold shrink-0 ml-2">Cài API Key</button>
+        <div class="flex items-center gap-2 shrink-0 ml-2">
+          <button onclick="openAiConfigModal()" class="text-pink-400 hover:underline font-semibold">API Key</button>
+          <span class="text-zinc-700">|</span>
+          <button onclick="openPricingModal()" class="text-emerald-400 hover:underline font-semibold">Gói Năm</button>
+        </div>
       </div>
 
-      <!-- Step 1: Media & Logo -->
+      <!-- Step 1: Dual-Buffer Multi-Clip Sequencer, Audio & Logo -->
       <div class="glass-panel rounded-xl p-3 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
             <span class="w-4 h-4 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px]">1</span>
-            Nạp Video, Nhạc & Logo
+            Ghép Nhiều Clip, Nhạc & Logo
           </span>
           <button onclick="loadDemoVideo()" class="text-[11px] text-pink-400 hover:text-pink-300 underline font-medium">
             + Video Mẫu Test
@@ -140,17 +157,26 @@
         </div>
 
         <label class="block border border-dashed border-zinc-700 hover:border-indigo-500 rounded-lg p-2.5 cursor-pointer transition bg-zinc-900/50 group">
-          <input type="file" id="rawVideoInput" accept="video/*" class="hidden" onchange="handleRawVideoUpload(event)" />
+          <input type="file" id="rawVideoInput" accept="video/*" multiple class="hidden" onchange="handleMultiVideoUpload(event)" />
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-lg bg-zinc-800 group-hover:bg-indigo-500/20 flex items-center justify-center text-zinc-400 group-hover:text-indigo-400 transition shrink-0">
-              <i class="fa-solid fa-video text-sm"></i>
+              <i class="fa-solid fa-layer-group text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <p id="rawVideoName" class="text-xs font-semibold text-zinc-200 truncate">Chọn Video Thô (Không giới hạn GB)</p>
-              <p id="rawVideoMeta" class="text-[10px] text-zinc-500">MP4, MOV, MKV, 4K Raw Stream trực tiếp</p>
+              <p id="rawVideoName" class="text-xs font-semibold text-zinc-200 truncate">+ Thêm 1 hoặc Nhiều Clip Video Thô</p>
+              <p id="rawVideoMeta" class="text-[10px] text-zinc-500">Bộ đệm kép không nháy đen • Không giới hạn GB</p>
             </div>
           </div>
         </label>
+
+        <!-- Playlist / Clip Sequencer List -->
+        <div id="clipSequenceContainer" class="hidden space-y-1 bg-zinc-950/90 border border-zinc-800 rounded-lg p-2 max-h-32 overflow-y-auto">
+          <div class="flex items-center justify-between text-[10px] text-zinc-400 pb-1 border-b border-zinc-800/80">
+            <span>Danh sách clip ghép nối (<b id="clipCountBadge" class="text-indigo-400">0</b>):</span>
+            <button onclick="clearAllClips()" class="text-red-400 hover:underline">Xóa hết</button>
+          </div>
+          <div id="clipListItems" class="space-y-1 pt-1"></div>
+        </div>
 
         <div class="grid grid-cols-3 gap-1.5">
           <label class="block border border-dashed border-zinc-700 hover:border-pink-500 rounded-lg p-2 cursor-pointer transition bg-zinc-900/50 text-center">
@@ -178,7 +204,7 @@
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-pink-400 flex items-center gap-1.5">
             <span class="w-4 h-4 rounded-full bg-pink-500/20 text-pink-400 flex items-center justify-center text-[10px]">2</span>
-            Gemini AI Quét 3 Khung Hình & Dựng
+            Gemini AI Quét Video & Auto-Subtitle
           </span>
           <button onclick="openAiConfigModal()" class="text-[10px] bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 transition">
             <i class="fa-solid fa-eye mr-1"></i>3-Frame Vision
@@ -192,14 +218,14 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto pr-1" id="presetTemplatesGrid">
+        <div class="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1" id="presetTemplatesGrid">
           <button onclick="applyPresetPrompt('jewelry')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-indigo-500/60 transition">
             <div class="text-[11px] font-semibold text-indigo-300">💎 Trang Sức / Bạc</div>
             <div class="text-[9px] text-zinc-500 truncate">Giữ màu ánh kim gốc sáng nét</div>
           </button>
           <button onclick="applyPresetPrompt('tiktok')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-pink-500/60 transition">
             <div class="text-[11px] font-semibold text-pink-300">⚡ TikTok Viral 2026</div>
-            <div class="text-[9px] text-zinc-500 truncate">Hook nhanh + chạy chữ động</div>
+            <div class="text-[9px] text-zinc-500 truncate">Hook nhanh + phụ đề nhiều câu</div>
           </button>
           <button onclick="applyPresetPrompt('sales')" class="text-left p-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/60 transition">
             <div class="text-[11px] font-semibold text-amber-300">🛍️ Chốt Đơn / Sale</div>
@@ -235,34 +261,7 @@
           </button>
         </div>
 
-        <textarea id="aiPromptInput" rows="3" placeholder="Chọn 1 mẫu gợi ý ở trên hoặc tự nhập ý tưởng của bạn... Gemini AI sẽ quét 3 mốc thời gian (Đầu - Giữa - Cuối) trong video để hiểu trọn nội dung và tự dựng!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
-
-        <div class="bg-zinc-900/80 border border-zinc-800 rounded-lg p-2 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">
-              <i class="fa-solid fa-satellite-dish text-emerald-400 mr-1"></i>AI Trend Hub (2026)
-            </span>
-            <span class="text-[9px] text-emerald-400 font-semibold">Sẵn sàng</span>
-          </div>
-          <div class="grid grid-cols-2 gap-1 text-[10px]">
-            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
-              <input type="checkbox" id="trendKinetic" checked class="accent-indigo-500 rounded" />
-              <span>Kinetic Captions</span>
-            </label>
-            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
-              <input type="checkbox" id="trendPreHook" checked class="accent-indigo-500 rounded" />
-              <span>0.5s Pre-Hook</span>
-            </label>
-            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
-              <input type="checkbox" id="trendRawPolish" checked class="accent-indigo-500 rounded" />
-              <span>Raw-Premium Polish</span>
-            </label>
-            <label class="flex items-center gap-1.5 text-zinc-300 cursor-pointer">
-              <input type="checkbox" id="trendAutoSfx" checked class="accent-indigo-500 rounded" />
-              <span>Beat-Sync SFX</span>
-            </label>
-          </div>
-        </div>
+        <textarea id="aiPromptInput" rows="3" placeholder="Chọn 1 mẫu gợi ý ở trên hoặc tự nhập ý tưởng... AI sẽ quét 3 mốc khung hình trong video để tự động viết phụ đề nhiều câu và cân chỉnh màu sắc!" class="w-full bg-zinc-900/90 border border-zinc-700 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"></textarea>
 
         <button onclick="runRealGeminiAutoEdit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-xs font-bold text-white shadow-lg transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -278,12 +277,12 @@
             <div id="aiProgressBar" class="bg-gradient-to-r from-indigo-500 to-pink-500 h-full w-0 transition-all duration-300"></div>
           </div>
           <div id="aiVisionInsightBox" class="hidden text-[10px] bg-indigo-950/60 border border-indigo-500/40 rounded p-2 text-indigo-200 leading-relaxed space-y-1"></div>
-          <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-0.5 max-h-28 overflow-y-auto"></ul>
+          <ul id="aiLogList" class="text-[10px] text-zinc-400 space-y-1 pt-0.5 max-h-24 overflow-y-auto"></ul>
         </div>
       </div>
     </aside>
 
-    <!-- CENTER STAGE: VISUAL PREVIEW & TIMELINE -->
+    <!-- CENTER STAGE: VISUAL PREVIEW & MULTI-CLIP TIMELINE -->
     <section class="flex-1 flex flex-col bg-[#0c0c0e] relative overflow-hidden">
       
       <div class="h-11 border-b border-zinc-800/80 px-4 flex items-center justify-between bg-zinc-950/60">
@@ -296,13 +295,13 @@
         </div>
 
         <div class="flex items-center gap-2 text-[11px]">
-          <button onclick="toggleSafeZones()" class="md:hidden px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 text-[10px]">
-            <i class="fa-solid fa-border-all"></i> Safe Zone
+          <button onclick="openPricingModal()" class="md:hidden px-2 py-0.5 rounded bg-emerald-600/20 text-emerald-300 text-[10px]">
+            Bảng Giá
           </button>
           <span id="outputResIndicator" class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 font-semibold">
             1080p Full HD
           </span>
-          <span class="hidden sm:inline text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1 text-indigo-400"></i>Kéo thả Chữ & Logo</span>
+          <span class="hidden sm:inline text-zinc-500"><i class="fa-solid fa-hand-pointer mr-1 text-indigo-400"></i>Kéo thả Phụ Đề & Logo</span>
         </div>
       </div>
 
@@ -316,7 +315,7 @@
               <i class="fa-solid fa-film text-2xl"></i>
             </div>
             <h3 class="text-sm font-bold text-white mb-1">Chưa có video nào được nạp</h3>
-            <p class="text-xs text-zinc-400 max-w-xs mb-4">Tải video thô ở cột bên trái hoặc bấm nút dưới để chạy thử ngay.</p>
+            <p class="text-xs text-zinc-400 max-w-xs mb-4">Chọn 1 hoặc nhiều clip video ở cột bên trái để ghép nối, hoặc chạy thử ngay video mẫu.</p>
             <button onclick="loadDemoVideo()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white transition">
               <i class="fa-solid fa-play mr-1.5"></i>Tạo Video Mẫu Thử Nghiệm
             </button>
@@ -357,7 +356,7 @@
             <button onclick="markOutAtPlayhead()" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-indigo-600/30 border border-zinc-700 hover:border-indigo-500 text-zinc-300 font-mono">
               O: Cắt Cuối ]
             </button>
-            <span class="hidden md:inline text-zinc-500 ml-1">Đoạn chọn: <b id="trimRangeLabel" class="text-indigo-400">0.0s - 10.0s</b></span>
+            <span class="hidden md:inline text-zinc-500 ml-1">Đoạn xuất: <b id="trimRangeLabel" class="text-indigo-400">0.0s - 10.0s</b></span>
             <button onclick="resetTrim()" class="text-zinc-500 hover:text-zinc-300 underline ml-1">Reset</button>
           </div>
         </div>
@@ -368,13 +367,13 @@
             <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-pink-500 z-10 pointer-events-none" style="left: 0%;">
               <div class="w-2.5 h-2.5 rounded-full bg-pink-500 -ml-1 -mt-1 shadow"></div>
             </div>
-            <span class="text-[10px] text-zinc-400 z-0"><i class="fa-solid fa-film mr-1 text-indigo-400"></i>V1: Video Track (Kéo chuột để tua nhanh)</span>
+            <span id="timelineClipInfo" class="text-[10px] text-zinc-400 z-0"><i class="fa-solid fa-film mr-1 text-indigo-400"></i>V1: Dual-Buffer Video Track (Kéo chuột để tua nhanh)</span>
           </div>
 
           <div class="grid grid-cols-2 gap-1.5">
             <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 justify-between">
-              <span class="text-[10px] text-purple-400 truncate"><i class="fa-solid fa-font mr-1"></i>T1: <b id="timelineTextPreview">AUTOCUT STUDIO AI</b></span>
-              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 rounded">Kinetic</span>
+              <span class="text-[10px] text-purple-400 truncate"><i class="fa-solid fa-closed-captioning mr-1"></i>T1: <b id="timelineTextPreview">AUTOCUT STUDIO AI</b></span>
+              <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 rounded">Auto-Sub</span>
             </div>
             <div class="h-6 bg-zinc-900/70 rounded-md border border-zinc-800/80 flex items-center px-2 justify-between">
               <span class="text-[10px] text-amber-400 truncate"><i class="fa-solid fa-stamp mr-1"></i>L1: <b id="timelineLogoPreview">Chưa gắn Logo</b></span>
@@ -393,17 +392,17 @@
     </section>
 
     <!-- RIGHT PANEL: 5-TAB INSPECTOR -->
-    <aside class="w-full lg:w-[330px] border-l border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
+    <aside class="w-full lg:w-[335px] border-l border-zinc-800 bg-zinc-950/70 flex flex-col h-auto lg:h-[calc(100vh-3.5rem)] overflow-y-auto">
       <div class="grid grid-cols-5 border-b border-zinc-800 bg-zinc-950 text-[10px] font-semibold">
         <button onclick="switchInspectorTab('transform')" id="ins-tab-transform" class="ins-tab py-2.5 text-indigo-400 border-b-2 border-indigo-500">Cắt/Hiệu Ứng</button>
         <button onclick="switchInspectorTab('color')" id="ins-tab-color" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Màu Sắc</button>
-        <button onclick="switchInspectorTab('text')" id="ins-tab-text" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Chữ Động</button>
+        <button onclick="switchInspectorTab('text')" id="ins-tab-text" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Phụ Đề</button>
         <button onclick="switchInspectorTab('logo')" id="ins-tab-logo" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Logo Hãng</button>
         <button onclick="switchInspectorTab('audio')" id="ins-tab-audio" class="ins-tab py-2.5 text-zinc-400 hover:text-white">Âm/SFX</button>
       </div>
 
       <div class="p-4 space-y-4">
-        <!-- TAB 1 -->
+        <!-- TAB 1: TRANSFORM -->
         <div id="ins-panel-transform" class="ins-panel space-y-3.5">
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
@@ -447,7 +446,7 @@
           <hr class="border-zinc-800" />
 
           <div class="space-y-2">
-            <label class="text-[11px] font-semibold text-zinc-400 uppercase block">Hiệu Ứng Chuyển Cảnh Đầu/Cuối</label>
+            <label class="text-[11px] font-semibold text-zinc-400 uppercase block">Hiệu Ứng Chuyển Cảnh</label>
             <select id="transitionSelect" onchange="updateTransition(this.value)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white">
               <option value="none">Không dùng chuyển cảnh</option>
               <option value="fade">Fade In / Fade Out Mượt Mà (0.6s)</option>
@@ -456,7 +455,7 @@
           </div>
         </div>
 
-        <!-- TAB 2 -->
+        <!-- TAB 2: COLOR -->
         <div id="ins-panel-color" class="ins-panel hidden space-y-3.5">
           <div>
             <label class="text-[11px] font-semibold text-zinc-400 uppercase block mb-2">Bộ Lọc Màu Chuyên Nghiệp</label>
@@ -493,10 +492,10 @@
           </div>
         </div>
 
-        <!-- TAB 3 -->
-        <div id="ins-panel-text" class="ins-panel hidden space-y-3.5">
+        <!-- TAB 3: MULTI-LINE AUTO-SUBTITLE & KINETIC CAPTIONS -->
+        <div id="ins-panel-text" class="ins-panel hidden space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-zinc-200">Hiển thị lớp chữ</span>
+            <span class="text-xs font-semibold text-zinc-200">Hiển thị phụ đề</span>
             <input type="checkbox" id="showTextToggle" checked onchange="state.text.visible = this.checked" class="w-4 h-4 accent-indigo-600" />
           </div>
 
@@ -506,8 +505,13 @@
           </div>
 
           <div>
-            <label class="text-xs text-zinc-400 block mb-1">Nội dung chữ / Phụ đề</label>
-            <input type="text" id="overlayTextInput" value="AUTOCUT STUDIO AI" oninput="updateTextOverlay()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-xs text-white" />
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs text-zinc-400">Kịch bản Phụ đề (Mỗi dòng = 1 đoạn)</label>
+              <span class="text-[10px] text-indigo-400">Tự ngắt dòng</span>
+            </div>
+            <textarea id="subtitleScriptInput" rows="4" oninput="parseSubtitleScript()" placeholder="Dòng 1: Câu mở đầu thu hút...&#10;Dòng 2: Giới thiệu điểm nổi bật...&#10;Dòng 3: Kêu gọi hành động ngay!" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white leading-relaxed resize-none">AUTOCUT STUDIO AI
+DỰNG VIDEO TỰ ĐỘNG 100%
+CHUẨN XU HƯỚNG 2026 🔥</textarea>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -524,13 +528,13 @@
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
               <span class="text-zinc-400">Cỡ chữ</span>
-              <span id="fontSizeVal" class="font-mono">28px</span>
+              <span id="fontSizeVal" class="font-mono">26px</span>
             </div>
-            <input type="range" id="fontSizeSlider" min="14" max="64" value="28" oninput="updateTextOverlay()" class="w-full" />
+            <input type="range" id="fontSizeSlider" min="14" max="64" value="26" oninput="updateTextOverlay()" class="w-full" />
           </div>
         </div>
 
-        <!-- TAB 4 -->
+        <!-- TAB 4: BRAND LOGO -->
         <div id="ins-panel-logo" class="ins-panel hidden space-y-3.5">
           <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-zinc-200">Hiển thị Logo Thương Hiệu</span>
@@ -568,7 +572,7 @@
           </div>
         </div>
 
-        <!-- TAB 5 -->
+        <!-- TAB 5: AUDIO & SFX -->
         <div id="ins-panel-audio" class="ins-panel hidden space-y-3.5">
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs">
@@ -614,7 +618,75 @@
     </aside>
   </main>
 
-  <!-- MODAL 1: GEMINI API KEY WITH INSTANT TEST BUTTON -->
+  <!-- MODAL 0: COMMERCIAL SAAS PRICING & ANNUAL PLANS SHOWCASE -->
+  <div id="pricingModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl my-auto">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+        <div>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">AutoCut Studio AI SaaS</span>
+          <h3 class="text-lg font-bold text-white mt-1">Bảng Giá & Gói Bản Quyền Theo Năm</h3>
+          <p class="text-xs text-zinc-400">Mở khóa toàn bộ sức mạnh AI dựng video tự động, ghép đa clip và xuất độ phân giải 2K / 4K Ultra HD</p>
+        </div>
+        <button onclick="closePricingModal()" class="text-zinc-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-zinc-400 uppercase">Gói Trải Nghiệm (Free)</div>
+            <div class="text-2xl font-extrabold text-white">0đ <span class="text-xs font-normal text-zinc-500">/ vĩnh viễn</span></div>
+            <p class="text-[11px] text-zinc-400">Dành cho người dùng mới làm quen với trình chỉnh sửa trực quan.</p>
+            <ul class="space-y-2 text-xs text-zinc-300 pt-2 border-t border-zinc-800/80">
+              <li><i class="fa-solid fa-check text-emerald-400 mr-2"></i>Chỉnh sửa trực quan & cắt đoạn</li>
+              <li><i class="fa-solid fa-check text-emerald-400 mr-2"></i>Chèn chữ & Logo thương hiệu</li>
+              <li><i class="fa-solid fa-check text-emerald-400 mr-2"></i>Xuất video tối đa 1080p Full HD</li>
+              <li class="text-zinc-500"><i class="fa-solid fa-xmark text-zinc-600 mr-2"></i>Khóa xuất 2K / 4K Ultra HD</li>
+            </ul>
+          </div>
+          <button onclick="closePricingModal()" class="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-white transition">
+            Đang Sử Dụng
+          </button>
+        </div>
+
+        <div class="bg-indigo-950/30 border-2 border-indigo-500 rounded-2xl p-5 flex flex-col justify-between space-y-4 relative">
+          <span class="absolute -top-3 right-4 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow">PHỔ BIẾN NHẤT</span>
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-indigo-400 uppercase">Gói Pro Creator (1 Năm)</div>
+            <div class="text-2xl font-extrabold text-white">1.490.000đ <span class="text-xs font-normal text-zinc-400">/ năm</span></div>
+            <p class="text-[11px] text-zinc-300">Tối ưu cho Nhà sáng tạo nội dung, TikToker & Shop bán hàng.</p>
+            <ul class="space-y-2 text-xs text-zinc-200 pt-2 border-t border-indigo-500/20">
+              <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i><b>Full Auto-Edit AI</b> (Quét 3 khung hình)</li>
+              <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i><b>Auto-Subtitle</b> chạy chữ nhiều dòng</li>
+              <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Ghép nối nhiều clip không giới hạn GB</li>
+              <li><i class="fa-solid fa-check text-indigo-400 mr-2"></i>Mở khóa xuất video <b>2K QHD & 4K UHD</b></li>
+            </ul>
+          </div>
+          <button onclick="selectPlanAndRegister('Pro Creator 1 Năm')" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg transition">
+            Đăng Ký Gói Pro 1 Năm
+          </button>
+        </div>
+
+        <div class="bg-zinc-950 border border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-amber-400 uppercase">Gói Studio / Agency (1 Năm)</div>
+            <div class="text-2xl font-extrabold text-white">2.990.000đ <span class="text-xs font-normal text-zinc-500">/ năm</span></div>
+            <p class="text-[11px] text-zinc-400">Dành cho Team Media, Studio quay sản phẩm & Doanh nghiệp.</p>
+            <ul class="space-y-2 text-xs text-zinc-300 pt-2 border-t border-zinc-800/80">
+              <li><i class="fa-solid fa-check text-amber-400 mr-2"></i>Toàn bộ tính năng gói Pro Creator</li>
+              <li><i class="fa-solid fa-check text-amber-400 mr-2"></i><b>Dùng chung Gemini Vision API</b> hệ thống</li>
+              <li><i class="fa-solid fa-check text-amber-400 mr-2"></i>Mở khóa kho <b>AI Trend Hub 2026</b></li>
+              <li><i class="fa-solid fa-check text-amber-400 mr-2"></i>Hỗ trợ kỹ thuật ưu tiên 1-1 từ Owner</li>
+            </ul>
+          </div>
+          <button onclick="selectPlanAndRegister('Studio Agency 1 Năm')" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-xs font-bold text-zinc-950 transition">
+            Đăng Ký Gói Studio
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: GEMINI API KEY -->
   <div id="aiConfigModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -624,7 +696,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Kết Nối API Gemini Thật (Đọc 3 Khung Hình Video)</h3>
-            <p class="text-[11px] text-zinc-400">Tự động nhận diện toàn bộ diễn biến Đầu - Giữa - Cuối video</p>
+            <p class="text-[11px] text-zinc-400">Tự động viết phụ đề nhiều dòng & biên tập theo nội dung video</p>
           </div>
         </div>
         <button onclick="closeAiConfigModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -660,7 +732,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Cổng Tài Khoản AutoCut Studio</h3>
-            <p class="text-[11px] text-zinc-400">Đăng nhập Owner hoặc Tài khoản con</p>
+            <p class="text-[11px] text-zinc-400">Tài khoản được bảo toàn vĩnh viễn qua mọi bản nâng cấp</p>
           </div>
         </div>
         <button onclick="closeAuthModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -706,6 +778,14 @@
           <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Tạo mật khẩu</label>
           <input type="password" id="regPasswordInput" placeholder="Nhập mật khẩu..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none" />
         </div>
+        <div>
+          <label class="text-[11px] font-semibold text-zinc-400 block mb-1">Gói đăng ký mong muốn</label>
+          <select id="regPlanSelect" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-indigo-300">
+            <option value="Pro Creator 1 Năm">Gói Pro Creator (1 Năm)</option>
+            <option value="Studio Agency 1 Năm">Gói Studio / Agency (1 Năm)</option>
+            <option value="Dùng thử 30 ngày">Gói Dùng Thử 30 Ngày</option>
+          </select>
+        </div>
         <button onclick="handleRegisterSubmit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-xs font-bold text-white transition">
           Tạo Tài Khoản Con Mới
         </button>
@@ -713,7 +793,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: OWNER CLOUD DASHBOARD -->
+  <!-- MODAL 3: OWNER CLOUD DASHBOARD WITH BACKUP & RESTORE -->
   <div id="ownerDashboardModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="px-6 py-4 border-b border-zinc-800 bg-zinc-950 flex items-center justify-between">
@@ -723,7 +803,7 @@
           </div>
           <div>
             <h2 class="text-sm font-bold text-white">Cổng Chủ Sở Hữu — Quản Trị Tài Khoản Con & Cloud Sync</h2>
-            <p class="text-[11px] text-zinc-400">Quản lý từ xa đa thiết bị • Cấp quyền theo năm • Cấu hình Gemini API</p>
+            <p class="text-[11px] text-zinc-400">Tự động kế thừa dữ liệu qua mọi bản nâng cấp • Sao lưu JSON an toàn</p>
           </div>
         </div>
         <button onclick="closeOwnerDashboard()" class="text-zinc-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
@@ -754,7 +834,7 @@
             <i class="fa-solid fa-calendar-check mr-1.5"></i>2. Lịch Gia Hạn Năm
           </button>
           <button onclick="switchOwnerTab('cloud')" id="own-tab-cloud" class="own-tab py-3 px-4 text-zinc-400 hover:text-white shrink-0">
-            <i class="fa-solid fa-cloud mr-1.5"></i>3. Đồng Bộ Cloud (Firebase) & API Key
+            <i class="fa-solid fa-cloud mr-1.5"></i>3. Cloud Sync, Sao Lưu & Bảo Mật
           </button>
         </div>
 
@@ -762,11 +842,20 @@
           <!-- TAB 1 -->
           <div id="own-panel-subaccounts" class="own-panel space-y-5">
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between flex-wrap gap-2">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">Tạo & Cấp Quyền Tài Khoản Con Mới</h4>
-                <button onclick="syncFromCloud(true)" class="text-[11px] text-indigo-400 hover:underline flex items-center gap-1">
-                  <i class="fa-solid fa-rotate"></i> Đồng bộ ngay từ Cloud
-                </button>
+                <div class="flex items-center gap-3">
+                  <button onclick="exportBackupJson()" class="text-[11px] text-emerald-400 hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> Tải File Sao Lưu (.JSON)
+                  </button>
+                  <label class="text-[11px] text-amber-400 hover:underline flex items-center gap-1 cursor-pointer">
+                    <i class="fa-solid fa-upload"></i> Khôi Phục Từ File
+                    <input type="file" accept=".json" class="hidden" onchange="importBackupJson(event)" />
+                  </label>
+                  <button onclick="syncFromCloud(true)" class="text-[11px] text-indigo-400 hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-rotate"></i> Đồng bộ Cloud
+                  </button>
+                </div>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-5 gap-2.5">
                 <input type="text" id="newSubName" placeholder="Tên người dùng / Đối tác" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
@@ -786,7 +875,7 @@
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl overflow-hidden">
               <div class="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
                 <span class="text-xs font-bold text-zinc-200">Danh Sách Tài Khoản Con (<span id="subAccountCount">0</span>)</span>
-                <span class="text-[11px] text-zinc-400">Tích chọn để bật/tắt quyền trực tiếp</span>
+                <span class="text-[11px] text-zinc-400">Dữ liệu tự động giữ nguyên khi bạn cập nhật code mới trên GitHub</span>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -841,7 +930,7 @@
                 <span id="firebaseTestStatus" class="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">Chưa kiểm tra</span>
               </div>
               <p class="text-[11px] text-zinc-400 leading-relaxed">
-                Dán đường dẫn <b>Firebase Realtime Database URL</b> (chọn chế độ Test Mode) vào đây để đồng bộ tài khoản con và quyền truy cập trên mọi thiết bị:
+                Dán đường dẫn <b>Firebase Realtime Database URL</b> (chọn chế độ Test Mode) vào đây để đồng bộ tài khoản con trên mọi thiết bị và không bao giờ mất dữ liệu khi cập nhật web:
               </p>
               <div class="flex gap-2">
                 <input type="text" id="firebaseUrlInput" placeholder="https://ten-du-an-default-rtdb.firebaseio.com" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
@@ -879,15 +968,15 @@
     </div>
   </div>
 
-  <!-- MODAL 4: HIGH-RES 4-TIER EXPORT -->
+  <!-- MODAL 4: HIGH-RES 4-TIER EXPORT WITH AUDIO MIXER -->
   <div id="exportModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Thành Phẩm
+            <i class="fa-solid fa-film text-indigo-400"></i> Xuất Video Thành Phẩm (Hình + Âm Thanh)
           </h3>
-          <p class="text-[11px] text-zinc-400">Chọn độ phân giải đầu ra chuẩn Studio</p>
+          <p class="text-[11px] text-zinc-400">Ưu tiên MP4 tương thích Zalo & iPhone • Trộn tiếng tự động</p>
         </div>
         <button onclick="closeExportModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -939,7 +1028,7 @@
 
       <div id="exportProgressSection" class="hidden space-y-2">
         <div class="flex justify-between text-xs">
-          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang kết xuất video...</span>
+          <span class="text-indigo-400 font-medium"><i class="fa-solid fa-gear fa-spin mr-1.5"></i>Đang kết xuất video & trộn âm thanh...</span>
           <span id="exportPercentText" class="font-mono text-white">0%</span>
         </div>
         <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -953,15 +1042,29 @@
     </div>
   </div>
 
-  <!-- Hidden Media Elements -->
-  <video id="sourceVideo" class="hidden" playsinline></video>
+  <!-- Dual-Buffer Hidden Video Elements for Zero-Flicker Seamless Multi-Clip Playback -->
+  <video id="videoBufferA" class="hidden" playsinline></video>
+  <video id="videoBufferB" class="hidden" playsinline></video>
   <audio id="bgmAudio" class="hidden" loop></audio>
 
   <script>
     // =========================================================================
-    // 1. SAFE STORAGE & CLOUD SYNC ENGINE
+    // 1. PERMANENT STORAGE KEY + AUTOMATIC LEGACY ACCOUNT MIGRATION ENGINE
     // =========================================================================
-    const STORAGE_KEY = 'autocut_enterprise_saas_v10';
+    const MASTER_STORAGE_KEY = 'AUTOCUT_MASTER_PERSISTENT_DB';
+    const LEGACY_KEYS = [
+      'autocut_enterprise_saas_v12',
+      'autocut_enterprise_saas_v11',
+      'autocut_enterprise_saas_v10',
+      'autocut_enterprise_saas_v9',
+      'autocut_enterprise_saas_v8',
+      'autocut_enterprise_saas_v7',
+      'autocut_enterprise_saas_v6',
+      'autocut_enterprise_saas_v5',
+      'autocut_enterprise_saas_v4',
+      'autocut_enterprise_saas_v3'
+    ];
+
     let memoryFallbackStorage = {};
 
     function safeStorageGet(key) {
@@ -989,6 +1092,7 @@
             name: 'Studio Trang Sức Bạc',
             email: 'silver@studio.vn',
             password: '123',
+            plan: 'Pro Creator 1 Năm',
             status: 'active',
             createdAt: now.toISOString(),
             expiresAt: nextYear.toISOString(),
@@ -998,13 +1102,45 @@
       };
     }
 
-    let sysData = null;
-    try {
-      const raw = safeStorageGet(STORAGE_KEY);
-      sysData = raw ? JSON.parse(raw) : getDefaultSystemData();
-    } catch (e) {
-      sysData = getDefaultSystemData();
+    function initializeAndMigrateDatabase() {
+      let base = null;
+      try {
+        const rawMaster = safeStorageGet(MASTER_STORAGE_KEY);
+        if (rawMaster) base = JSON.parse(rawMaster);
+      } catch (e) {}
+
+      if (!base) base = getDefaultSystemData();
+      if (!Array.isArray(base.subAccounts)) base.subAccounts = [];
+
+      const existingEmails = new Set(base.subAccounts.map(u => u.email.toLowerCase()));
+
+      for (const oldKey of LEGACY_KEYS) {
+        try {
+          const oldRaw = safeStorageGet(oldKey);
+          if (!oldRaw) continue;
+          const oldData = JSON.parse(oldRaw);
+          if (oldData.firebaseUrl && !base.firebaseUrl) base.firebaseUrl = oldData.firebaseUrl;
+          if (oldData.geminiApiKey && !base.geminiApiKey) base.geminiApiKey = oldData.geminiApiKey;
+          if (oldData.githubUrl) base.githubUrl = oldData.githubUrl;
+          if (oldData.ownerMasterPass) base.ownerMasterPass = oldData.ownerMasterPass;
+          if (oldData.currentSession && !base.currentSession) base.currentSession = oldData.currentSession;
+
+          if (Array.isArray(oldData.subAccounts)) {
+            oldData.subAccounts.forEach(acc => {
+              if (acc && acc.email && !existingEmails.has(acc.email.toLowerCase())) {
+                existingEmails.add(acc.email.toLowerCase());
+                base.subAccounts.push(acc);
+              }
+            });
+          }
+        } catch (e) {}
+      }
+
+      safeStorageSet(MASTER_STORAGE_KEY, JSON.stringify(base));
+      return base;
     }
+
+    let sysData = initializeAndMigrateDatabase();
 
     function isOwnerActive() {
       return Boolean(sysData.currentSession && sysData.currentSession.role === 'owner');
@@ -1018,7 +1154,7 @@
     }
 
     async function saveSystemData(pushCloud = true) {
-      safeStorageSet(STORAGE_KEY, JSON.stringify(sysData));
+      safeStorageSet(MASTER_STORAGE_KEY, JSON.stringify(sysData));
       refreshAccountUI();
 
       if (pushCloud && sysData.firebaseUrl) {
@@ -1052,13 +1188,16 @@
         if (!remote) {
           await saveSystemData(true);
         } else {
-          if (Array.isArray(remote.subAccounts) && remote.subAccounts.length > 0) {
-            sysData.subAccounts = remote.subAccounts;
+          if (Array.isArray(remote.subAccounts)) {
+            const map = new Map();
+            sysData.subAccounts.forEach(u => map.set(u.email.toLowerCase(), u));
+            remote.subAccounts.forEach(u => map.set(u.email.toLowerCase(), u));
+            sysData.subAccounts = Array.from(map.values());
           }
           if (remote.geminiApiKey) sysData.geminiApiKey = remote.geminiApiKey;
           if (remote.githubUrl) sysData.githubUrl = remote.githubUrl;
           if (remote.ownerMasterPass) sysData.ownerMasterPass = remote.ownerMasterPass;
-          safeStorageSet(STORAGE_KEY, JSON.stringify(sysData));
+          safeStorageSet(MASTER_STORAGE_KEY, JSON.stringify(sysData));
           refreshAccountUI();
           if (isOwnerActive()) {
             renderSubAccountsTable();
@@ -1071,6 +1210,44 @@
         if (showAlert) alert('Lỗi kết nối Firebase: ' + err.message + '. Hãy bật Test Mode trên Firebase!');
         return false;
       }
+    }
+
+    function exportBackupJson() {
+      const dataStr = JSON.stringify({
+        exportedAt: new Date().toISOString(),
+        subAccounts: sysData.subAccounts,
+        githubUrl: sysData.githubUrl,
+        firebaseUrl: sysData.firebaseUrl
+      }, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `AutoCut_Accounts_Backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+    }
+
+    function importBackupJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (Array.isArray(parsed.subAccounts)) {
+            const map = new Map();
+            sysData.subAccounts.forEach(u => map.set(u.email.toLowerCase(), u));
+            parsed.subAccounts.forEach(u => map.set(u.email.toLowerCase(), u));
+            sysData.subAccounts = Array.from(map.values());
+            await saveSystemData(true);
+            renderSubAccountsTable();
+            renderAnnualCalendar();
+            alert(`Đã khôi phục thành công ${parsed.subAccounts.length} tài khoản con!`);
+          }
+        } catch (err) {
+          alert('File sao lưu JSON không hợp lệ!');
+        }
+      };
+      reader.readAsText(file);
     }
 
     function getActivePermissions() {
@@ -1137,6 +1314,19 @@
       }
     }
 
+    function openPricingModal() {
+      document.getElementById('pricingModal').classList.remove('hidden');
+    }
+    function closePricingModal() {
+      document.getElementById('pricingModal').classList.add('hidden');
+    }
+    function selectPlanAndRegister(planName) {
+      closePricingModal();
+      openAuthModal('register');
+      const sel = document.getElementById('regPlanSelect');
+      if (sel) sel.value = planName;
+    }
+
     function openAiConfigModal() {
       document.getElementById('geminiApiKeyInput').value = sysData.geminiApiKey || '';
       document.getElementById('apiKeyTestResult').classList.add('hidden');
@@ -1155,7 +1345,7 @@
       box.className = 'text-[11px] p-2 rounded-lg border bg-zinc-950 border-zinc-700 text-zinc-300';
       box.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Đang kiểm tra kết nối tới Google AI...';
 
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash-latest'];
+      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
       for (const m of models) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
@@ -1243,6 +1433,7 @@
       const name = document.getElementById('regNameInput').value.trim();
       const email = document.getElementById('regEmailInput').value.trim().toLowerCase();
       const password = document.getElementById('regPasswordInput').value.trim();
+      const plan = document.getElementById('regPlanSelect')?.value || 'Pro Creator 1 Năm';
 
       if (!name || !email || !password) return alert('Vui lòng điền đầy đủ thông tin!');
       if (sysData.subAccounts.some(u => u.email.toLowerCase() === email) || email === sysData.ownerEmail) {
@@ -1258,6 +1449,7 @@
         name,
         email,
         password,
+        plan,
         status: 'pending',
         createdAt: now.toISOString(),
         expiresAt: nextYear.toISOString(),
@@ -1265,7 +1457,7 @@
       });
 
       await saveSystemData(true);
-      alert('Đăng ký thành công! Tài khoản đã gửi tới Chủ Sở Hữu để duyệt.');
+      alert(`Đăng ký gói "${plan}" thành công! Tài khoản đã gửi tới Chủ Sở Hữu để duyệt.`);
       switchAuthTab('login');
       document.getElementById('loginEmailInput').value = email;
     }
@@ -1331,6 +1523,7 @@
         name,
         email,
         password,
+        plan: years >= 1 ? `Pro ${years} Năm` : 'Dùng thử 30 ngày',
         status: 'active',
         createdAt: now.toISOString(),
         expiresAt: exp.toISOString(),
@@ -1411,7 +1604,7 @@
         tr.innerHTML = `
           <td class="py-2.5 px-3">
             <div class="font-bold text-white">${sub.name}</div>
-            <div class="text-[10px] text-zinc-400">${sub.email}</div>
+            <div class="text-[10px] text-zinc-400">${sub.email} • <span class="text-indigo-400">${sub.plan || 'Gói 1 Năm'}</span></div>
           </td>
           <td class="py-2.5 px-3 font-mono text-zinc-300 text-[11px]">${sub.password}</td>
           <td class="py-2.5 px-3 text-center"><input type="checkbox" ${sub.permissions.autoEdit ? 'checked' : ''} onchange="toggleSubPermission('${sub.id}', 'autoEdit')" class="accent-indigo-500 w-4 h-4 cursor-pointer" /></td>
@@ -1498,17 +1691,24 @@
     }
 
     // =========================================================================
-    // 2. VIDEO EDITOR ENGINE & 10 DIVERSE PROMPT TEMPLATES
+    // 2. DUAL-BUFFER VIDEO SEQUENCER & AUDIO-MIXED MP4 ENGINE
     // =========================================================================
     const canvas = document.getElementById('previewCanvas');
     const ctx = canvas.getContext('2d');
-    const video = document.getElementById('sourceVideo');
+    const videoA = document.getElementById('videoBufferA');
+    const videoB = document.getElementById('videoBufferB');
     const bgm = document.getElementById('bgmAudio');
+
+    let activeVideoEl = videoA;
+    let standbyVideoEl = videoB;
 
     const state = {
       hasVideo: false,
       isDemoMode: false,
       isPlaying: false,
+      clips: [],
+      activeClipIndex: 0,
+      standbyClipIndex: -1,
       duration: 10,
       currentTime: 0,
       trimStart: 0,
@@ -1524,10 +1724,10 @@
       text: {
         visible: true,
         kinetic: true,
-        content: 'AUTOCUT STUDIO AI',
+        lines: ['AUTOCUT STUDIO AI', 'DỰNG VIDEO TỰ ĐỘNG 100%', 'CHUẨN XU HƯỚNG 2026 🔥'],
         color: '#ffffff',
         bgColor: '#4f46e5',
-        size: 28,
+        size: 26,
         xRatio: 0.5,
         yRatio: 0.80
       },
@@ -1548,44 +1748,64 @@
 
     const PROMPT_TEMPLATES = {
       jewelry: {
-        prompt: 'Phân tích chi tiết trang sức trong video, giữ nguyên màu bạc xi bạch kim sáng bóng tự nhiên tuyệt đối không ám vàng, tăng độ sắc nét chi tiết, chuyển động zoom mượt sang trọng và chèn tiếng ding tinh tế.',
-        preset: 'silver', caption: 'BẠC CAO CẤP XI BẠCH KIM ✨', textColor: '#ffffff', bgColor: '#27272a', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'fade', sfx: 'ding'
+        prompt: 'Phân tích chi tiết trang sức trong video, giữ nguyên màu bạc xi bạch kim sáng bóng tự nhiên tuyệt đối không ám vàng, viết phụ đề sang trọng và chèn tiếng ding tinh tế.',
+        preset: 'silver',
+        lines: ['BẠC CAO CẤP XI BẠCH KIM ✨', 'SÁNG BÓNG TỰ NHIÊN TỪNG GÓC CẠNH', 'CHẾ TÁC TINH XẢO ĐỘC BẢN'],
+        textColor: '#ffffff', bgColor: '#27272a', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'fade', sfx: 'ding'
       },
       tiktok: {
-        prompt: 'Quét nội dung video và tạo câu hook 3-5 chữ cực cuốn cho TikTok/Reels, bật chạy chữ động từng từ theo nhịp, tốc độ 1.1x năng động và chèn hiệu ứng whoosh + pop bắt tai.',
-        preset: 'vivid', caption: 'XEM HẾT VIDEO NÀY NGAY 🔥', textColor: '#ffffff', bgColor: '#db2777', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+        prompt: 'Quét nội dung video và tạo phụ đề chạy chữ nhiều câu cực cuốn cho TikTok/Reels, tốc độ 1.1x năng động và chèn hiệu ứng whoosh + pop.',
+        preset: 'vivid',
+        lines: ['ĐỪNG LƯỚT QUA VIDEO NÀY 🔥', 'BÍ MẬT ĐẰNG SAU THÀNH PHẨM', 'XEM NGAY ĐẾN GIÂY CUỐI 👇'],
+        textColor: '#ffffff', bgColor: '#db2777', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
       },
       sales: {
-        prompt: 'Dựng video bán hàng chốt đơn livestream tốc độ cao, chữ vàng nổi bật thu hút mắt nhìn, tăng sáng rõ sản phẩm và rải hiệu ứng âm thanh kích thích mua hàng.',
-        preset: 'vivid', caption: 'ƯU ĐÃI ĐỘC QUYỀN HÔM NAY ⚡', textColor: '#facc15', bgColor: '#b91c1c', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'pop'
+        prompt: 'Dựng video bán hàng chốt đơn livestream tốc độ cao, chữ vàng nổi bật thu hút mắt nhìn, tăng sáng rõ sản phẩm.',
+        preset: 'vivid',
+        lines: ['ƯU ĐÃI ĐỘC QUYỀN HÔM NAY ⚡', 'GIẢM SÂU DUY NHẤT TRONG PHIÊN LIVE', 'ĐẶT HÀNG NGAY KẺO HẾT 🛒'],
+        textColor: '#facc15', bgColor: '#b91c1c', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'pop'
       },
       cinematic: {
-        prompt: 'Chuyển sang khung ngang 16:9 điện ảnh, chỉnh tông màu phim sâu lắng nghệ thuật, giảm tốc độ xuống 0.85x mượt mà và thêm chuyển cảnh fade êm ái.',
-        preset: 'cinematic', caption: 'CINEMATIC STORYTELLING', textColor: '#f4f4f5', bgColor: '#18181b', ratio: '16:9', speed: 0.85, autoZoom: true, trans: 'fade', sfx: 'bass'
+        prompt: 'Chuyển sang khung ngang 16:9 điện ảnh, chỉnh tông màu phim sâu lắng nghệ thuật, giảm tốc độ xuống 0.85x mượt mà.',
+        preset: 'cinematic',
+        lines: ['CINEMATIC STORYTELLING', 'MỖI KHOẢNH KHẮC LÀ MỖI TÁC PHẨM', 'EDITION 2026'],
+        textColor: '#f4f4f5', bgColor: '#18181b', ratio: '16:9', speed: 0.85, autoZoom: true, trans: 'fade', sfx: 'bass'
       },
       food: {
-        prompt: 'Phân tích món ăn trong video, tăng độ rực rỡ và độ tương phản để món ăn trông nóng hổi hấp dẫn, viết tiêu đề kích thích vị giác kèm tiếng pop vui nhộn.',
-        preset: 'vivid', caption: 'NGON KHÓ CƯỠNG TỪ MIẾNG ĐẦU 🤤', textColor: '#facc15', bgColor: '#c2410c', ratio: '9:16', speed: 1.05, autoZoom: true, trans: 'none', sfx: 'pop'
+        prompt: 'Phân tích món ăn trong video, tăng độ rực rỡ và độ tương phản để món ăn trông nóng hổi hấp dẫn.',
+        preset: 'vivid',
+        lines: ['NGON KHÓ CƯỠNG TỪ MIẾNG ĐẦU 🤤', 'HƯƠNG VỊ ĐẬM ĐÀ CHUẨN QUÁN', 'LƯU LẠI ĐI ĂN NGAY NHÉ!'],
+        textColor: '#facc15', bgColor: '#c2410c', ratio: '9:16', speed: 1.05, autoZoom: true, trans: 'none', sfx: 'pop'
       },
       fashion: {
-        prompt: 'Dựng video lookbook thời trang OOTD phong cách Hàn Quốc sáng trong trẻo, hiệu ứng flash chuyển cảnh mở đầu ấn tượng và tiêu đề thanh lịch.',
-        preset: 'silver', caption: 'OUTFIT CHUẨN GU MÙA MỚI ✨', textColor: '#ffffff', bgColor: '#be185d', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+        prompt: 'Dựng video lookbook thời trang OOTD phong cách Hàn Quốc sáng trong trẻo, hiệu ứng flash mở đầu ấn tượng.',
+        preset: 'silver',
+        lines: ['OUTFIT CHUẨN GU MÙA MỚI ✨', 'TÔN DÁNG THANH LỊCH MỌI GÓC NHÌN', 'SẴN HÀNG FULL SIZE'],
+        textColor: '#ffffff', bgColor: '#be185d', ratio: '9:16', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'whoosh'
       },
       podcast: {
-        prompt: 'Biên tập video chia sẻ kiến thức / podcast chuyên nghiệp, giữ màu sắc chân thực tự nhiên, phụ đề to rõ dễ đọc ở giữa dưới và âm thanh sạch sẽ.',
-        preset: 'original', caption: 'BÍ QUYẾT THỰC CHIẾN 2026 💡', textColor: '#ffffff', bgColor: '#1d4ed8', ratio: '9:16', speed: 1.0, autoZoom: false, trans: 'fade', sfx: 'ding'
+        prompt: 'Biên tập video chia sẻ kiến thức / podcast chuyên nghiệp, giữ màu sắc chân thực tự nhiên, phụ đề to rõ dễ đọc.',
+        preset: 'original',
+        lines: ['BÍ QUYẾT THỰC CHIẾN 2026 💡', 'TỐI ƯU QUY TRÌNH LÀM VIỆC', 'ÁP DỤNG NGAY HÔM NAY'],
+        textColor: '#ffffff', bgColor: '#1d4ed8', ratio: '9:16', speed: 1.0, autoZoom: false, trans: 'fade', sfx: 'ding'
       },
       realestate: {
-        prompt: 'Dựng video giới thiệu không gian bất động sản / nội thất cao cấp, khung hình cân đối sang trọng, chuyển động zoom nhẹ nhàng và fade mượt.',
-        preset: 'silver', caption: 'KHÔNG GIAN SỐNG ĐẲNG CẤP 🏡', textColor: '#facc15', bgColor: '#065f46', ratio: '16:9', speed: 0.95, autoZoom: true, trans: 'fade', sfx: 'ding'
+        prompt: 'Dựng video giới thiệu không gian bất động sản / nội thất cao cấp, khung hình cân đối sang trọng.',
+        preset: 'silver',
+        lines: ['KHÔNG GIAN SỐNG ĐẲNG CẤP 🏡', 'THIẾT KẾ HIỆN ĐẠI ĐÓN ÁNH SÁNG', 'LIÊN HỆ XEM NHÀ TRỰC TIẾP'],
+        textColor: '#facc15', bgColor: '#065f46', ratio: '16:9', speed: 0.95, autoZoom: true, trans: 'fade', sfx: 'ding'
       },
       travel: {
-        prompt: 'Dựng travel vlog du lịch khám phá đầy năng lượng, màu sắc bầu trời và cảnh quan tươi sáng rực rỡ, nhịp cắt nhanh cuốn hút.',
-        preset: 'vivid', caption: 'HÀNH TRÌNH ĐÁNG NHỚ 🌍✈️', textColor: '#ffffff', bgColor: '#0369a1', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
+        prompt: 'Dựng travel vlog du lịch khám phá đầy năng lượng, màu sắc bầu trời và cảnh quan tươi sáng rực rỡ.',
+        preset: 'vivid',
+        lines: ['HÀNH TRÌNH ĐÁNG NHỚ 🌍✈️', 'KHÁM PHÁ NHỮNG VÙNG ĐẤT MỚI', 'XÁCH BA LÔ LÊN VÀ ĐI'],
+        textColor: '#ffffff', bgColor: '#0369a1', ratio: '9:16', speed: 1.1, autoZoom: true, trans: 'flash', sfx: 'whoosh'
       },
       tech: {
-        prompt: 'Review sản phẩm công nghệ / ô tô sắc nét, tăng độ tương phản góc cạnh mạnh mẽ, thêm tiếng bass drop uy lực ngay giây đầu tiên.',
-        preset: 'cinematic', caption: 'ĐÁNH GIÁ CHI TIẾT SIÊU PHẨM 🚀', textColor: '#38bdf8', bgColor: '#0f172a', ratio: '16:9', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'bass'
+        prompt: 'Review sản phẩm công nghệ / ô tô sắc nét, tăng độ tương phản góc cạnh mạnh mẽ, thêm tiếng bass drop uy lực.',
+        preset: 'cinematic',
+        lines: ['ĐÁNH GIÁ CHI TIẾT SIÊU PHẨM 🚀', 'HIỆU NĂNG VƯỢT TRỘI TRONG TẦM GIÁ', 'CÓ ĐÁNG ĐỂ NÂNG CẤP?'],
+        textColor: '#38bdf8', bgColor: '#0f172a', ratio: '16:9', speed: 1.0, autoZoom: true, trans: 'flash', sfx: 'bass'
       }
     };
 
@@ -1602,6 +1822,179 @@
       const keys = Object.keys(PROMPT_TEMPLATES);
       const randKey = keys[Math.floor(Math.random() * keys.length)];
       applyPresetPrompt(randKey);
+    }
+
+    function parseSubtitleScript() {
+      const raw = document.getElementById('subtitleScriptInput').value;
+      const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+      state.text.lines = lines.length > 0 ? lines : [''];
+      document.getElementById('timelineTextPreview').innerText = state.text.lines[0] || '(Trống)';
+    }
+
+    function getActiveSubtitleLine() {
+      const lines = state.text.lines;
+      if (!lines || lines.length === 0) return '';
+      if (lines.length === 1) return lines[0];
+      const activeDur = Math.max(0.5, state.trimEnd - state.trimStart);
+      const elapsed = Math.max(0, state.currentTime - state.trimStart);
+      const idx = Math.min(lines.length - 1, Math.floor((elapsed / activeDur) * lines.length));
+      return lines[idx];
+    }
+
+    // DUAL-BUFFER MULTI-CLIP SEQUENCER
+    async function handleMultiVideoUpload(e) {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+
+      for (const file of files) {
+        const url = URL.createObjectURL(file);
+        const dur = await probeVideoDuration(url);
+        state.clips.push({
+          id: 'CLIP-' + Math.random().toString(36).slice(2, 7),
+          name: file.name,
+          url,
+          size: file.size,
+          duration: dur || 5.0,
+          startOffset: 0
+        });
+      }
+      e.target.value = '';
+      rebuildClipTimeline();
+    }
+
+    function probeVideoDuration(url) {
+      return new Promise((resolve) => {
+        const temp = document.createElement('video');
+        temp.preload = 'metadata';
+        temp.onloadedmetadata = () => resolve(temp.duration || 5.0);
+        temp.onerror = () => resolve(5.0);
+        temp.src = url;
+      });
+    }
+
+    function rebuildClipTimeline() {
+      if (state.clips.length === 0) {
+        state.hasVideo = false;
+        document.getElementById('clipSequenceContainer').classList.add('hidden');
+        document.getElementById('emptyCanvasOverlay').classList.remove('hidden');
+        document.getElementById('rawVideoName').innerText = '+ Thêm 1 hoặc Nhiều Clip Video Thô';
+        return;
+      }
+
+      state.isDemoMode = false;
+      state.hasVideo = true;
+      state.activeClipIndex = -1;
+      state.standbyClipIndex = -1;
+      document.getElementById('emptyCanvasOverlay').classList.add('hidden');
+      document.getElementById('clipSequenceContainer').classList.remove('hidden');
+
+      let totalDur = 0;
+      let totalSize = 0;
+      state.clips.forEach((c) => {
+        c.startOffset = totalDur;
+        totalDur += c.duration;
+        totalSize += c.size;
+      });
+
+      state.duration = totalDur;
+      state.trimStart = 0;
+      state.trimEnd = totalDur;
+      state.currentTime = 0;
+
+      document.getElementById('rawVideoName').innerText = `${state.clips.length} Clip Đã Ghép (${totalDur.toFixed(1)}s)`;
+      document.getElementById('rawVideoMeta').innerText = `Tổng dung lượng: ${formatSize(totalSize)} • Bộ đệm kép không nháy đen`;
+      document.getElementById('timelineClipInfo').innerHTML = `<i class="fa-solid fa-film mr-1 text-indigo-400"></i>V1: Đã ghép ${state.clips.length} clip (${totalDur.toFixed(1)}s)`;
+
+      renderClipSequenceList();
+      syncTrimSliders();
+      resizeCanvas();
+      switchActiveClipByGlobalTime(0, false);
+    }
+
+    function renderClipSequenceList() {
+      const container = document.getElementById('clipListItems');
+      document.getElementById('clipCountBadge').innerText = state.clips.length;
+      container.innerHTML = state.clips.map((c, idx) => `
+        <div class="flex items-center justify-between bg-zinc-900 px-2 py-1 rounded text-[11px] border ${idx === state.activeClipIndex ? 'border-indigo-500/60' : 'border-zinc-800'}">
+          <span class="truncate flex-1 text-zinc-200"><b class="text-indigo-400">#${idx + 1}</b> ${c.name} <span class="text-zinc-500">(${c.duration.toFixed(1)}s)</span></span>
+          <div class="flex items-center gap-1 ml-2 shrink-0">
+            <button onclick="moveClip(${idx}, -1)" class="px-1 text-zinc-400 hover:text-white" title="Lên trên">↑</button>
+            <button onclick="moveClip(${idx}, 1)" class="px-1 text-zinc-400 hover:text-white" title="Xuống dưới">↓</button>
+            <button onclick="removeClip(${idx})" class="px-1 text-zinc-500 hover:text-red-400" title="Xóa clip">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function moveClip(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= state.clips.length) return;
+      const temp = state.clips[idx];
+      state.clips[idx] = state.clips[target];
+      state.clips[target] = temp;
+      rebuildClipTimeline();
+    }
+
+    function removeClip(idx) {
+      state.clips.splice(idx, 1);
+      rebuildClipTimeline();
+    }
+
+    function clearAllClips() {
+      state.clips = [];
+      rebuildClipTimeline();
+    }
+
+    function preloadStandbyClip(nextIdx) {
+      if (nextIdx >= 0 && nextIdx < state.clips.length && state.standbyClipIndex !== nextIdx) {
+        state.standbyClipIndex = nextIdx;
+        standbyVideoEl.src = state.clips[nextIdx].url;
+        standbyVideoEl.currentTime = 0;
+        standbyVideoEl.load();
+      }
+    }
+
+    function switchActiveClipByGlobalTime(globalTime, shouldPlay = false) {
+      if (state.isDemoMode || state.clips.length === 0) return;
+      let targetIdx = state.clips.findIndex(c => globalTime >= c.startOffset && globalTime < c.startOffset + c.duration);
+      if (targetIdx === -1) targetIdx = state.clips.length - 1;
+
+      const clip = state.clips[targetIdx];
+      const localTime = Math.max(0, Math.min(clip.duration - 0.05, globalTime - clip.startOffset));
+
+      if (state.activeClipIndex !== targetIdx) {
+        // Swap buffers if standby already preloaded the target clip
+        if (state.standbyClipIndex === targetIdx && standbyVideoEl.readyState >= 2) {
+          activeVideoEl.pause();
+          const tmp = activeVideoEl;
+          activeVideoEl = standbyVideoEl;
+          standbyVideoEl = tmp;
+          state.activeClipIndex = targetIdx;
+          state.standbyClipIndex = -1;
+          activeVideoEl.playbackRate = state.speed;
+          activeVideoEl.currentTime = localTime;
+          if (shouldPlay) activeVideoEl.play().catch(() => {});
+          renderClipSequenceList();
+          preloadStandbyClip((targetIdx + 1) % state.clips.length);
+          return;
+        }
+
+        state.activeClipIndex = targetIdx;
+        activeVideoEl.src = clip.url;
+        activeVideoEl.playbackRate = state.speed;
+        activeVideoEl.onloadeddata = () => {
+          activeVideoEl.currentTime = localTime;
+          if (shouldPlay) activeVideoEl.play().catch(() => {});
+          else drawFrame(ctx, canvas.width, canvas.height, false);
+        };
+        renderClipSequenceList();
+        preloadStandbyClip((targetIdx + 1) % state.clips.length);
+      } else {
+        if (Math.abs(activeVideoEl.currentTime - localTime) > 0.25 && !activeVideoEl.seeking) {
+          activeVideoEl.currentTime = localTime;
+        }
+        if (shouldPlay && activeVideoEl.paused) activeVideoEl.play().catch(() => {});
+      }
     }
 
     const QUALITY_SPECS = {
@@ -1622,13 +2015,96 @@
       c.closePath();
     }
 
-    let audioCtx = null;
+    function drawWrappedSubtitleBox(targetCtx, textStr, centerX, centerY, maxWidth, fontSize, bgColor, textColor, scaleRatio) {
+      targetCtx.font = `800 ${fontSize}px Inter, sans-serif`;
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
 
-    function initSfxAudio() {
+      const words = textStr.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      for (const w of words) {
+        const testLine = currentLine ? currentLine + ' ' + w : w;
+        if (targetCtx.measureText(testLine).width > maxWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = w;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine) lines.push(currentLine);
+
+      let widest = 0;
+      lines.forEach(l => {
+        const mw = targetCtx.measureText(l).width;
+        if (mw > widest) widest = mw;
+      });
+
+      const lineHeight = fontSize * 1.28;
+      const padX = 14 * scaleRatio;
+      const padY = 8 * scaleRatio;
+      const boxW = Math.min(maxWidth + padX * 2, widest + padX * 2);
+      const boxH = lines.length * lineHeight + padY * 1.6;
+
+      targetCtx.fillStyle = bgColor;
+      drawRoundedRect(targetCtx, centerX - boxW / 2, centerY - boxH / 2, boxW, boxH, 8 * scaleRatio);
+      targetCtx.fill();
+
+      targetCtx.fillStyle = textColor;
+      const startY = centerY - ((lines.length - 1) * lineHeight) / 2;
+      lines.forEach((l, idx) => {
+        targetCtx.fillText(l, centerX, startY + idx * lineHeight);
+      });
+    }
+
+    // Unified Web Audio Mixer (Mixes VideoA + VideoB + BGM + SFX for both Preview & Export)
+    let audioCtx = null;
+    let audioDest = null;
+    let audioNodesConnected = false;
+    let videoAGain = null;
+    let videoBGain = null;
+    let bgmGain = null;
+
+    function initAudioGraph() {
       try {
         if (!audioCtx) {
           const AC = window.AudioContext || window.webkitAudioContext;
           audioCtx = new AC();
+          audioDest = audioCtx.createMediaStreamDestination();
+
+          const keepAliveOsc = audioCtx.createOscillator();
+          const keepAliveGain = audioCtx.createGain();
+          keepAliveGain.gain.value = 0.0001;
+          keepAliveOsc.connect(keepAliveGain);
+          keepAliveGain.connect(audioDest);
+          keepAliveOsc.start();
+        }
+        if (!audioNodesConnected) {
+          audioNodesConnected = true;
+          videoAGain = audioCtx.createGain();
+          videoBGain = audioCtx.createGain();
+          bgmGain = audioCtx.createGain();
+
+          videoAGain.connect(audioCtx.destination);
+          videoAGain.connect(audioDest);
+          videoBGain.connect(audioCtx.destination);
+          videoBGain.connect(audioDest);
+          bgmGain.connect(audioCtx.destination);
+          bgmGain.connect(audioDest);
+
+          try {
+            const srcA = audioCtx.createMediaElementSource(videoA);
+            srcA.connect(videoAGain);
+          } catch (e) {}
+          try {
+            const srcB = audioCtx.createMediaElementSource(videoB);
+            srcB.connect(videoBGain);
+          } catch (e) {}
+          try {
+            const srcBgm = audioCtx.createMediaElementSource(bgm);
+            srcBgm.connect(bgmGain);
+          } catch (e) {}
         }
         if (audioCtx.state === 'suspended') audioCtx.resume();
       } catch (e) {}
@@ -1636,13 +2112,14 @@
 
     function playSynthSfx(type) {
       try {
-        initSfxAudio();
+        initAudioGraph();
         if (!audioCtx) return;
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        if (audioDest) gain.connect(audioDest);
 
         if (type === 'whoosh') {
           osc.type = 'sine';
@@ -1680,32 +2157,6 @@
     function formatSize(bytes) {
       if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
       return (bytes / 1048576).toFixed(1) + ' MB';
-    }
-
-    function handleRawVideoUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      document.getElementById('rawVideoName').innerText = file.name;
-      document.getElementById('rawVideoMeta').innerText = `Dung lượng: ${formatSize(file.size)} • Sẵn sàng`;
-      const url = URL.createObjectURL(file);
-      state.isDemoMode = false;
-      state.hasVideo = true;
-      document.getElementById('emptyCanvasOverlay').classList.add('hidden');
-
-      video.src = url;
-      video.load();
-      video.onloadedmetadata = () => {
-        state.duration = video.duration || 10;
-        state.trimStart = 0;
-        state.trimEnd = state.duration;
-        state.currentTime = 0.05;
-        video.currentTime = 0.05;
-        syncTrimSliders();
-        resizeCanvas();
-      };
-      video.onseeked = () => {
-        if (!state.isPlaying) drawFrame(ctx, canvas.width, canvas.height, false);
-      };
     }
 
     function handleRefVideoUpload(e) {
@@ -1757,6 +2208,8 @@
     }
 
     function loadDemoVideo() {
+      state.clips = [];
+      document.getElementById('clipSequenceContainer').classList.add('hidden');
       state.isDemoMode = true;
       state.hasVideo = true;
       state.duration = 12.0;
@@ -1779,8 +2232,7 @@
       runRealGeminiAutoEdit();
     }
 
-    // Fast 3-Keyframe Sampler (320px lightweight Base64)
-    async function captureMultiKeyframes() {
+    async function captureThreeKeyframesAcrossTimeline() {
       const frames = [];
       const ratios = [0.15, 0.5, 0.85];
       const tempCanvas = document.createElement('canvas');
@@ -1789,53 +2241,49 @@
       const tctx = tempCanvas.getContext('2d');
 
       if (state.isDemoMode) {
+        const savedT = state.currentTime;
         for (const r of ratios) {
           state.currentTime = state.duration * r;
           drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
           const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
-          if (b64) frames.push(b64);
+          if (b64 && b64.length > 100) frames.push(b64);
         }
+        state.currentTime = savedT;
         return frames;
       }
 
-      if (video.readyState < 2) return frames;
-      const savedTime = video.currentTime;
+      if (state.clips.length === 0) return frames;
+      const savedT = state.currentTime;
       const wasPlaying = state.isPlaying;
-      if (wasPlaying) video.pause();
+      if (wasPlaying) activeVideoEl.pause();
 
       for (const r of ratios) {
-        const targetT = Math.min(state.duration - 0.1, Math.max(0.1, state.duration * r));
+        const targetGlobal = Math.max(0.1, Math.min(state.duration - 0.1, state.duration * r));
         await new Promise((resolve) => {
-          let settled = false;
+          let done = false;
           const finish = () => {
-            if (settled) return;
-            settled = true;
-            video.removeEventListener('seeked', finish);
+            if (done) return;
+            done = true;
+            activeVideoEl.removeEventListener('seeked', finish);
             try {
               drawFrame(tctx, tempCanvas.width, tempCanvas.height, true);
               const b64 = tempCanvas.toDataURL('image/jpeg', 0.65).split(',')[1];
-              if (b64 && b64.length > 100) frames.push(b64);
+              if (b64 && b64.length > 200) frames.push(b64);
             } catch (e) {}
             resolve();
           };
-          video.addEventListener('seeked', finish);
-          video.currentTime = targetT;
-          setTimeout(finish, 450);
+          activeVideoEl.addEventListener('seeked', finish);
+          switchActiveClipByGlobalTime(targetGlobal, false);
+          setTimeout(finish, 1100); // Extended timeout for heavy 4K files
         });
       }
 
-      video.currentTime = savedTime;
-      if (wasPlaying) video.play().catch(() => {});
+      switchActiveClipByGlobalTime(savedT, wasPlaying);
       return frames;
     }
 
-    // Verified Gemini Models Fallback Chain
     async function callGeminiVisionVerified(apiKey, promptText, base64Frames) {
-      const models = [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash-latest'
-      ];
+      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
       let lastErrorMsg = '';
 
       for (const model of models) {
@@ -1895,23 +2343,22 @@
 
       progressBar.style.width = '30%';
       percentText.innerText = '30%';
-      addLog('Quét 3 mốc khung hình (Đầu - Giữa - Cuối video)...');
+      addLog('Quét 3 mốc khung hình (Đầu - Giữa - Cuối)...');
 
-      const frames = await captureMultiKeyframes();
+      const frames = await captureThreeKeyframesAcrossTimeline();
       let aiPlan = null;
-      let modelUsed = '';
 
       if (sysData.geminiApiKey) {
         progressBar.style.width = '65%';
         percentText.innerText = '65%';
         addLog(`Gửi ${frames.length} khung hình tới Gemini Vision...`);
 
-        const systemInstruction = `Bạn là đạo diễn dựng phim AI chuyên nghiệp. Hãy quan sát ${frames.length} khung hình được trích xuất từ Đầu, Giữa và Cuối video đính kèm, kết hợp với yêu cầu của người dùng: "${prompt}".
-Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) theo cấu trúc sau:
+        const systemInstruction = `Bạn là đạo diễn dựng phim AI. Quan sát ${frames.length} khung hình đính kèm (Đầu, Giữa, Cuối video) và đọc yêu cầu: "${prompt}".
+Trả về DUY NHẤT JSON hợp lệ (không markdown):
 {
-  "sceneSummary": "Tóm tắt 1-2 câu chính xác những gì xuất hiện xuyên suốt từ đầu đến cuối video",
-  "editStrategy": "Giải thích ngắn gọn cách AI cắt ghép, chỉnh màu và đặt nhịp cho video này",
-  "captionText": "Tiêu đề ngắn 3-6 từ tiếng Việt cực thu hút đúng với nội dung trong video",
+  "sceneSummary": "Tóm tắt 1-2 câu nội dung thấy xuyên suốt trong video",
+  "editStrategy": "Giải thích ngắn gọn cách AI chỉnh màu, nhịp và phụ đề",
+  "subtitleLines": ["Câu phụ đề 1 ngắn gọn", "Câu phụ đề 2 thu hút", "Câu phụ đề 3 kêu gọi hành động"],
   "colorPreset": "original" hoặc "silver" hoặc "vivid" hoặc "cinematic",
   "aspectRatio": "9:16" hoặc "16:9" hoặc "1:1" hoặc "4:5",
   "speed": 1.0,
@@ -1924,14 +2371,13 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
         const result = await callGeminiVisionVerified(sysData.geminiApiKey, systemInstruction, frames);
         if (result.plan) {
           aiPlan = result.plan;
-          modelUsed = result.modelUsed;
-          addLog(`Đã phân tích xong bằng ${modelUsed}!`);
+          addLog(`Hoàn tất phân tích bằng ${result.modelUsed}!`);
         } else {
           addLog(`Lỗi Gemini API (${result.error}) → Áp dụng kịch bản thông minh cục bộ.`, true);
         }
       } else {
         await new Promise(r => setTimeout(r, 250));
-        addLog('Đang dùng bộ dựng cục bộ (Bấm "Cài API Key" để AI đọc hình ảnh thật).');
+        addLog('Đang dùng bộ dựng & Auto-Subtitle cục bộ.');
       }
 
       progressBar.style.width = '100%';
@@ -1941,11 +2387,14 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
         insightBox.classList.remove('hidden');
         insightBox.innerHTML = `
           <div><i class="fa-solid fa-eye text-pink-400 mr-1"></i><b>Nội dung AI đọc được:</b> ${aiPlan.sceneSummary}</div>
-          <div class="text-emerald-300 mt-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><b>Chiến lược dựng:</b> ${aiPlan.editStrategy || 'Tự động tối ưu ánh sáng, nhịp cắt và hiệu ứng âm thanh.'}</div>
+          <div class="text-emerald-300 mt-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><b>Chiến lược dựng:</b> ${aiPlan.editStrategy || 'Tự động tạo phụ đề nhiều câu & tối ưu màu sắc.'}</div>
         `;
         if (aiPlan.aspectRatio) setAspectRatio(aiPlan.aspectRatio);
         applyColorPreset(aiPlan.colorPreset || 'silver');
-        state.text.content = aiPlan.captionText || 'AUTOCUT STUDIO AI';
+        if (Array.isArray(aiPlan.subtitleLines) && aiPlan.subtitleLines.length > 0) {
+          state.text.lines = aiPlan.subtitleLines;
+          document.getElementById('subtitleScriptInput').value = aiPlan.subtitleLines.join('\n');
+        }
         state.text.color = aiPlan.textColor || '#ffffff';
         state.text.bgColor = aiPlan.bgColor || '#4f46e5';
         state.autoZoom = Boolean(aiPlan.autoZoom);
@@ -1964,7 +2413,8 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
 
         setAspectRatio(lower.includes('16:9') || lower.includes('ngang') ? '16:9' : tpl.ratio);
         applyColorPreset(tpl.preset);
-        state.text.content = tpl.caption;
+        state.text.lines = [...tpl.lines];
+        document.getElementById('subtitleScriptInput').value = tpl.lines.join('\n');
         state.text.color = lower.includes('vàng') ? '#facc15' : tpl.textColor;
         state.text.bgColor = tpl.bgColor;
         state.autoZoom = tpl.autoZoom;
@@ -1985,14 +2435,13 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
       }
 
       document.getElementById('autoZoomToggle').checked = state.autoZoom;
-      document.getElementById('overlayTextInput').value = state.text.content;
       document.getElementById('textColorPicker').value = state.text.color;
       document.getElementById('textBgPicker').value = state.text.bgColor;
-      updateTextOverlay();
+      parseSubtitleScript();
       renderSfxMarkers();
 
       state.currentTime = state.trimStart;
-      if (!state.isDemoMode) video.currentTime = state.trimStart;
+      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.trimStart, true);
       if (!state.isPlaying) togglePlay();
     }
 
@@ -2056,17 +2505,17 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
 
     function togglePlay() {
       if (!state.hasVideo) return;
-      initSfxAudio();
+      initAudioGraph();
       state.isPlaying = !state.isPlaying;
       document.getElementById('playPauseBtn').innerHTML = state.isPlaying ? '<i class="fa-solid fa-pause"></i>' : '<i class="fa-solid fa-play"></i>';
       if (state.isPlaying) {
         if (!state.isDemoMode) {
-          if (video.currentTime < state.trimStart || video.currentTime >= state.trimEnd) video.currentTime = state.trimStart;
-          video.play().catch(() => {});
+          if (state.currentTime < state.trimStart || state.currentTime >= state.trimEnd) state.currentTime = state.trimStart;
+          switchActiveClipByGlobalTime(state.currentTime, true);
         }
         if (bgm.src) bgm.play().catch(() => {});
       } else {
-        if (!state.isDemoMode) video.pause();
+        if (!state.isDemoMode) activeVideoEl.pause();
         if (bgm.src) bgm.pause();
       }
     }
@@ -2074,13 +2523,13 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
     function skipToStart() {
       state.currentTime = state.trimStart;
       state.lastTriggeredSfxIndex = -1;
-      if (!state.isDemoMode) video.currentTime = state.trimStart;
+      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.trimStart, state.isPlaying);
     }
 
     function stepFrame(delta) {
       if (!state.hasVideo) return;
       state.currentTime = Math.max(0, Math.min(state.duration, state.currentTime + delta));
-      if (!state.isDemoMode) video.currentTime = state.currentTime;
+      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.currentTime, state.isPlaying);
     }
 
     function markInAtPlayhead() {
@@ -2107,7 +2556,7 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
       const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       state.currentTime = pct * state.duration;
       state.lastTriggeredSfxIndex = -1;
-      if (!state.isDemoMode && !video.seeking) video.currentTime = state.currentTime;
+      if (!state.isDemoMode) switchActiveClipByGlobalTime(state.currentTime, state.isPlaying);
     }
     window.addEventListener('mousemove', (e) => { if (isScrubbingTimeline) updateScrubPosition(e); });
     window.addEventListener('mouseup', () => { isScrubbingTimeline = false; });
@@ -2116,481 +2565,4 @@ Trả về DUY NHẤT một đối tượng JSON hợp lệ (không markdown) th
       const s = document.getElementById('trimStartSlider');
       const e = document.getElementById('trimEndSlider');
       s.max = state.duration; e.max = state.duration;
-      s.value = state.trimStart; e.value = state.trimEnd;
-      document.getElementById('trimStartVal').innerText = state.trimStart.toFixed(1) + 's';
-      document.getElementById('trimEndVal').innerText = state.trimEnd.toFixed(1) + 's';
-      document.getElementById('trimRangeLabel').innerText = `${state.trimStart.toFixed(1)}s - ${state.trimEnd.toFixed(1)}s`;
-      document.getElementById('totalDurationDisplay').innerText = formatTime(state.duration);
-
-      const leftPct = (state.trimStart / state.duration) * 100;
-      const widthPct = ((state.trimEnd - state.trimStart) / state.duration) * 100;
-      const hl = document.getElementById('trimHighlight');
-      hl.style.left = leftPct + '%';
-      hl.style.width = widthPct + '%';
-    }
-
-    function updateTrim() {
-      let s = parseFloat(document.getElementById('trimStartSlider').value);
-      let e = parseFloat(document.getElementById('trimEndSlider').value);
-      if (s >= e - 0.3) s = Math.max(0, e - 0.3);
-      state.trimStart = s; state.trimEnd = e;
-      syncTrimSliders();
-    }
-
-    function resetTrim() {
-      state.trimStart = 0; state.trimEnd = state.duration;
-      syncTrimSliders();
-    }
-
-    function updateTransform() {
-      const z = document.getElementById('zoomSlider').value;
-      state.zoom = z / 100;
-      document.getElementById('zoomVal').innerText = z + '%';
-    }
-
-    function updateSpeed() {
-      const sp = parseFloat(document.getElementById('speedSlider').value);
-      state.speed = sp;
-      if (!state.isDemoMode) video.playbackRate = sp;
-      document.getElementById('speedVal').innerText = sp.toFixed(1) + 'x';
-    }
-
-    function updateTransition(val) {
-      state.transition = val;
-      document.getElementById('transitionSelect').value = val;
-      document.getElementById('transitionBadge').innerText = val === 'none' ? 'Fade: Tắt' : `Hiệu ứng: ${val.toUpperCase()}`;
-    }
-
-    function applyColorPreset(preset) {
-      let b = 100, c = 100, s = 100;
-      if (preset === 'silver') { b = 108; c = 114; s = 96; }
-      if (preset === 'vivid') { b = 105; c = 115; s = 135; }
-      if (preset === 'cinematic') { b = 95; c = 122; s = 88; }
-      state.filters = { brightness: b, contrast: c, saturate: s };
-      document.getElementById('brightSlider').value = b;
-      document.getElementById('contrastSlider').value = c;
-      document.getElementById('saturateSlider').value = s;
-      updateFilters();
-    }
-
-    function updateFilters() {
-      state.filters.brightness = document.getElementById('brightSlider').value;
-      state.filters.contrast = document.getElementById('contrastSlider').value;
-      state.filters.saturate = document.getElementById('saturateSlider').value;
-      document.getElementById('brightVal').innerText = state.filters.brightness + '%';
-      document.getElementById('contrastVal').innerText = state.filters.contrast + '%';
-      document.getElementById('saturateVal').innerText = state.filters.saturate + '%';
-    }
-
-    function updateTextOverlay() {
-      state.text.content = document.getElementById('overlayTextInput').value;
-      state.text.color = document.getElementById('textColorPicker').value;
-      state.text.bgColor = document.getElementById('textBgPicker').value;
-      state.text.size = parseInt(document.getElementById('fontSizeSlider').value);
-      document.getElementById('fontSizeVal').innerText = state.text.size + 'px';
-      document.getElementById('timelineTextPreview').innerText = state.text.content || '(Trống)';
-    }
-
-    function updateAudioVolumes() {
-      const ov = document.getElementById('origVolSlider').value / 100;
-      const bv = document.getElementById('bgmVolSlider').value / 100;
-      video.volume = ov;
-      bgm.volume = bv;
-      document.getElementById('origVolVal').innerText = Math.round(ov * 100) + '%';
-      document.getElementById('bgmVolVal').innerText = Math.round(bv * 100) + '%';
-    }
-
-    function triggerAndAddSfx(type) {
-      playSynthSfx(type);
-      const labels = { whoosh: 'Whoosh', pop: 'Pop!', ding: 'Ding ✨', bass: 'Bass Drop' };
-      state.sfxEvents.push({ time: Number(state.currentTime.toFixed(1)), type, label: labels[type] });
-      renderSfxMarkers();
-    }
-
-    function clearAllSfx() {
-      state.sfxEvents = [];
-      renderSfxMarkers();
-    }
-
-    function renderSfxMarkers() {
-      const container = document.getElementById('sfxMarkersContainer');
-      if (state.sfxEvents.length === 0) {
-        container.innerHTML = '<span class="text-[10px] text-zinc-600 italic">Chưa có hiệu ứng âm thanh</span>';
-        return;
-      }
-      container.innerHTML = state.sfxEvents.map((s) => `
-        <span class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-medium shrink-0">
-          ${s.label} @ ${s.time}s
-        </span>
-      `).join('');
-    }
-
-    function handlePointerDown(clientX, clientY) {
-      const rect = canvas.getBoundingClientRect();
-      const x = (clientX - rect.left) / rect.width;
-      const y = (clientY - rect.top) / rect.height;
-
-      if (state.logo.visible && state.logo.img) {
-        if (Math.abs(x - state.logo.xRatio) < 0.18 && Math.abs(y - state.logo.yRatio) < 0.18) {
-          state.dragTarget = 'logo';
-          state.dragOffsetX = x - state.logo.xRatio;
-          state.dragOffsetY = y - state.logo.yRatio;
-          return;
-        }
-      }
-      if (state.text.visible) {
-        if (Math.abs(x - state.text.xRatio) < 0.38 && Math.abs(y - state.text.yRatio) < 0.16) {
-          state.dragTarget = 'text';
-          state.dragOffsetX = x - state.text.xRatio;
-          state.dragOffsetY = y - state.text.yRatio;
-        }
-      }
-    }
-
-    function handlePointerMove(clientX, clientY) {
-      if (!state.dragTarget) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = (clientX - rect.left) / rect.width - state.dragOffsetX;
-      const y = (clientY - rect.top) / rect.height - state.dragOffsetY;
-      const nx = Math.max(0.06, Math.min(0.94, x));
-      const ny = Math.max(0.06, Math.min(0.94, y));
-      if (state.dragTarget === 'logo') { state.logo.xRatio = nx; state.logo.yRatio = ny; }
-      else if (state.dragTarget === 'text') { state.text.xRatio = nx; state.text.yRatio = ny; }
-    }
-
-    canvas.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
-    window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', () => { state.dragTarget = null; });
-
-    canvas.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 0) handlePointerDown(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('touchmove', (e) => {
-      if (state.dragTarget && e.touches.length > 0) handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('touchend', () => { state.dragTarget = null; });
-
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = (sec % 60).toFixed(1);
-      return `${String(m).padStart(2, '0')}:${s.padStart(4, '0')}`;
-    }
-
-    let isExportingNow = false;
-    let lastFrameTime = performance.now();
-
-    function renderLoop(now) {
-      const dt = (now - lastFrameTime) / 1000;
-      lastFrameTime = now;
-
-      if (state.hasVideo) {
-        if (state.isPlaying) {
-          if (state.isDemoMode) {
-            state.currentTime += dt * state.speed;
-            if (!isExportingNow && state.currentTime >= state.trimEnd) {
-              state.currentTime = state.trimStart;
-              state.lastTriggeredSfxIndex = -1;
-            }
-          } else {
-            state.currentTime = video.currentTime;
-            if (!isExportingNow && state.currentTime >= state.trimEnd && !video.seeking) {
-              video.currentTime = state.trimStart;
-              state.lastTriggeredSfxIndex = -1;
-            }
-          }
-
-          state.sfxEvents.forEach((ev, idx) => {
-            if (Math.abs(state.currentTime - ev.time) < 0.08 && state.lastTriggeredSfxIndex !== idx) {
-              playSynthSfx(ev.type);
-              state.lastTriggeredSfxIndex = idx;
-            }
-          });
-        }
-
-        document.getElementById('currentTimeDisplay').innerText = formatTime(state.currentTime);
-        const pct = Math.min(100, (state.currentTime / state.duration) * 100);
-        document.getElementById('playhead').style.left = pct + '%';
-
-        drawFrame(ctx, canvas.width, canvas.height, false);
-      }
-
-      requestAnimationFrame(renderLoop);
-    }
-
-    function drawFrame(targetCtx, w, h, isExportOrCapture = false) {
-      targetCtx.save();
-      targetCtx.fillStyle = '#000';
-      targetCtx.fillRect(0, 0, w, h);
-
-      targetCtx.filter = `brightness(${state.filters.brightness}%) contrast(${state.filters.contrast}%) saturate(${state.filters.saturate}%)`;
-
-      const pulseZoom = state.autoZoom ? (1 + Math.sin(state.currentTime * 3) * 0.04) : 1;
-      const totalZoom = state.zoom * pulseZoom;
-
-      targetCtx.translate(w / 2, h / 2);
-      targetCtx.scale(totalZoom, totalZoom);
-      targetCtx.translate(-w / 2, -h / 2);
-
-      if (state.isDemoMode) {
-        const grad = targetCtx.createLinearGradient(0, 0, w, h);
-        grad.addColorStop(0, '#18181b');
-        grad.addColorStop(0.5, '#27272a');
-        grad.addColorStop(1, '#09090b');
-        targetCtx.fillStyle = grad;
-        targetCtx.fillRect(0, 0, w, h);
-
-        const cx = w / 2;
-        const cy = h * 0.44 + Math.sin(state.currentTime * 2) * 8;
-        const radius = Math.min(w, h) * 0.22;
-
-        const ringGrad = targetCtx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
-        ringGrad.addColorStop(0, '#f4f4f5');
-        ringGrad.addColorStop(0.35, '#a1a1aa');
-        ringGrad.addColorStop(0.55, '#ffffff');
-        ringGrad.addColorStop(1, '#71717a');
-
-        targetCtx.strokeStyle = ringGrad;
-        targetCtx.lineWidth = radius * 0.24;
-        targetCtx.beginPath();
-        targetCtx.arc(cx, cy, radius, 0, Math.PI * 2);
-        targetCtx.stroke();
-      } else if (video.readyState >= 2) {
-        const vw = video.videoWidth;
-        const vh = video.videoHeight;
-        const scale = Math.max(w / vw, h / vh);
-        const dw = vw * scale;
-        const dh = vh * scale;
-        targetCtx.drawImage(video, (w - dw) / 2, (h - dh) / 2, dw, dh);
-      }
-
-      targetCtx.restore();
-
-      // Transition Overlay
-      const elapsedInTrim = state.currentTime - state.trimStart;
-      const remainingInTrim = state.trimEnd - state.currentTime;
-      if (state.transition === 'fade') {
-        let fadeAlpha = 0;
-        if (elapsedInTrim < 0.6) fadeAlpha = 1 - (elapsedInTrim / 0.6);
-        else if (remainingInTrim < 0.6) fadeAlpha = 1 - (remainingInTrim / 0.6);
-        if (fadeAlpha > 0) {
-          targetCtx.fillStyle = `rgba(0,0,0,${Math.max(0, Math.min(1, fadeAlpha))})`;
-          targetCtx.fillRect(0, 0, w, h);
-        }
-      } else if (state.transition === 'flash' && elapsedInTrim < 0.3) {
-        const flashAlpha = 1 - (elapsedInTrim / 0.3);
-        targetCtx.fillStyle = `rgba(255,255,255,${Math.max(0, flashAlpha * 0.85)})`;
-        targetCtx.fillRect(0, 0, w, h);
-      }
-
-      // Brand Logo Layer
-      if (state.logo.visible && state.logo.img) {
-        targetCtx.save();
-        targetCtx.globalAlpha = state.logo.opacity;
-        const lw = w * (state.logo.scalePct / 100);
-        const lh = lw * (state.logo.img.height / state.logo.img.width);
-        const lx = w * state.logo.xRatio - lw / 2;
-        const ly = h * state.logo.yRatio - lh / 2;
-        targetCtx.drawImage(state.logo.img, lx, ly, lw, lh);
-        targetCtx.restore();
-      }
-
-      // Text / Kinetic Captions Layer
-      if (state.text.visible && state.text.content.trim()) {
-        targetCtx.save();
-        const scaleRatio = w / 360;
-        const fontSize = Math.round(state.text.size * scaleRatio);
-        targetCtx.font = `800 ${fontSize}px Inter, sans-serif`;
-        targetCtx.textAlign = 'center';
-        targetCtx.textBaseline = 'middle';
-
-        let displayStr = state.text.content;
-        if (state.text.kinetic) {
-          const words = displayStr.split(' ');
-          const activeIdx = Math.floor(state.currentTime * 3) % words.length;
-          displayStr = words.map((word, i) => i === activeIdx ? `[ ${word} ]` : word).join(' ');
-        }
-
-        const tx = w * state.text.xRatio;
-        const ty = h * state.text.yRatio;
-        const metrics = targetCtx.measureText(displayStr);
-        const padX = 14 * scaleRatio;
-        const padY = 8 * scaleRatio;
-        const boxW = metrics.width + padX * 2;
-        const boxH = fontSize + padY * 2;
-
-        targetCtx.fillStyle = state.text.bgColor;
-        drawRoundedRect(targetCtx, tx - boxW / 2, ty - boxH / 2, boxW, boxH, 8 * scaleRatio);
-        targetCtx.fill();
-
-        targetCtx.fillStyle = state.text.color;
-        targetCtx.fillText(displayStr, tx, ty);
-        targetCtx.restore();
-      }
-
-      // Safe Zone Guides
-      if (state.showSafeZones && !isExportOrCapture) {
-        targetCtx.save();
-        targetCtx.strokeStyle = 'rgba(236, 72, 153, 0.6)';
-        targetCtx.setLineDash([5, 5]);
-        targetCtx.lineWidth = 1;
-        targetCtx.strokeRect(w * 0.06, h * 0.12, w * 0.78, h * 0.68);
-        targetCtx.fillStyle = 'rgba(236, 72, 153, 0.85)';
-        targetCtx.font = '10px Inter, sans-serif';
-        targetCtx.fillText('Vùng An Toàn TikTok/Reels', w * 0.08, h * 0.11);
-        targetCtx.restore();
-      }
-    }
-
-    // =========================================================================
-    // 4. PURE VIDEO STREAM OFFSCREEN EXPORT ENGINE (100% RELIABLE)
-    // =========================================================================
-    function getTargetExportDimensions() {
-      const shortSide = QUALITY_SPECS[state.exportQuality].shortDim;
-      let ew = shortSide, eh = Math.round(shortSide * 16 / 9);
-      if (state.aspectRatio === '16:9') { ew = Math.round(shortSide * 16 / 9); eh = shortSide; }
-      if (state.aspectRatio === '1:1') { ew = shortSide; eh = shortSide; }
-      if (state.aspectRatio === '4:5') { ew = shortSide; eh = Math.round(shortSide * 5 / 4); }
-      return { width: ew, height: eh };
-    }
-
-    function openExportModal() {
-      if (!state.hasVideo) return alert('Vui lòng nạp video trước khi xuất!');
-      document.getElementById('exportModal').classList.remove('hidden');
-      document.getElementById('exportDurationInfo').innerText = (state.trimEnd - state.trimStart).toFixed(1) + 's';
-      selectExportQuality(state.exportQuality);
-    }
-    function closeExportModal() {
-      if (isExportingNow) return;
-      document.getElementById('exportModal').classList.add('hidden');
-    }
-    function selectExportQuality(q) {
-      const perms = getActivePermissions();
-      if ((q === '2k' || q === '4k') && !perms.export4k) {
-        alert('Chức năng xuất 2K / 4K yêu cầu quyền từ Chủ Sở Hữu!');
-        q = '1080p';
-      }
-      state.exportQuality = q;
-      document.querySelectorAll('.q-btn').forEach(btn => {
-        btn.className = 'q-btn p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-indigo-500 text-left transition';
-      });
-      document.getElementById(`q-btn-${q}`).className = 'q-btn p-3 rounded-xl bg-indigo-950/40 border-2 border-indigo-500 text-left transition';
-      document.getElementById('outputResIndicator').innerText = QUALITY_SPECS[q].label;
-      updateExportPixelLabel();
-    }
-    function updateExportPixelLabel() {
-      const dims = getTargetExportDimensions();
-      document.getElementById('exportExactPixel').innerText = `${dims.width} × ${dims.height} px (${state.aspectRatio})`;
-    }
-
-    function createSafeMediaRecorder(stream, bitrate) {
-      const candidates = [
-        { mimeType: 'video/webm;codecs=vp9', ext: 'webm' },
-        { mimeType: 'video/webm;codecs=vp8', ext: 'webm' },
-        { mimeType: 'video/webm', ext: 'webm' },
-        { mimeType: 'video/mp4', ext: 'mp4' }
-      ];
-      for (const c of candidates) {
-        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(c.mimeType)) {
-          try {
-            const rec = new MediaRecorder(stream, { mimeType: c.mimeType, videoBitsPerSecond: bitrate });
-            return { recorder: rec, mimeType: c.mimeType, ext: c.ext };
-          } catch (e) {}
-        }
-      }
-      return { recorder: new MediaRecorder(stream), mimeType: 'video/webm', ext: 'webm' };
-    }
-
-    async function startTrueResolutionExport() {
-      if (isExportingNow) return;
-      try {
-        isExportingNow = true;
-
-        const progSec = document.getElementById('exportProgressSection');
-        const progBar = document.getElementById('exportProgressBar');
-        const progTxt = document.getElementById('exportPercentText');
-        const renderBtn = document.getElementById('startRenderBtn');
-
-        progSec.classList.remove('hidden');
-        renderBtn.disabled = true;
-
-        const dims = getTargetExportDimensions();
-        const exportCanvas = document.createElement('canvas');
-        exportCanvas.width = dims.width;
-        exportCanvas.height = dims.height;
-        const exportCtx = exportCanvas.getContext('2d');
-
-        drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
-
-        const videoStream = exportCanvas.captureStream(30);
-        const { recorder, mimeType, ext } = createSafeMediaRecorder(videoStream, QUALITY_SPECS[state.exportQuality].bitrate);
-
-        const chunks = [];
-        recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-        recorder.onstop = () => {
-          clearInterval(exportRenderInterval);
-          isExportingNow = false;
-          const blob = new Blob(chunks, { type: mimeType });
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `AutoCut_${state.exportQuality.toUpperCase()}_${dims.width}x${dims.height}_${Date.now()}.${ext}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          progSec.classList.add('hidden');
-          renderBtn.disabled = false;
-          closeExportModal();
-        };
-
-        const exactDurationMs = Math.max(1500, ((state.trimEnd - state.trimStart) / state.speed) * 1000);
-        state.currentTime = state.trimStart;
-        state.lastTriggeredSfxIndex = -1;
-        if (!state.isDemoMode) video.currentTime = state.trimStart;
-        if (!state.isPlaying) togglePlay();
-
-        const exportRenderInterval = setInterval(() => {
-          drawFrame(exportCtx, exportCanvas.width, exportCanvas.height, true);
-        }, 33);
-
-        recorder.start(250);
-        const startTime = performance.now();
-        const timer = setInterval(() => {
-          const elapsed = performance.now() - startTime;
-          const pct = Math.min(100, Math.round((elapsed / exactDurationMs) * 100));
-          progBar.style.width = pct + '%';
-          progTxt.innerText = pct + '%';
-
-          const reachedEnd = (!state.isDemoMode && video.currentTime >= state.trimEnd - 0.05) || elapsed >= exactDurationMs;
-          if (reachedEnd) {
-            clearInterval(timer);
-            if (recorder.state !== 'inactive') recorder.stop();
-          }
-        }, 80);
-      } catch (err) {
-        isExportingNow = false;
-        alert('Lỗi xuất video: ' + err.message);
-        document.getElementById('exportProgressSection').classList.add('hidden');
-        document.getElementById('startRenderBtn').disabled = false;
-      }
-    }
-
-    function switchInspectorTab(tab) {
-      document.querySelectorAll('.ins-tab').forEach(b => {
-        b.classList.remove('text-indigo-400', 'border-b-2', 'border-indigo-500');
-        b.classList.add('text-zinc-400');
-      });
-      document.getElementById(`ins-tab-${tab}`).classList.add('text-indigo-400', 'border-b-2', 'border-indigo-500');
-      document.getElementById(`ins-tab-${tab}`).classList.remove('text-zinc-400');
-
-      document.querySelectorAll('.ins-panel').forEach(p => p.classList.add('hidden'));
-      document.getElementById(`ins-panel-${tab}`).classList.remove('hidden');
-    }
-
-    // Boot Application
-    refreshAccountUI();
-    syncFromCloud(false);
-    resizeCanvas();
-    requestAnimationFrame(renderLoop);
-  </script>
-</body>
-</html>
+      s.value = state.trimStart;
