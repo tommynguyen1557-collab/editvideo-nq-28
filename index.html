@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AutoCut Studio AI v16.0 — Zero-Key Smart Vision Edition</title>
+  <title>AutoCut Studio AI v17.0 — Strict Owner Security & CRM</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236366f1'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>✨</text></svg>" />
   <script>
     (function(){const w=console.warn;console.warn=function(...a){if(a[0]&&typeof a[0]==='string'&&a[0].includes('cdn.tailwindcss.com'))return;w.apply(console,a);};})();
@@ -31,7 +31,7 @@
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="font-bold text-sm text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v16.0</span></h1>
+          <h1 class="font-bold text-sm text-white">AUTOCUT <span class="text-indigo-400">STUDIO AI</span> <span class="text-[10px] text-emerald-400 font-mono">v17.0</span></h1>
           <span id="headerRoleBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">KHÁCH</span>
         </div>
         <div class="flex items-center gap-2 text-[10px] text-zinc-400">
@@ -43,7 +43,7 @@
     </div>
 
     <div class="hidden md:flex items-center gap-1.5 bg-zinc-900 p-1 rounded-xl border border-zinc-800 text-[11px]">
-      <button type="button" onclick="openModal('pricingModal')" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 font-semibold border border-emerald-500/30"><i class="fa-solid fa-tags mr-1"></i>Bảng Giá</button>
+      <button type="button" onclick="openModal('pricingModal')" class="px-2.5 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 font-semibold border border-emerald-500/30"><i class="fa-solid fa-tags mr-1"></i>Bảng Giá & Gói Năm</button>
       <button type="button" onclick="openAiConfigModal()" class="px-2.5 py-1 rounded-lg bg-indigo-600/20 text-indigo-300 font-semibold border border-indigo-500/30"><i class="fa-solid fa-sliders mr-1"></i>Chế Độ AI</button>
       <button type="button" onclick="toggleSafeZones()" id="safeZoneBtn" class="px-2.5 py-1 rounded-lg text-zinc-400 hover:text-white"><i class="fa-solid fa-border-all mr-1"></i>Safe Zone</button>
     </div>
@@ -71,7 +71,7 @@
         <div class="flex items-center gap-2 shrink-0 ml-2">
           <button type="button" onclick="openAiConfigModal()" class="text-indigo-400 hover:underline font-semibold">Cài Đặt AI</button>
           <span class="text-zinc-700">|</span>
-          <button type="button" onclick="openModal('pricingModal')" class="text-emerald-400 hover:underline font-semibold">Gói Năm</button>
+          <button type="button" onclick="openModal('pricingModal')" class="text-emerald-400 hover:underline font-semibold">Mua Gói Năm</button>
         </div>
       </div>
 
@@ -307,50 +307,53 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     </aside>
   </main>
 
-  <!-- MODAL: PRICING -->
+  <!-- MODAL: PRICING (WITH PHONE NUMBER CONTACT FLOW) -->
   <div id="pricingModal" class="modal-backdrop">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-4xl w-full p-6 space-y-5 shadow-2xl">
       <div class="flex justify-between items-center border-b border-zinc-800 pb-3">
-        <h3 class="text-base font-bold text-white">Bảng Giá & Gói Bản Quyền Theo Năm</h3>
+        <div>
+          <h3 class="text-base font-bold text-white">Bảng Giá & Đăng Ký Gói Bản Quyền Theo Năm</h3>
+          <p class="text-[11px] text-zinc-400">Để lại Số Điện Thoại / Zalo khi đăng ký để Chủ Sở Hữu kích hoạt và hỗ trợ trực tiếp</p>
+        </div>
         <button type="button" onclick="closeModal('pricingModal')" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
         <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
           <div class="font-bold text-zinc-400">GÓI FREE</div>
           <div class="text-xl font-bold text-white">0đ</div>
-          <p class="text-zinc-400">AI Dựng Tự Động tích hợp sẵn (không cần Key), xuất tối đa 1080p.</p>
+          <p class="text-zinc-400">AI Dựng Tự Động tích hợp sẵn, xuất tối đa 1080p.</p>
           <button type="button" onclick="closeModal('pricingModal')" class="w-full py-2 rounded-lg bg-zinc-800 font-bold">Đang Dùng</button>
         </div>
         <div class="bg-indigo-950/30 border-2 border-indigo-500 rounded-xl p-4 space-y-3">
           <div class="font-bold text-indigo-400">GÓI PRO CREATOR (1 NĂM)</div>
           <div class="text-xl font-bold text-white">1.490.000đ / năm</div>
           <p class="text-zinc-300">Mở khóa Full AI Auto-Edit, Auto-Subtitle & Xuất 2K / 4K.</p>
-          <button type="button" onclick="selectPlanAndRegister('Pro Creator 1 Năm')" class="w-full py-2 rounded-lg bg-indigo-600 font-bold text-white">Đăng Ký Ngay</button>
+          <button type="button" onclick="selectPlanAndRegister('Pro Creator 1 Năm')" class="w-full py-2 rounded-lg bg-indigo-600 font-bold text-white">Mua Gói Pro 1 Năm</button>
         </div>
         <div class="bg-zinc-950 border border-amber-500/40 rounded-xl p-4 space-y-3">
           <div class="font-bold text-amber-400">GÓI STUDIO AGENCY (1 NĂM)</div>
           <div class="text-xl font-bold text-white">2.990.000đ / năm</div>
           <p class="text-zinc-400">Dùng chung AI nâng cao hệ thống + Hỗ trợ 1-1.</p>
-          <button type="button" onclick="selectPlanAndRegister('Studio Agency 1 Năm')" class="w-full py-2 rounded-lg bg-amber-500 text-zinc-950 font-bold">Đăng Ký Studio</button>
+          <button type="button" onclick="selectPlanAndRegister('Studio Agency 1 Năm')" class="w-full py-2 rounded-lg bg-amber-500 text-zinc-950 font-bold">Mua Gói Studio</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: AI ENGINE SETTINGS (ZERO-KEY BY DEFAULT + OPTIONAL MULTI-PROVIDER API) -->
+  <!-- MODAL: AI ENGINE SETTINGS -->
   <div id="aiConfigModal" class="modal-backdrop">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center">
         <div>
           <h3 class="text-sm font-bold text-white">Cài Đặt Bộ Não AI Dựng Video</h3>
-          <p class="text-[11px] text-zinc-400">Hoạt động ngay không cần API Key • Tùy chọn gắn thêm Key nếu muốn</p>
+          <p class="text-[11px] text-zinc-400">Hoạt động ngay không cần API Key</p>
         </div>
         <button type="button" onclick="closeModal('aiConfigModal')" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs space-y-1">
         <div class="font-bold text-emerald-400"><i class="fa-solid fa-circle-check mr-1.5"></i>Chế độ Mặc Định: AI Tích Hợp Sẵn (Không cần API Key)</div>
-        <p class="text-[11px] text-zinc-300 leading-relaxed">Hệ thống tự động quét độ sáng, tương phản, tông màu của 3 khung hình video và phân tích từ khóa yêu cầu để dựng phim hoàn chỉnh mà bạn không cần đăng ký bất kỳ tài khoản API nào.</p>
+        <p class="text-[11px] text-zinc-300 leading-relaxed">Hệ thống tự động quét độ sáng, tương phản, tông màu của video và phân tích từ khóa yêu cầu để dựng phim hoàn chỉnh mà không cần đăng ký API ngoài.</p>
       </div>
 
       <div class="space-y-2 pt-1 border-t border-zinc-800">
@@ -361,99 +364,112 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
           <option value="openai">OpenAI / Groq / OpenRouter Key (sk-... / gsk_...)</option>
         </select>
         <input type="password" id="geminiApiKeyInput" placeholder="Để trống nếu dùng AI Tích Hợp Sẵn..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
-        <div id="apiKeyTestResult" class="hidden text-[11px] p-2 rounded-lg border"></div>
       </div>
 
       <div class="flex gap-2 pt-1">
-        <button type="button" onclick="testExternalApiKey()" class="px-3.5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-bold text-zinc-200 border border-zinc-700">Kiểm Tra Key</button>
-        <button type="button" onclick="saveAiSettings()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white">Lưu Cài Đặt AI</button>
+        <button type="button" onclick="saveAiSettings()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white">Lưu Cài Đặt AI</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: AUTH -->
+  <!-- MODAL: AUTH (STRICT OWNER LOCK + CUSTOMER PHONE FIELD) -->
   <div id="authModal" class="modal-backdrop">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
       <div class="flex justify-between items-center">
-        <h3 class="text-sm font-bold text-white">Đăng Nhập / Đăng Ký Tài Khoản</h3>
+        <h3 class="text-sm font-bold text-white">Đăng Nhập / Đăng Ký Mua Gói</h3>
         <button type="button" onclick="closeModal('authModal')" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="grid grid-cols-2 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-semibold">
         <button type="button" id="authSwitchLogin" onclick="switchAuthTab('login')" class="py-2 rounded-lg bg-indigo-600 text-white">Đăng Nhập</button>
-        <button type="button" id="authSwitchRegister" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-zinc-400">Đăng Ký Mới</button>
+        <button type="button" id="authSwitchRegister" onclick="switchAuthTab('register')" class="py-2 rounded-lg text-zinc-400">Đăng Ký / Mua Gói</button>
       </div>
       <div id="loginFormPanel" class="space-y-3">
-        <input type="text" id="loginEmailInput" placeholder="Email (Owner: admin@autocut.vn)" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-        <input type="password" id="loginPasswordInput" onkeydown="if(event.key==='Enter') handleLoginSubmit()" placeholder="Mật khẩu (Owner: OWNER-MASTER-2026)" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+        <input type="text" id="loginEmailInput" placeholder="Email đăng nhập..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+        <input type="password" id="loginPasswordInput" onkeydown="if(event.key==='Enter') handleLoginSubmit()" placeholder="Mật khẩu..." class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
         <button type="button" id="loginSubmitBtn" onclick="handleLoginSubmit()" class="w-full py-2.5 rounded-xl bg-indigo-600 text-xs font-bold text-white">Đăng Nhập Ngay</button>
-        <div class="pt-2 border-t border-zinc-800 flex justify-between text-[11px]">
-          <button type="button" onclick="quickOwnerLogin()" class="text-amber-400 font-semibold"><i class="fa-solid fa-crown mr-1"></i>Vào Nhanh Quyền Owner</button>
-          <button type="button" onclick="logoutAccount()" class="text-zinc-500 hover:text-red-400">Đăng xuất</button>
+        <div class="pt-2 border-t border-zinc-800 flex justify-between items-center text-[11px]">
+          <span class="text-zinc-500">Chủ sở hữu nhập mã bảo mật để kích hoạt</span>
+          <button type="button" onclick="logoutAccount()" class="text-zinc-400 hover:text-red-400">Đăng xuất</button>
         </div>
       </div>
       <div id="registerFormPanel" class="hidden space-y-3">
-        <input type="text" id="regNameInput" placeholder="Họ tên / Tên Shop" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-        <input type="email" id="regEmailInput" placeholder="Email đăng ký" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-        <input type="password" id="regPasswordInput" placeholder="Tạo mật khẩu" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-        <select id="regPlanSelect" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-indigo-300">
-          <option value="Pro Creator 1 Năm">Gói Pro Creator (1 Năm)</option>
-          <option value="Studio Agency 1 Năm">Gói Studio Agency (1 Năm)</option>
-          <option value="Dùng thử 30 ngày">Gói Dùng Thử 30 Ngày</option>
-        </select>
-        <button type="button" onclick="handleRegisterSubmit()" class="w-full py-2.5 rounded-xl bg-indigo-600 text-xs font-bold text-white">Gửi Đăng Ký</button>
+        <input type="text" id="regNameInput" placeholder="Họ và Tên / Tên Shop *" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+        <input type="tel" id="regPhoneInput" placeholder="Số điện thoại / Zalo liên hệ (VD: 0988xxxxxx) *" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-semibold" />
+        <input type="email" id="regEmailInput" placeholder="Email đăng ký *" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+        <input type="password" id="regPasswordInput" placeholder="Tạo mật khẩu *" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+        <div>
+          <label class="text-[11px] text-zinc-400 block mb-1">Chọn gói sử dụng theo năm:</label>
+          <select id="regPlanSelect" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-indigo-300">
+            <option value="Pro Creator 1 Năm">Gói Pro Creator (1 Năm - 1.490.000đ)</option>
+            <option value="Studio Agency 1 Năm">Gói Studio Agency (1 Năm - 2.990.000đ)</option>
+            <option value="Dùng thử 30 ngày">Gói Dùng Thử 30 Ngày</option>
+          </select>
+        </div>
+        <button type="button" onclick="handleRegisterSubmit()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-xs font-bold text-white">Gửi Thông Tin Đăng Ký</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: OWNER DASHBOARD -->
+  <!-- MODAL: STRICT OWNER DASHBOARD (ONLY ACCESSIBLE WITH NGOQUOC-28-12) -->
   <div id="ownerDashboardModal" class="modal-backdrop">
     <div class="bg-zinc-900 border border-zinc-700 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
       <div class="px-6 py-4 border-b border-zinc-800 bg-zinc-950 flex justify-between items-center">
-        <h2 class="text-sm font-bold text-amber-400"><i class="fa-solid fa-crown mr-2"></i>Bảng Quản Trị Chủ Sở Hữu & Cloud Sync</h2>
+        <h2 class="text-sm font-bold text-amber-400"><i class="fa-solid fa-crown mr-2"></i>Cổng Chủ Sở Hữu Độc Quyền — Quản Lý Khách Hàng & Phân Quyền</h2>
         <button type="button" onclick="closeModal('ownerDashboardModal')" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <div id="ownerAuthGate" class="p-8 text-center space-y-4">
-        <h3 class="text-sm font-bold text-white">Nhập Mã Bí Mật Chủ Sở Hữu</h3>
+        <div class="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl mx-auto">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white">Khu Vực Dành Riêng Cho Chủ Sở Hữu</h3>
+          <p class="text-xs text-zinc-400 mt-1">Vui lòng nhập mật khẩu Chủ Sở Hữu để mở khóa bảng quản trị tài khoản con.</p>
+        </div>
         <div class="flex gap-2 max-w-sm mx-auto">
-          <input type="password" id="ownerMasterPassInput" onkeydown="if(event.key==='Enter') verifyOwnerMaster()" placeholder="OWNER-MASTER-2026" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-          <button type="button" onclick="verifyOwnerMaster()" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 font-bold text-xs">Mở Khóa</button>
+          <input type="password" id="ownerMasterPassInput" onkeydown="if(event.key==='Enter') verifyOwnerMaster()" placeholder="Nhập mật khẩu Chủ Sở Hữu..." class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+          <button type="button" onclick="verifyOwnerMaster()" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs">Xác Nhận</button>
         </div>
       </div>
 
       <div id="ownerControlContent" class="hidden flex-1 flex flex-col overflow-hidden">
-        <div class="flex border-b border-zinc-800 bg-zinc-950/60 px-6 text-xs font-semibold">
-          <button type="button" onclick="switchOwnerTab('subaccounts')" id="own-tab-subaccounts" class="own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400">1. Tài Khoản Con</button>
-          <button type="button" onclick="switchOwnerTab('cloud')" id="own-tab-cloud" class="own-tab py-3 px-4 text-zinc-400">2. Firebase Cloud & Bảo Mật</button>
+        <div class="flex border-b border-zinc-800 bg-zinc-950/60 px-6 text-xs font-semibold justify-between items-center">
+          <div class="flex">
+            <button type="button" onclick="switchOwnerTab('subaccounts')" id="own-tab-subaccounts" class="own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400">1. Danh Sách Khách Hàng & SĐT</button>
+            <button type="button" onclick="switchOwnerTab('cloud')" id="own-tab-cloud" class="own-tab py-3 px-4 text-zinc-400">2. Firebase Cloud & Bảo Mật</button>
+          </div>
+          <button type="button" onclick="lockOwnerSession()" class="text-[11px] text-red-400 hover:underline px-3 py-1"><i class="fa-solid fa-lock mr-1"></i>Khóa Quyền Owner</button>
         </div>
         <div class="flex-1 overflow-y-auto p-6 space-y-5">
           <div id="own-panel-subaccounts" class="own-panel space-y-4">
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-3">
               <div class="flex justify-between items-center flex-wrap gap-2">
-                <span class="text-xs font-bold text-white">Tạo Tài Khoản Con (<span id="subAccountCount">0</span>)</span>
+                <span class="text-xs font-bold text-white">Cấp Tài Khoản Con Mới (<span id="subAccountCount">0</span>)</span>
                 <div class="flex gap-3 text-[11px]">
                   <button type="button" onclick="exportBackupJson()" class="text-emerald-400 hover:underline">Tải Sao Lưu JSON</button>
                   <label class="text-amber-400 hover:underline cursor-pointer">Khôi Phục JSON<input type="file" accept=".json" class="hidden" onchange="importBackupJson(event)" /></label>
                   <button type="button" onclick="syncFromCloud(true)" class="text-indigo-400 hover:underline">Đồng Bộ Cloud</button>
                 </div>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-5 gap-2">
-                <input type="text" id="newSubName" placeholder="Tên khách hàng" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-                <input type="email" id="newSubEmail" placeholder="Email" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-                <input type="text" id="newSubPass" value="123456" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-                <select id="newSubDuration" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white">
+              <div class="grid grid-cols-1 md:grid-cols-6 gap-2">
+                <input type="text" id="newSubName" placeholder="Tên khách hàng" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white" />
+                <input type="tel" id="newSubPhone" placeholder="Số ĐT / Zalo" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-emerald-400" />
+                <input type="email" id="newSubEmail" placeholder="Email" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white" />
+                <input type="text" id="newSubPass" value="123456" placeholder="Mật khẩu" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white" />
+                <select id="newSubDuration" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-xs text-white">
                   <option value="1">1 Năm (365 ngày)</option>
                   <option value="2">2 Năm (730 ngày)</option>
                   <option value="0.08">Dùng thử 30 ngày</option>
                 </select>
-                <button type="button" onclick="createSubAccountByOwner()" class="bg-indigo-600 text-white font-bold text-xs rounded-lg py-2">Tạo Tài Khoản</button>
+                <button type="button" onclick="createSubAccountByOwner()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg py-2">Tạo Tài Khoản</button>
               </div>
             </div>
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr class="border-b border-zinc-800 text-[10px] uppercase text-zinc-400 bg-zinc-900/50">
-                    <th class="p-2.5">Tài Khoản</th>
+                    <th class="p-2.5">Khách Hàng / Gói</th>
+                    <th class="p-2.5">SĐT / Zalo</th>
                     <th class="p-2.5">Mật Khẩu</th>
                     <th class="p-2.5 text-center">AI</th>
                     <th class="p-2.5 text-center">2K/4K</th>
@@ -469,17 +485,17 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
 
           <div id="own-panel-cloud" class="own-panel hidden space-y-4">
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2">
-              <label class="text-xs font-bold text-indigo-400 block">Firebase Realtime Database URL</label>
+              <label class="text-xs font-bold text-indigo-400 block">Firebase Realtime Database URL (Đồng bộ đa thiết bị)</label>
               <div class="flex gap-2">
                 <input type="text" id="firebaseUrlInput" placeholder="https://ten-du-an-default-rtdb.firebaseio.com" class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-emerald-400 font-mono" />
                 <button type="button" onclick="saveFirebaseConfig()" class="px-4 py-2 rounded-lg bg-indigo-600 text-xs font-bold text-white">Lưu & Test</button>
               </div>
             </div>
             <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2">
-              <label class="text-xs font-bold text-amber-400 block">Đổi Mã Bí Mật Chủ Sở Hữu</label>
+              <label class="text-xs font-bold text-amber-400 block">Đổi Mật Khẩu Chủ Sở Hữu (Hiện tại: NGOQUOC-28-12)</label>
               <div class="flex gap-2">
-                <input type="text" id="newOwnerMasterPass" placeholder="Nhập mã bí mật mới..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
-                <button type="button" onclick="updateOwnerMasterPass()" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 text-xs font-bold">Đổi Mã</button>
+                <input type="text" id="newOwnerMasterPass" placeholder="Nhập mật khẩu Chủ Sở Hữu mới..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white" />
+                <button type="button" onclick="updateOwnerMasterPass()" class="px-4 py-2 rounded-lg bg-amber-500 text-zinc-950 text-xs font-bold">Cập Nhật</button>
               </div>
             </div>
           </div>
@@ -518,13 +534,14 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
 
   <script>
     // =========================================================================
-    // 1. MODAL & STORAGE ENGINE
+    // 1. STRICT OWNER SECURITY (NGOQUOC-28-12) & STORAGE ENGINE
     // =========================================================================
     function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
     function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('active'); }
 
+    const OWNER_REQUIRED_PASS = 'NGOQUOC-28-12';
     const MASTER_KEY = 'AUTOCUT_MASTER_PERSISTENT_DB';
-    const LEGACY_KEYS = ['autocut_enterprise_saas_v15','autocut_enterprise_saas_v14','autocut_enterprise_saas_v13','autocut_enterprise_saas_v12','autocut_enterprise_saas_v11','autocut_enterprise_saas_v10','autocut_enterprise_saas_v9','autocut_enterprise_saas_v8'];
+    const LEGACY_KEYS = ['autocut_enterprise_saas_v16','autocut_enterprise_saas_v15','autocut_enterprise_saas_v14','autocut_enterprise_saas_v13','autocut_enterprise_saas_v12','autocut_enterprise_saas_v11','autocut_enterprise_saas_v10','autocut_enterprise_saas_v9','autocut_enterprise_saas_v8'];
     let memStore = {};
     const getStore = k => { try { return localStorage.getItem(k); } catch(e) { return memStore[k] || null; } };
     const setStore = (k, v) => { try { localStorage.setItem(k, v); } catch(e) { memStore[k] = v; } };
@@ -536,15 +553,24 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
         const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
         base = {
           ownerEmail: 'admin@autocut.vn',
-          ownerMasterPass: 'OWNER-MASTER-2026',
+          ownerMasterPass: OWNER_REQUIRED_PASS,
           githubUrl: 'https://tommynguyen1557-collab.github.io/editvideo-nq-28/',
           firebaseUrl: '',
           aiProvider: 'builtin',
           geminiApiKey: '',
           currentSession: null,
-          subAccounts: [{ id: 'SUB-01', name: 'Studio Bạc', email: 'silver@studio.vn', password: '123', status: 'active', expiresAt: exp.toISOString(), permissions: { autoEdit: true, export4k: true } }]
+          subAccounts: [{ id: 'SUB-01', name: 'Studio Bạc', phone: '0900000000', email: 'silver@studio.vn', password: '123', plan: 'Pro Creator 1 Năm', status: 'active', expiresAt: exp.toISOString(), permissions: { autoEdit: true, export4k: true } }]
         };
       }
+      // Enforce the new owner password NGOQUOC-28-12 if old default was stored
+      if (!base.ownerMasterPass || base.ownerMasterPass === 'OWNER-MASTER-2026') {
+        base.ownerMasterPass = OWNER_REQUIRED_PASS;
+      }
+      // Revoke any unverified guest/quick owner session from older versions
+      if (base.currentSession && base.currentSession.role === 'owner' && base.currentSession.verifiedKey !== base.ownerMasterPass) {
+        base.currentSession = null;
+      }
+
       if (!base.aiProvider) base.aiProvider = 'builtin';
       if (!Array.isArray(base.subAccounts)) base.subAccounts = [];
       const emails = new Set(base.subAccounts.map(u => u.email.toLowerCase()));
@@ -564,7 +590,14 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     }
 
     let sysData = initDb();
-    const isOwnerActive = () => Boolean(sysData.currentSession && sysData.currentSession.role === 'owner');
+
+    // Strict check: Owner is ONLY active if session role is 'owner' AND verifiedKey matches ownerMasterPass
+    const isOwnerActive = () => Boolean(
+      sysData.currentSession &&
+      sysData.currentSession.role === 'owner' &&
+      sysData.currentSession.verifiedKey === sysData.ownerMasterPass
+    );
+
     const cleanFbUrl = u => u ? u.trim().replace(/\/autocut_saas\.json.*$/i, '').replace(/\/+$/, '') : '';
 
     async function fetchTimed(url, opts = {}, ms = 3500) {
@@ -605,7 +638,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
             sysData.subAccounts = Array.from(m.values());
           }
           if (rem.geminiApiKey) sysData.geminiApiKey = rem.geminiApiKey;
-          if (rem.ownerMasterPass) sysData.ownerMasterPass = rem.ownerMasterPass;
+          if (rem.ownerMasterPass && rem.ownerMasterPass !== 'OWNER-MASTER-2026') sysData.ownerMasterPass = rem.ownerMasterPass;
           setStore(MASTER_KEY, JSON.stringify(sysData));
           refreshUI();
           if (isOwnerActive()) renderSubTable();
@@ -633,18 +666,13 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       const p = getPerms();
       document.getElementById('headerUserName').innerText = p.name;
       document.getElementById('userAvatarBadge').innerText = p.name.charAt(0).toUpperCase();
-      const aiDot = document.getElementById('aiEngineStatusDot');
-      if (sysData.geminiApiKey && sysData.aiProvider !== 'builtin') {
-        aiDot.innerText = `AI Engine: ${sysData.aiProvider.toUpperCase()} API ✓`;
-      } else {
-        aiDot.innerText = 'AI Engine: Tích hợp sẵn (Không cần Key)';
-      }
+      document.getElementById('aiEngineStatusDot').innerText = 'AI Engine: Tích hợp sẵn (Không cần Key)';
       document.getElementById('cloudStatusDot').innerText = sysData.firebaseUrl ? 'Cloud: Đã nối ✓' : 'Cloud: Local';
       const badge = document.getElementById('headerRoleBadge');
       if (p.role === 'owner') {
         badge.innerText = 'CHỦ SỞ HỮU';
         badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40';
-        document.getElementById('headerUserExpiry').innerText = 'Toàn quyền';
+        document.getElementById('headerUserExpiry').innerText = 'Toàn quyền quản trị';
         document.getElementById('permissionSummaryText').innerHTML = 'Quyền Owner: <b>Mở khóa 100% & Xuất 4K</b>';
       } else if (p.role === 'sub') {
         badge.innerText = 'TÀI KHOẢN CON';
@@ -659,7 +687,7 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       }
     }
 
-    // AUTH & OWNER ACTIONS
+    // AUTH & STRICT OWNER ACTIONS
     function openAuthModal(tab = 'login') { openModal('authModal'); switchAuthTab(tab); }
     function switchAuthTab(tab) {
       const l = tab === 'login';
@@ -675,52 +703,110 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       if (!email || !pass) return alert('Vui lòng nhập Email và Mật khẩu!');
       if (sysData.firebaseUrl) await syncFromCloud(false);
 
+      // Owner login requires exact password NGOQUOC-28-12 (or updated master pass)
       if ((email === sysData.ownerEmail || email === 'owner' || email === 'admin') && pass === sysData.ownerMasterPass) {
-        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
-        saveDb(false); closeModal('authModal'); return;
+        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail, verifiedKey: sysData.ownerMasterPass };
+        saveDb(false);
+        closeModal('authModal');
+        alert('Xác thực thành công quyền Chủ Sở Hữu!');
+        return;
       }
+
       const sub = sysData.subAccounts.find(u => u.email.toLowerCase() === email && u.password === pass);
       if (!sub) return alert('Sai Email hoặc Mật khẩu!');
-      if (sub.status !== 'active') return alert('Tài khoản đang chờ duyệt hoặc bị khóa!');
-      if (new Date(sub.expiresAt) < new Date()) return alert('Tài khoản đã hết hạn!');
+      if (sub.status !== 'active') return alert('Tài khoản đang chờ Chủ Sở Hữu duyệt hoặc đang bị khóa!');
+      if (new Date(sub.expiresAt) < new Date()) return alert('Tài khoản đã hết hạn sử dụng theo năm!');
+
       sysData.currentSession = { role: 'sub', email: sub.email };
-      saveDb(false); closeModal('authModal');
+      saveDb(false);
+      closeModal('authModal');
     }
 
-    function quickOwnerLogin() { sysData.currentSession = { role: 'owner', email: sysData.ownerEmail }; saveDb(false); closeModal('authModal'); }
-    function logoutAccount() { sysData.currentSession = null; saveDb(false); closeModal('authModal'); }
-    function selectPlanAndRegister(plan) { closeModal('pricingModal'); openAuthModal('register'); document.getElementById('regPlanSelect').value = plan; }
+    function logoutAccount() {
+      sysData.currentSession = null;
+      saveDb(false);
+      closeModal('authModal');
+      closeModal('ownerDashboardModal');
+    }
+
+    function lockOwnerSession() {
+      sysData.currentSession = null;
+      saveDb(false);
+      document.getElementById('ownerAuthGate').classList.remove('hidden');
+      document.getElementById('ownerControlContent').classList.add('hidden');
+      document.getElementById('ownerMasterPassInput').value = '';
+    }
+
+    function selectPlanAndRegister(plan) {
+      closeModal('pricingModal');
+      openAuthModal('register');
+      document.getElementById('regPlanSelect').value = plan;
+    }
 
     async function handleRegisterSubmit() {
       const name = document.getElementById('regNameInput').value.trim();
+      const phone = document.getElementById('regPhoneInput').value.trim();
       const email = document.getElementById('regEmailInput').value.trim().toLowerCase();
       const password = document.getElementById('regPasswordInput').value.trim();
-      if (!name || !email || !password) return alert('Điền đủ thông tin!');
-      if (sysData.subAccounts.some(u => u.email.toLowerCase() === email)) return alert('Email đã tồn tại!');
-      const exp = new Date(); exp.setFullYear(exp.getFullYear() + 1);
-      sysData.subAccounts.unshift({ id: 'SUB-' + Math.floor(100 + Math.random()*900), name, email, password, status: 'pending', expiresAt: exp.toISOString(), permissions: { autoEdit: true, export4k: false } });
+      const plan = document.getElementById('regPlanSelect').value;
+
+      if (!name || !phone || !email || !password) {
+        return alert('Vui lòng nhập đầy đủ Họ tên, Số điện thoại/Zalo, Email và Mật khẩu!');
+      }
+      if (sysData.subAccounts.some(u => u.email.toLowerCase() === email)) {
+        return alert('Email này đã được đăng ký!');
+      }
+
+      const exp = new Date();
+      exp.setFullYear(exp.getFullYear() + 1);
+
+      sysData.subAccounts.unshift({
+        id: 'SUB-' + Math.floor(100 + Math.random() * 900),
+        name,
+        phone,
+        email,
+        password,
+        plan,
+        status: 'pending',
+        expiresAt: exp.toISOString(),
+        permissions: { autoEdit: true, export4k: false }
+      });
+
       await saveDb(true);
-      alert('Đăng ký thành công! Chờ Chủ Sở Hữu duyệt.');
+      alert(`Đăng ký "${plan}" thành công!\nThông tin SĐT (${phone}) đã gửi tới Chủ Sở Hữu để liên hệ kích hoạt.`);
       switchAuthTab('login');
+      document.getElementById('loginEmailInput').value = email;
     }
 
     function openOwnerDashboard() {
       openModal('ownerDashboardModal');
-      if (isOwnerActive()) showOwnerView();
-      else { document.getElementById('ownerAuthGate').classList.remove('hidden'); document.getElementById('ownerControlContent').classList.add('hidden'); }
+      if (isOwnerActive()) {
+        showOwnerView();
+      } else {
+        document.getElementById('ownerAuthGate').classList.remove('hidden');
+        document.getElementById('ownerControlContent').classList.add('hidden');
+        document.getElementById('ownerMasterPassInput').value = '';
+      }
     }
+
     function verifyOwnerMaster() {
-      if (document.getElementById('ownerMasterPassInput').value.trim() === sysData.ownerMasterPass) {
-        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail };
-        saveDb(false); showOwnerView();
-      } else alert('Sai mã bí mật! Mặc định: OWNER-MASTER-2026');
+      const entered = document.getElementById('ownerMasterPassInput').value.trim();
+      if (entered === sysData.ownerMasterPass) {
+        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail, verifiedKey: sysData.ownerMasterPass };
+        saveDb(false);
+        showOwnerView();
+      } else {
+        alert('Sai mật khẩu Chủ Sở Hữu! Chỉ Chủ Sở Hữu mới có quyền truy cập khu vực này.');
+      }
     }
+
     function showOwnerView() {
       document.getElementById('ownerAuthGate').classList.add('hidden');
       document.getElementById('ownerControlContent').classList.remove('hidden');
       document.getElementById('firebaseUrlInput').value = sysData.firebaseUrl || '';
       renderSubTable();
     }
+
     function switchOwnerTab(t) {
       document.querySelectorAll('.own-tab').forEach(b => b.className = 'own-tab py-3 px-4 text-zinc-400');
       document.getElementById('own-tab-' + t).className = 'own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400';
@@ -729,36 +815,63 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     }
 
     async function createSubAccountByOwner() {
+      if (!isOwnerActive()) return alert('Không có quyền Chủ Sở Hữu!');
       const name = document.getElementById('newSubName').value.trim();
+      const phone = document.getElementById('newSubPhone').value.trim() || 'Chưa cập nhật';
       const email = document.getElementById('newSubEmail').value.trim().toLowerCase();
       const password = document.getElementById('newSubPass').value.trim() || '123456';
       const yrs = parseFloat(document.getElementById('newSubDuration').value);
-      if (!name || !email) return alert('Nhập tên và email!');
+      if (!name || !email) return alert('Nhập tên và email khách hàng!');
       const exp = new Date(); exp.setDate(exp.getDate() + Math.round(yrs * 365));
-      sysData.subAccounts.unshift({ id: 'SUB-' + Math.floor(100 + Math.random()*900), name, email, password, status: 'active', expiresAt: exp.toISOString(), permissions: { autoEdit: true, export4k: true } });
-      document.getElementById('newSubName').value = ''; document.getElementById('newSubEmail').value = '';
-      await saveDb(true); renderSubTable();
+      sysData.subAccounts.unshift({
+        id: 'SUB-' + Math.floor(100 + Math.random() * 900),
+        name,
+        phone,
+        email,
+        password,
+        plan: yrs >= 1 ? `Gói ${yrs} Năm` : 'Dùng thử 30 ngày',
+        status: 'active',
+        expiresAt: exp.toISOString(),
+        permissions: { autoEdit: true, export4k: true }
+      });
+      document.getElementById('newSubName').value = '';
+      document.getElementById('newSubPhone').value = '';
+      document.getElementById('newSubEmail').value = '';
+      await saveDb(true);
+      renderSubTable();
     }
 
-    async function toggleSubPerm(id, k) { const s = sysData.subAccounts.find(u => u.id === id); if (s) { s.permissions[k] = !s.permissions[k]; await saveDb(true); } }
-    async function toggleSubStatus(id) { const s = sysData.subAccounts.find(u => u.id === id); if (s) { s.status = s.status === 'active' ? 'locked' : 'active'; await saveDb(true); renderSubTable(); } }
-    async function renewSubYear(id) { const s = sysData.subAccounts.find(u => u.id === id); if (s) { const d = new Date(s.expiresAt) > new Date() ? new Date(s.expiresAt) : new Date(); d.setFullYear(d.getFullYear()+1); s.expiresAt = d.toISOString(); s.status = 'active'; await saveDb(true); renderSubTable(); } }
-    async function deleteSub(id) { if (confirm('Xóa tài khoản này?')) { sysData.subAccounts = sysData.subAccounts.filter(u => u.id !== id); await saveDb(true); renderSubTable(); } }
+    async function toggleSubPerm(id, k) { if (!isOwnerActive()) return; const s = sysData.subAccounts.find(u => u.id === id); if (s) { s.permissions[k] = !s.permissions[k]; await saveDb(true); } }
+    async function toggleSubStatus(id) { if (!isOwnerActive()) return; const s = sysData.subAccounts.find(u => u.id === id); if (s) { s.status = s.status === 'active' ? 'locked' : 'active'; await saveDb(true); renderSubTable(); } }
+    async function renewSubYear(id) { if (!isOwnerActive()) return; const s = sysData.subAccounts.find(u => u.id === id); if (s) { const d = new Date(s.expiresAt) > new Date() ? new Date(s.expiresAt) : new Date(); d.setFullYear(d.getFullYear()+1); s.expiresAt = d.toISOString(); s.status = 'active'; await saveDb(true); renderSubTable(); } }
+    async function deleteSub(id) { if (!isOwnerActive()) return; if (confirm('Xóa khách hàng này?')) { sysData.subAccounts = sysData.subAccounts.filter(u => u.id !== id); await saveDb(true); renderSubTable(); } }
+
+    function copyPhone(phone) {
+      navigator.clipboard.writeText(phone);
+      alert('Đã sao chép SĐT khách hàng: ' + phone);
+    }
 
     function renderSubTable() {
       const tb = document.getElementById('subAccountsTableBody');
       document.getElementById('subAccountCount').innerText = sysData.subAccounts.length;
       tb.innerHTML = sysData.subAccounts.map(s => `
         <tr>
-          <td class="p-2.5"><div class="font-bold text-white">${s.name}</div><div class="text-[10px] text-zinc-400">${s.email}</div></td>
+          <td class="p-2.5">
+            <div class="font-bold text-white">${s.name}</div>
+            <div class="text-[10px] text-zinc-400">${s.email} • <span class="text-indigo-400">${s.plan || 'Gói 1 Năm'}</span></div>
+          </td>
+          <td class="p-2.5">
+            <span class="font-mono text-emerald-400 font-semibold">${s.phone || 'Chưa có'}</span>
+            ${s.phone ? `<button type="button" onclick="copyPhone('${s.phone}')" class="ml-1 text-[10px] text-zinc-400 hover:text-white" title="Copy SĐT"><i class="fa-solid fa-copy"></i></button>` : ''}
+          </td>
           <td class="p-2.5 font-mono text-zinc-300">${s.password}</td>
           <td class="p-2.5 text-center"><input type="checkbox" ${s.permissions.autoEdit?'checked':''} onchange="toggleSubPerm('${s.id}','autoEdit')" /></td>
           <td class="p-2.5 text-center"><input type="checkbox" ${s.permissions.export4k?'checked':''} onchange="toggleSubPerm('${s.id}','export4k')" /></td>
           <td class="p-2.5">${new Date(s.expiresAt).toLocaleDateString('vi-VN')}</td>
-          <td class="p-2.5">${s.status==='active'?'<span class="text-emerald-400 font-bold">Hoạt động</span>':'<span class="text-amber-400 font-bold">Khóa/Chờ</span>'}</td>
-          <td class="p-2.5 text-right space-x-1">
+          <td class="p-2.5">${s.status==='active'?'<span class="text-emerald-400 font-bold">Hoạt động</span>':'<span class="text-amber-400 font-bold">Chờ duyệt / Khóa</span>'}</td>
+          <td class="p-2.5 text-right space-x-1 whitespace-nowrap">
             <button type="button" onclick="renewSubYear('${s.id}')" class="px-2 py-1 rounded bg-emerald-600/20 text-emerald-300">+1 Năm</button>
-            <button type="button" onclick="toggleSubStatus('${s.id}')" class="px-2 py-1 rounded bg-amber-500/20 text-amber-300">${s.status==='active'?'Khóa':'Mở'}</button>
+            <button type="button" onclick="toggleSubStatus('${s.id}')" class="px-2 py-1 rounded bg-amber-500/20 text-amber-300">${s.status==='active'?'Khóa':'Duyệt/Mở'}</button>
             <button type="button" onclick="deleteSub('${s.id}')" class="px-2 py-1 rounded bg-zinc-800 text-red-400">Xóa</button>
           </td>
         </tr>
@@ -766,11 +879,13 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
     }
 
     function exportBackupJson() {
+      if (!isOwnerActive()) return;
       const a = document.createElement('a');
       a.href = URL.createObjectURL(new Blob([JSON.stringify(sysData, null, 2)], { type: 'application/json' }));
       a.download = `AutoCut_Backup_${Date.now()}.json`; a.click();
     }
     function importBackupJson(e) {
+      if (!isOwnerActive()) return;
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader();
       r.onload = async ev => {
@@ -781,14 +896,27 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       };
       r.readAsText(f);
     }
-    async function saveFirebaseConfig() { sysData.firebaseUrl = cleanFbUrl(document.getElementById('firebaseUrlInput').value); const ok = await saveDb(true); alert(ok ? 'Kết nối Cloud thành công!' : 'Lỗi kết nối Cloud!'); }
-    async function updateOwnerMasterPass() { const p = document.getElementById('newOwnerMasterPass').value.trim(); if (p.length >= 4) { sysData.ownerMasterPass = p; await saveDb(true); alert('Đã đổi mã Master!'); } }
+    async function saveFirebaseConfig() {
+      if (!isOwnerActive()) return;
+      sysData.firebaseUrl = cleanFbUrl(document.getElementById('firebaseUrlInput').value);
+      const ok = await saveDb(true);
+      alert(ok ? 'Kết nối Cloud thành công!' : 'Lỗi kết nối Cloud!');
+    }
+    async function updateOwnerMasterPass() {
+      if (!isOwnerActive()) return;
+      const p = document.getElementById('newOwnerMasterPass').value.trim();
+      if (p.length >= 4) {
+        sysData.ownerMasterPass = p;
+        sysData.currentSession.verifiedKey = p;
+        await saveDb(true);
+        alert('Đã đổi mật khẩu Chủ Sở Hữu thành: ' + p);
+      }
+    }
 
     // AI SETTINGS MODAL
     function openAiConfigModal() {
       document.getElementById('aiProviderSelect').value = sysData.aiProvider || 'builtin';
       document.getElementById('geminiApiKeyInput').value = sysData.geminiApiKey || '';
-      document.getElementById('apiKeyTestResult').classList.add('hidden');
       openModal('aiConfigModal');
     }
     function saveAiSettings() {
@@ -796,31 +924,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       sysData.geminiApiKey = document.getElementById('geminiApiKeyInput').value.trim();
       saveDb(isOwnerActive());
       closeModal('aiConfigModal');
-    }
-    async function testExternalApiKey() {
-      const prov = document.getElementById('aiProviderSelect').value;
-      const k = document.getElementById('geminiApiKeyInput').value.trim();
-      const box = document.getElementById('apiKeyTestResult');
-      box.classList.remove('hidden');
-      if (prov === 'builtin' || !k) {
-        box.className = 'text-[11px] p-2 rounded-lg border bg-emerald-950/50 border-emerald-500/40 text-emerald-300';
-        box.innerText = 'AI Tích Hợp Sẵn hoạt động 100% không cần API Key!';
-        return;
-      }
-      box.className = 'text-[11px] p-2 rounded-lg border bg-zinc-950 border-zinc-700 text-zinc-300';
-      box.innerText = 'Đang kiểm tra kết nối...';
-      try {
-        if (prov === 'gemini') {
-          const res = await fetchTimed(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${k}`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: 'Hi' }] }] })
-          }, 6000);
-          box.innerText = res.ok ? 'Kết nối Gemini API thành công!' : 'Key Gemini không hợp lệ (Hệ thống sẽ tự dùng AI tích hợp sẵn).';
-        } else {
-          const endpoint = k.startsWith('gsk_') ? 'https://api.groq.com/openai/v1/models' : 'https://api.openai.com/v1/models';
-          const res = await fetchTimed(endpoint, { headers: { 'Authorization': `Bearer ${k}` } }, 6000);
-          box.innerText = res.ok ? 'Kết nối API Key thành công!' : 'Key không hợp lệ (Hệ thống sẽ tự dùng AI tích hợp sẵn).';
-        }
-      } catch(e) { box.innerText = 'Không thể kết nối mạng tới API.'; }
     }
 
     // =========================================================================
@@ -959,7 +1062,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       if (v) { document.getElementById('aiPromptInput').value = v; document.getElementById('quickChatCommand').value = ''; runSmartAutoEdit(); }
     }
 
-    // Client-side Pixel Luminance & Color Analyzer (Works 100% Offline / Zero-Key)
     function analyzeCurrentFramePixels() {
       try {
         const tc = document.createElement('canvas'); tc.width = 64; tc.height = 64;
@@ -967,17 +1069,10 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
         drawFrame(tctx, 64, 64, true);
         const data = tctx.getImageData(0, 0, 64, 64).data;
         let rSum = 0, gSum = 0, bSum = 0, count = data.length / 4;
-        for (let i = 0; i < data.length; i += 4) {
-          rSum += data[i]; gSum += data[i+1]; bSum += data[i+2];
-        }
-        const avgR = rSum / count, avgG = gSum / count, avgB = bSum / count;
-        const luma = (0.299 * avgR + 0.587 * avgG + 0.114 * avgB);
-        const isDark = luma < 85;
-        const isWarm = avgR > avgB + 18;
-        return { luma: Math.round(luma), isDark, isWarm };
-      } catch(e) {
-        return { luma: 120, isDark: false, isWarm: false };
-      }
+        for (let i = 0; i < data.length; i += 4) { rSum += data[i]; gSum += data[i+1]; bSum += data[i+2]; }
+        const luma = (0.299 * (rSum / count) + 0.587 * (gSum / count) + 0.114 * (bSum / count));
+        return { luma: Math.round(luma), isDark: luma < 85 };
+      } catch(e) { return { luma: 120, isDark: false }; }
     }
 
     async function runSmartAutoEdit() {
@@ -999,7 +1094,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
       const metrics = analyzeCurrentFramePixels();
       const tpl = TEMPLATES[lastTpl] || TEMPLATES.jewelry;
 
-      // Smart Keyword + Pixel Auto-Adjustment
       setAspectRatio(lower.includes('16:9') || lower.includes('ngang') ? '16:9' : tpl.ratio);
       applyColorPreset(tpl.preset);
 
@@ -1012,7 +1106,6 @@ CHUẨN XU HƯỚNG 2026 🔥</textarea>
         applyColorPreset('silver');
       }
 
-      // Generate smart Vietnamese subtitle lines from user prompt
       const cleanWords = prompt.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
       if (cleanWords.length > 5 && !TEMPLATES[lastTpl].prompt.includes(prompt)) {
         const parts = prompt.split(/[,.!?;]+/).map(s => s.trim().toUpperCase()).filter(s => s.length > 2);
