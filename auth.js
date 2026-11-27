@@ -1,669 +1,799 @@
 /**
- * AutoCut Studio AI — CORE 1: Authentication, Strict Owner Access & Cloud Sync
- * Freeze this module once verified. Do NOT mix video editor or AI logic here.
+ * AutoCut Studio AI — Core Auth, Firebase Cloud Sync, AI Proxy & VietQR Billing (v2.0)
  */
-(function (window) {
+(function () {
   'use strict';
 
-  const OWNER_DEFAULT_PASS = 'NGOQUOC-28-12';
-  const MASTER_KEY = 'AUTOCUT_MASTER_PERSISTENT_DB';
-  const LEGACY_KEYS = [
-    'autocut_enterprise_saas_v18', 'autocut_enterprise_saas_v17',
-    'autocut_enterprise_saas_v16', 'autocut_enterprise_saas_v15',
-    'autocut_enterprise_saas_v14', 'autocut_enterprise_saas_v13',
-    'autocut_enterprise_saas_v12', 'autocut_enterprise_saas_v11',
-    'autocut_enterprise_saas_v10', 'autocut_enterprise_saas_v9',
-    'autocut_enterprise_saas_v8', 'autocut_enterprise_saas_v7'
+  // ================= 1. CẤU HÌNH MẶC ĐỊNH GẮN CỨNG (HARDCODE) =================
+  const DEFAULTS = {
+    FIREBASE_URL: 'https://autocut-studio-30130-default-rtdb.asia-southeast1.firebasedatabase.app',
+    PROXY_URL: 'https://autocut-ai-proxy.tommynguyen1557.workers.dev',
+    WEB_URL: 'https://tommynguyen1557-collab.github.io/editvideo-nq-28/',
+    OWNER_PASS: 'NGOQUOC-28-12',
+    DB_ROOT: 'autocut_saas'
+  };
+
+  const PACKAGES = {
+    '1M': { id: '1M', name: 'Gói 1 Tháng', price: 139000, days: 30, badge: 'Cơ bản' },
+    '6M': { id: '6M', name: 'Gói 6 Tháng', price: 699000, days: 180, badge: 'Tiết kiệm 16%' },
+    '1Y': { id: '1Y', name: 'Gói 1 Năm', price: 1190000, days: 365, badge: 'Phổ biến nhất' }
+  };
+
+  const BANKS = [
+    { code: 'MB', name: 'MB Bank (Quân Đội)' },
+    { code: 'VCB', name: 'Vietcombank' },
+    { code: 'TCB', name: 'Techcombank' },
+    { code: 'BIDV', name: 'BIDV' },
+    { code: 'CTG', name: 'VietinBank' },
+    { code: 'ACB', name: 'ACB (Á Châu)' },
+    { code: 'VPB', name: 'VPBank' },
+    { code: 'TPB', name: 'TPBank' },
+    { code: 'VIB', name: 'VIB' },
+    { code: 'STB', name: 'Sacombank' },
+    { code: 'HDB', name: 'HDBank' },
+    { code: 'OCB', name: 'OCB' },
+    { code: 'MSB', name: 'MSB' }
   ];
 
-  const memStore = {};
-  const getStore = (k) => { try { return localStorage.getItem(k); } catch { return memStore[k] || null; } };
-  const setStore = (k, v) => { try { localStorage.setItem(k, v); } catch { memStore[k] = v; } };
+  const STORAGE_KEYS = {
+    FB_URL: 'autocut_firebase_url',
+    AI_CONFIG: 'autocut_ai_config',
+    OWNER_SESSION: 'autocut_owner_unlocked',
+    USER_SESSION: 'autocut_current_user',
+    LOCAL_USERS: 'autocut_users_cache',
+    PAYMENT_CFG: 'autocut_payment_config',
+    OWNER_PASS: 'autocut_owner_pass_cache',
+    WEB_URL: 'autocut_web_url_cache'
+  };
 
-  function escapeHtml(str) {
-    return String(str || '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-
-  function cleanFbUrl(u) {
-    if (!u) return '';
-    let url = u.trim().replace(/\/autocut_saas\.json.*$/i, '').replace(/\/+$/, '');
-    if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-    return url;
-  }
-
-  async function fetchTimed(url, opts = {}, ms = 4000) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ms);
-    try {
-      const res = await fetch(url, { ...opts, signal: controller.signal });
-      clearTimeout(timer);
-      return res;
-    } catch (err) {
-      clearTimeout(timer);
-      throw err;
-    }
-  }
-
-  function initDatabase() {
-    let base = null;
-    try {
-      const raw = getStore(MASTER_KEY);
-      if (raw) base = JSON.parse(raw);
-    } catch {}
-
-    if (!base) {
-      const exp = new Date();
-      exp.setFullYear(exp.getFullYear() + 1);
-      base = {
-        ownerEmail: 'admin@autocut.vn',
-        ownerMasterPass: OWNER_DEFAULT_PASS,
-        githubUrl: 'https://tommynguyen1557-collab.github.io/editvideo-nq-28/',
-        firebaseUrl: '',
-        aiProvider: 'builtin',
-        aiProxyUrl: '',
-        geminiApiKey: '',
-        currentSession: null,
-        subAccounts: [
-          {
-            id: 'SUB-01',
-            name: 'Studio Bạc Mẫu',
-            phone: '0900000000',
-            email: 'silver@studio.vn',
-            password: '123',
-            plan: 'Pro Creator 1 Năm (1.490.000đ)',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            expiresAt: exp.toISOString(),
-            permissions: { autoEdit: true, export4k: true }
-          }
-        ]
-      };
-    }
-
-    // Enforce owner password NGOQUOC-28-12 over any old defaults
-    if (!base.ownerMasterPass || base.ownerMasterPass === 'OWNER-MASTER-2026') {
-      base.ownerMasterPass = OWNER_DEFAULT_PASS;
-    }
-    // Invalidate unverified owner sessions
-    if (base.currentSession && base.currentSession.role === 'owner' && base.currentSession.verifiedKey !== base.ownerMasterPass) {
-      base.currentSession = null;
-    }
-    if (!base.aiProvider) base.aiProvider = 'builtin';
-    if (!Array.isArray(base.subAccounts)) base.subAccounts = [];
-
-    // Migrate accounts from any legacy version without duplicates
-    const emailSet = new Set(base.subAccounts.map((u) => (u.email || '').toLowerCase()));
-    LEGACY_KEYS.forEach((oldKey) => {
+  // ================= 2. KHỞI TẠO TRẠNG THÁI & ĐỒNG BỘ =================
+  const state = {
+    firebaseUrl: (localStorage.getItem(STORAGE_KEYS.FB_URL) || DEFAULTS.FIREBASE_URL).replace(/\/+$/, ''),
+    webUrl: localStorage.getItem(STORAGE_KEYS.WEB_URL) || DEFAULTS.WEB_URL,
+    ownerPass: localStorage.getItem(STORAGE_KEYS.OWNER_PASS) || DEFAULTS.OWNER_PASS,
+    isOwner: sessionStorage.getItem(STORAGE_KEYS.OWNER_SESSION) === '1',
+    cloudConnected: false,
+    aiConfig: (() => {
       try {
-        const oldRaw = getStore(oldKey);
-        if (!oldRaw) return;
-        const oldData = JSON.parse(oldRaw);
-        if (oldData.firebaseUrl && !base.firebaseUrl) base.firebaseUrl = oldData.firebaseUrl;
-        if (oldData.geminiApiKey && !base.geminiApiKey) base.geminiApiKey = oldData.geminiApiKey;
-        if (Array.isArray(oldData.subAccounts)) {
-          oldData.subAccounts.forEach((acc) => {
-            const em = (acc && acc.email || '').toLowerCase();
-            if (em && !emailSet.has(em)) {
-              emailSet.add(em);
-              base.subAccounts.push(acc);
-            }
-          });
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS.AI_CONFIG) || 'null');
+        if (saved && (saved.proxyUrl || saved.apiKey)) return saved;
+      } catch (_) {}
+      return { mode: 'proxy', proxyUrl: DEFAULTS.PROXY_URL, apiKey: '' };
+    })(),
+    payment: (() => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.PAYMENT_CFG) || 'null') || {
+          bankCode: 'MB',
+          accountNo: '',
+          accountName: ''
+        };
+      } catch (_) {
+        return { bankCode: 'MB', accountNo: '', accountName: '' };
+      }
+    })(),
+    users: (() => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.LOCAL_USERS) || '{}') || {};
+      } catch (_) {
+        return {};
+      }
+    })(),
+    currentUser: (() => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.USER_SESSION) || 'null');
+      } catch (_) {
+        return null;
+      }
+    })(),
+    selectedPkg: '6M'
+  };
+
+  // Lưu ngay cấu hình mặc định vào localStorage để các module khác luôn đọc được
+  function persistLocal() {
+    localStorage.setItem(STORAGE_KEYS.FB_URL, state.firebaseUrl);
+    localStorage.setItem(STORAGE_KEYS.AI_CONFIG, JSON.stringify(state.aiConfig));
+    localStorage.setItem('autocut_proxy_url', state.aiConfig.proxyUrl || DEFAULTS.PROXY_URL);
+    localStorage.setItem('autocut_ai_mode', state.aiConfig.mode || 'proxy');
+    localStorage.setItem(STORAGE_KEYS.PAYMENT_CFG, JSON.stringify(state.payment));
+    localStorage.setItem(STORAGE_KEYS.LOCAL_USERS, JSON.stringify(state.users));
+    if (state.currentUser) {
+      localStorage.setItem(STORAGE_KEYS.USER_SESSION, JSON.stringify(state.currentUser));
+    }
+  }
+  persistLocal();
+
+  function esc(str) {
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function formatVND(num) {
+    return Number(num || 0).toLocaleString('vi-VN') + 'đ';
+  }
+
+  function formatDate(ts) {
+    if (!ts) return 'Chưa kích hoạt';
+    const d = new Date(Number(ts));
+    if (isNaN(d.getTime())) return 'Chưa kích hoạt';
+    return d.toLocaleDateString('vi-VN');
+  }
+
+  function cleanPhone(raw) {
+    return String(raw || '').replace(/[^\d]/g, '');
+  }
+
+  // ================= 3. KẾT NỐI FIREBASE REST API =================
+  async function fbGet(path) {
+    if (!state.firebaseUrl) return null;
+    const res = await fetch(`${state.firebaseUrl}/${DEFAULTS.DB_ROOT}/${path}.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  async function fbPut(path, data) {
+    if (!state.firebaseUrl) return null;
+    const res = await fetch(`${state.firebaseUrl}/${DEFAULTS.DB_ROOT}/${path}.json`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  async function fbPatch(path, data) {
+    if (!state.firebaseUrl) return null;
+    const res = await fetch(`${state.firebaseUrl}/${DEFAULTS.DB_ROOT}/${path}.json`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  }
+
+  async function syncFromCloud() {
+    try {
+      const root = await fbGet('');
+      state.cloudConnected = true;
+
+      if (root && typeof root === 'object') {
+        if (root.config) {
+          if (root.config.ai && (root.config.ai.proxyUrl || root.config.ai.apiKey)) {
+            state.aiConfig = {
+              mode: root.config.ai.mode || 'proxy',
+              proxyUrl: (root.config.ai.proxyUrl || DEFAULTS.PROXY_URL).trim(),
+              apiKey: (root.config.ai.apiKey || '').trim()
+            };
+          }
+          if (root.config.payment) {
+            state.payment = {
+              bankCode: root.config.payment.bankCode || 'MB',
+              accountNo: root.config.payment.accountNo || '',
+              accountName: root.config.payment.accountName || ''
+            };
+          }
+          if (root.config.ownerPass) {
+            state.ownerPass = root.config.ownerPass;
+            localStorage.setItem(STORAGE_KEYS.OWNER_PASS, state.ownerPass);
+          }
+          if (root.config.webUrl) {
+            state.webUrl = root.config.webUrl;
+            localStorage.setItem(STORAGE_KEYS.WEB_URL, state.webUrl);
+          }
         }
-      } catch {}
+        if (root.users && typeof root.users === 'object') {
+          state.users = root.users;
+          if (state.currentUser && state.currentUser.phone && state.users[state.currentUser.phone]) {
+            state.currentUser = state.users[state.currentUser.phone];
+          }
+        }
+      } else {
+        // Khởi tạo nhánh mặc định trên Cloud nếu DB mới tinh
+        await fbPatch('config', {
+          ai: state.aiConfig,
+          payment: state.payment,
+          webUrl: state.webUrl,
+          updatedAt: Date.now()
+        });
+      }
+      persistLocal();
+    } catch (_) {
+      state.cloudConnected = false;
+    }
+    updateStatusIndicators();
+  }
+
+  // ================= 4. CẬP NHẬT TRẠNG THÁI GIAO DIỆN =================
+  function updateStatusIndicators() {
+    // Cập nhật text trạng thái dưới logo nếu tồn tại
+    const allElements = document.querySelectorAll('span, div, p, small');
+    allElements.forEach((el) => {
+      if (el.children.length === 0) {
+        const txt = (el.textContent || '').trim();
+        if (txt.startsWith('AI:')) {
+          el.textContent = state.aiConfig.mode === 'direct' && state.aiConfig.apiKey
+            ? 'AI: Gemini Direct ✓'
+            : 'AI: Proxy Server ✓';
+          el.style.color = '#4ade80';
+        } else if (txt.startsWith('Cloud:')) {
+          el.textContent = state.cloudConnected ? 'Cloud: Đã nối ✓' : 'Cloud: Cục bộ';
+          el.style.color = state.cloudConnected ? '#94a3b8' : '#fbbf24';
+        }
+      }
     });
 
-    setStore(MASTER_KEY, JSON.stringify(base));
-    return base;
+    // Hiển thị / ẩn huy hiệu CHỦ SỞ HỮU
+    const ownerBadges = document.querySelectorAll('[data-owner-badge], .owner-badge');
+    ownerBadges.forEach((b) => {
+      b.style.display = state.isOwner ? 'inline-flex' : 'none';
+    });
   }
 
-  let sysData = initDatabase();
-
-  function isOwner() {
-    return Boolean(
-      sysData.currentSession &&
-      sysData.currentSession.role === 'owner' &&
-      sysData.currentSession.verifiedKey === sysData.ownerMasterPass
-    );
-  }
-
-  function getPerms() {
-    if (isOwner()) {
-      return { role: 'owner', name: 'Chủ Sở Hữu', autoEdit: true, export4k: true, expiresAt: null };
-    }
-    if (sysData.currentSession && sysData.currentSession.role === 'sub') {
-      const sub = sysData.subAccounts.find((u) => u.email.toLowerCase() === sysData.currentSession.email.toLowerCase());
-      if (sub && sub.status === 'active' && new Date(sub.expiresAt) > new Date()) {
-        return {
-          role: 'sub',
-          name: sub.name,
-          autoEdit: Boolean(sub.permissions && sub.permissions.autoEdit),
-          export4k: Boolean(sub.permissions && sub.permissions.export4k),
-          expiresAt: sub.expiresAt
-        };
+  // ================= 5. CSS & MODAL HỆ THỐNG =================
+  function injectStyles() {
+    if (document.getElementById('autocut-auth-v2-style')) return;
+    const style = document.createElement('style');
+    style.id = 'autocut-auth-v2-style';
+    style.textContent = `
+      .ac-modal-backdrop {
+        position: fixed; inset: 0; background: rgba(5, 8, 18, 0.82);
+        backdrop-filter: blur(6px); z-index: 99999;
+        display: flex; align-items: center; justify-content: center; padding: 16px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
-    }
-    return { role: 'guest', name: 'Khách Trải Nghiệm', autoEdit: true, export4k: false, expiresAt: null };
+      .ac-modal-box {
+        background: #111625; border: 1px solid #26314d; border-radius: 16px;
+        width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto;
+        color: #f1f5f9; box-shadow: 0 24px 60px rgba(0,0,0,0.65); padding: 24px;
+      }
+      .ac-modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid #1e293b; padding-bottom: 14px; margin-bottom: 18px;
+      }
+      .ac-modal-title { font-size: 17px; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; }
+      .ac-close-btn {
+        background: #1e293b; border: none; color: #94a3b8; width: 32px; height: 32px;
+        border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700;
+      }
+      .ac-close-btn:hover { background: #334155; color: #fff; }
+      .ac-tabs { display: flex; gap: 8px; border-bottom: 1px solid #1e293b; margin-bottom: 18px; }
+      .ac-tab {
+        padding: 10px 16px; background: transparent; border: none; border-bottom: 2px solid transparent;
+        color: #94a3b8; font-weight: 600; font-size: 13px; cursor: pointer;
+      }
+      .ac-tab.active { color: #fbbf24; border-bottom-color: #fbbf24; }
+      .ac-card {
+        background: #0b0f19; border: 1px solid #1e293b; border-radius: 12px;
+        padding: 16px; margin-bottom: 14px;
+      }
+      .ac-label { display: block; font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 6px; }
+      .ac-input, .ac-select {
+        width: 100%; box-sizing: border-box; background: #131a2b; border: 1px solid #2b3856;
+        color: #f8fafc; padding: 10px 12px; border-radius: 8px; font-size: 13px; outline: none;
+      }
+      .ac-input:focus, .ac-select:focus { border-color: #6366f1; }
+      .ac-row { display: flex; gap: 10px; align-items: center; }
+      .ac-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .ac-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      @media (max-width: 640px) { .ac-grid-2, .ac-grid-3 { grid-template-columns: 1fr; } }
+      .ac-btn {
+        padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; font-size: 13px;
+        cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+      }
+      .ac-btn:hover { opacity: 0.9; }
+      .ac-btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+      .ac-btn-success { background: #10b981; color: #052e16; }
+      .ac-btn-warn { background: #f59e0b; color: #1c1917; }
+      .ac-btn-danger { background: #ef4444; color: #fff; }
+      .ac-btn-ghost { background: #1e293b; color: #cbd5e1; }
+      .ac-pkg-card {
+        background: #0b0f19; border: 2px solid #1e293b; border-radius: 12px;
+        padding: 14px; cursor: pointer; text-align: center; transition: all 0.15s;
+      }
+      .ac-pkg-card.selected { border-color: #8b5cf6; background: #171c33; }
+      .ac-qr-box {
+        display: flex; gap: 16px; align-items: center; background: #0f172a;
+        border: 1px solid #334155; border-radius: 12px; padding: 14px; margin-top: 14px;
+      }
+      @media (max-width: 600px) { .ac-qr-box { flex-direction: column; text-align: center; } }
+      .ac-qr-img {
+        width: 170px; height: 170px; border-radius: 10px; background: #fff; padding: 6px; object-fit: contain;
+      }
+      .ac-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      .ac-table th, .ac-table td {
+        padding: 9px 8px; border-bottom: 1px solid #1e293b; text-align: left;
+      }
+      .ac-table th { color: #94a3b8; font-weight: 600; }
+    `;
+    document.head.appendChild(style);
   }
 
-  function getAiConfig() {
-    return {
-      provider: sysData.aiProvider || 'builtin',
-      proxyUrl: sysData.aiProxyUrl || '',
-      apiKey: sysData.geminiApiKey || ''
+  function closeModal() {
+    const old = document.getElementById('ac-active-modal');
+    if (old) old.remove();
+  }
+
+  // ================= 6. MODAL CÀI ĐẶT AI =================
+  function openAISettingsModal() {
+    injectStyles();
+    closeModal();
+    const wrap = document.createElement('div');
+    wrap.id = 'ac-active-modal';
+    wrap.className = 'ac-modal-backdrop';
+    wrap.innerHTML = `
+      <div class="ac-modal-box" style="max-width:520px;">
+        <div class="ac-modal-header">
+          <div class="ac-modal-title">⚡ Cài Đặt AI Đa Phương Thức</div>
+          <button class="ac-close-btn" id="ac-close-x">✕</button>
+        </div>
+        <div class="ac-card">
+          <label class="ac-label">Chế độ kết nối AI</label>
+          <select class="ac-select" id="ac-ai-mode">
+            <option value="proxy" ${state.aiConfig.mode !== 'direct' ? 'selected' : ''}>AI Thật qua Proxy Worker (Khách không cần nhập Key)</option>
+            <option value="direct" ${state.aiConfig.mode === 'direct' ? 'selected' : ''}>Gọi trực tiếp bằng Gemini API Key cá nhân</option>
+          </select>
+        </div>
+        <div class="ac-card">
+          <label class="ac-label">Proxy URL (Cloudflare Worker)</label>
+          <input class="ac-input" id="ac-ai-proxy" value="${esc(state.aiConfig.proxyUrl || DEFAULTS.PROXY_URL)}" placeholder="https://autocut-ai-proxy.tommynguyen1557.workers.dev" />
+        </div>
+        <div class="ac-card">
+          <label class="ac-label">Gemini API Key (Để trống nếu dùng Proxy Worker)</label>
+          <input class="ac-input" type="password" id="ac-ai-key" value="${esc(state.aiConfig.apiKey || '')}" placeholder="AIzaSy... hoặc AQ..." />
+        </div>
+        <div class="ac-row" style="justify-content:flex-end;">
+          <button class="ac-btn ac-btn-ghost" id="ac-ai-cancel">Hủy</button>
+          <button class="ac-btn ac-btn-primary" id="ac-ai-save">Lưu Cấu Hình AI</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    document.getElementById('ac-close-x').onclick = closeModal;
+    document.getElementById('ac-ai-cancel').onclick = closeModal;
+    document.getElementById('ac-ai-save').onclick = async () => {
+      const mode = document.getElementById('ac-ai-mode').value;
+      const proxyUrl = (document.getElementById('ac-ai-proxy').value || DEFAULTS.PROXY_URL).trim().replace(/\/+$/, '');
+      const apiKey = (document.getElementById('ac-ai-key').value || '').trim();
+
+      state.aiConfig = { mode, proxyUrl, apiKey };
+      persistLocal();
+      updateStatusIndicators();
+
+      if (state.isOwner && state.cloudConnected) {
+        try {
+          await fbPatch('config', { ai: state.aiConfig, updatedAt: Date.now() });
+          alert('Đã lưu và đồng bộ cấu hình AI lên Firebase Cloud cho toàn bộ thiết bị ✓');
+        } catch (e) {
+          alert('Đã lưu trên máy này (lỗi đồng bộ Cloud: ' + e.message + ')');
+        }
+      } else {
+        alert('Đã lưu cấu hình AI ✓');
+      }
+      closeModal();
     };
   }
 
-  async function saveDb(pushCloud = true) {
-    setStore(MASTER_KEY, JSON.stringify(sysData));
-    refreshUI();
-    if (pushCloud && sysData.firebaseUrl) {
-      try {
-        const res = await fetchTimed(`${cleanFbUrl(sysData.firebaseUrl)}/autocut_saas.json`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ownerMasterPass: sysData.ownerMasterPass,
-            githubUrl: sysData.githubUrl,
-            aiProvider: sysData.aiProvider,
-            aiProxyUrl: sysData.aiProxyUrl,
-            geminiApiKey: sysData.geminiApiKey,
-            subAccounts: sysData.subAccounts
-          })
-        });
-        return res.ok;
-      } catch {
-        return false;
-      }
-    }
-    return true;
-  }
+  // ================= 7. MODAL ĐĂNG KÝ / MUA GÓI & VIETQR =================
+  function openAuthModal() {
+    injectStyles();
+    closeModal();
+    const wrap = document.createElement('div');
+    wrap.id = 'ac-active-modal';
+    wrap.className = 'ac-modal-backdrop';
 
-  async function syncFromCloud(showAlert = false) {
-    if (!sysData.firebaseUrl) return false;
-    try {
-      const res = await fetchTimed(`${cleanFbUrl(sysData.firebaseUrl)}/autocut_saas.json`);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const remote = await res.json();
-      if (!remote) {
-        await saveDb(true);
-      } else {
-        if (Array.isArray(remote.subAccounts)) {
-          const map = new Map();
-          sysData.subAccounts.forEach((u) => map.set(u.email.toLowerCase(), u));
-          remote.subAccounts.forEach((u) => map.set(u.email.toLowerCase(), u));
-          sysData.subAccounts = Array.from(map.values());
-        }
-        if (remote.githubUrl) sysData.githubUrl = remote.githubUrl;
-        if (remote.aiProvider) sysData.aiProvider = remote.aiProvider;
-        if (remote.aiProxyUrl) sysData.aiProxyUrl = remote.aiProxyUrl;
-        if (remote.geminiApiKey) sysData.geminiApiKey = remote.geminiApiKey;
-        if (remote.ownerMasterPass && remote.ownerMasterPass !== 'OWNER-MASTER-2026') {
-          sysData.ownerMasterPass = remote.ownerMasterPass;
-        }
-        setStore(MASTER_KEY, JSON.stringify(sysData));
-        refreshUI();
-        if (isOwner()) renderSubTable();
-      }
-      if (showAlert) alert('Đồng bộ thành công với Firebase Cloud!');
-      return true;
-    } catch (err) {
-      if (showAlert) alert('Lỗi kết nối Firebase: ' + err.message + '. Hãy kiểm tra URL và bật Test Mode!');
-      return false;
-    }
-  }
+    const curPhone = state.currentUser ? state.currentUser.phone : '';
+    const curName = state.currentUser ? state.currentUser.name : '';
 
-  function refreshUI() {
-    const p = getPerms();
-    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    wrap.innerHTML = `
+      <div class="ac-modal-box" style="max-width:660px;">
+        <div class="ac-modal-header">
+          <div class="ac-modal-title">💎 Đăng Ký Tài Khoản & Nâng Cấp Gói VIP</div>
+          <button class="ac-close-btn" id="ac-close-x">✕</button>
+        </div>
 
-    setText('headerUserName', p.name);
-    setText('userAvatarBadge', p.name.charAt(0).toUpperCase());
-    setText('cloudStatusDot', sysData.firebaseUrl ? 'Cloud: Đã nối ✓' : 'Cloud: Local');
+        ${state.currentUser ? `
+          <div class="ac-card" style="border-color:#10b981;">
+            <div style="font-size:13px; color:#4ade80; font-weight:700;">
+              ✓ Đang đăng nhập: ${esc(state.currentUser.name)} (${esc(state.currentUser.phone)})
+            </div>
+            <div style="font-size:12px; color:#cbd5e1; margin-top:4px;">
+              Gói hiện tại: <b>${esc(state.currentUser.packageName || 'Dùng thử')}</b> • Hạn dùng: <b>${formatDate(state.currentUser.expiresAt)}</b>
+            </div>
+          </div>
+        ` : ''}
 
-    const aiLabel = sysData.aiProvider === 'proxy' && sysData.aiProxyUrl
-      ? 'AI: Proxy Server ✓'
-      : sysData.aiProvider === 'gemini' && sysData.geminiApiKey
-        ? 'AI: Gemini API ✓'
-        : 'AI: Tích hợp sẵn';
-    setText('aiEngineStatusDot', aiLabel);
+        <div class="ac-grid-2" style="margin-bottom:12px;">
+          <div>
+            <label class="ac-label">Họ và tên khách hàng *</label>
+            <input class="ac-input" id="ac-reg-name" value="${esc(curName)}" placeholder="Ví dụ: Nguyễn Văn A" />
+          </div>
+          <div>
+            <label class="ac-label">Số điện thoại / Zalo * (Dùng để kích hoạt)</label>
+            <input class="ac-input" id="ac-reg-phone" value="${esc(curPhone)}" placeholder="Ví dụ: 0912345678" />
+          </div>
+        </div>
 
-    const badge = document.getElementById('headerRoleBadge');
-    const summary = document.getElementById('permissionSummaryText');
-    const authBtn = document.getElementById('authBtnLabel');
+        <label class="ac-label">Chọn gói sử dụng AutoCut Studio AI</label>
+        <div class="ac-grid-3" id="ac-pkg-grid">
+          ${Object.values(PACKAGES).map((p) => `
+            <div class="ac-pkg-card ${state.selectedPkg === p.id ? 'selected' : ''}" data-pkg="${p.id}">
+              <div style="font-size:11px; color:#a78bfa; font-weight:700;">${esc(p.badge)}</div>
+              <div style="font-size:15px; font-weight:700; margin:4px 0;">${esc(p.name)}</div>
+              <div style="font-size:18px; font-weight:800; color:#fbbf24;">${formatVND(p.price)}</div>
+              <div style="font-size:11px; color:#94a3b8; margin-top:4px;">${p.days} ngày sử dụng</div>
+            </div>
+          `).join('')}
+        </div>
 
-    if (p.role === 'owner') {
-      if (badge) {
-        badge.innerText = 'CHỦ SỞ HỮU';
-        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/40';
-      }
-      setText('headerUserExpiry', 'Toàn quyền quản trị');
-      if (summary) summary.innerHTML = 'Quyền Chủ Sở Hữu: <b>Mở khóa 100% & Xuất 4K</b>';
-      if (authBtn) authBtn.innerText = 'Tài Khoản Owner';
-    } else if (p.role === 'sub') {
-      if (badge) {
-        badge.innerText = 'TÀI KHOẢN CON';
-        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
-      }
-      setText('headerUserExpiry', 'Hết hạn: ' + new Date(p.expiresAt).toLocaleDateString('vi-VN'));
-      if (summary) summary.innerText = `Quyền: AI (${p.autoEdit ? '✓' : '✕'}) • 2K/4K (${p.export4k ? '✓' : '✕'})`;
-      if (authBtn) authBtn.innerText = 'Đổi Tài Khoản';
-    } else {
-      if (badge) {
-        badge.innerText = 'KHÁCH';
-        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300';
-      }
-      setText('headerUserExpiry', 'Chưa đăng nhập');
-      if (summary) summary.innerText = 'Chế độ Khách: Xuất tối đa 1080p.';
-      if (authBtn) authBtn.innerText = 'Đăng Nhập';
-    }
-  }
+        <div id="ac-vietqr-container"></div>
 
-  // Modal helpers
-  function openModal(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('active');
-  }
-  function closeModal(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove('active');
-  }
+        <div class="ac-row" style="justify-content:flex-end; margin-top:16px;">
+          <button class="ac-btn ac-btn-ghost" id="ac-reg-cancel">Đóng</button>
+          <button class="ac-btn ac-btn-primary" id="ac-reg-submit">Xác Nhận Đăng Ký & Gửi Duyệt</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(wrap);
 
-  // Auth Flows
-  function openAuthModal(tab = 'login') {
-    openModal('authModal');
-    switchAuthTab(tab);
-    syncFromCloud(false);
-  }
+    function renderVietQR() {
+      const container = document.getElementById('ac-vietqr-container');
+      const pkg = PACKAGES[state.selectedPkg] || PACKAGES['6M'];
+      const phone = cleanPhone(document.getElementById('ac-reg-phone').value) || 'SDT_KHACH';
+      const memo = `AUTOCUT ${phone} ${pkg.id}`;
+      const { bankCode, accountNo, accountName } = state.payment;
 
-  function switchAuthTab(tab) {
-    const isLogin = tab === 'login';
-    document.getElementById('loginFormPanel').classList.toggle('hidden', !isLogin);
-    document.getElementById('registerFormPanel').classList.toggle('hidden', isLogin);
-    document.getElementById('authSwitchLogin').className = isLogin ? 'py-2 rounded-lg bg-indigo-600 text-white' : 'py-2 rounded-lg text-zinc-400';
-    document.getElementById('authSwitchRegister').className = !isLogin ? 'py-2 rounded-lg bg-indigo-600 text-white' : 'py-2 rounded-lg text-zinc-400';
-  }
-
-  function selectPlanAndRegister(planName) {
-    closeModal('pricingModal');
-    openAuthModal('register');
-    const sel = document.getElementById('regPlanSelect');
-    if (sel) sel.value = planName;
-  }
-
-  async function handleLoginSubmit() {
-    const btn = document.getElementById('loginSubmitBtn');
-    const email = document.getElementById('loginEmailInput').value.trim().toLowerCase();
-    const pass = document.getElementById('loginPasswordInput').value.trim();
-
-    if (!email || !pass) return alert('Vui lòng nhập đầy đủ Email và Mật khẩu!');
-
-    if (btn) { btn.disabled = true; btn.innerText = 'Đang xác thực...'; }
-    try {
-      if (sysData.firebaseUrl) await syncFromCloud(false);
-
-      // Strict Owner Authentication
-      if ((email === sysData.ownerEmail || email === 'owner' || email === 'admin') && pass === sysData.ownerMasterPass) {
-        sysData.currentSession = { role: 'owner', email: sysData.ownerEmail, verifiedKey: sysData.ownerMasterPass };
-        await saveDb(false);
-        closeModal('authModal');
-        alert('Đăng nhập thành công với quyền Chủ Sở Hữu!');
+      if (!accountNo) {
+        container.innerHTML = `
+          <div class="ac-card" style="margin-top:14px; border-color:#f59e0b;">
+            <div style="font-size:13px; color:#fbbf24; font-weight:600;">
+              ℹ️ Chủ shop chưa cập nhật số tài khoản nhận VietQR tự động.
+            </div>
+            <div style="font-size:12px; color:#cbd5e1; margin-top:4px;">
+              Bạn vẫn có thể bấm <b>Xác Nhận Đăng Ký</b> bên dưới để lưu SĐT lên hệ thống và liên hệ Zalo Chủ Sở Hữu kích hoạt gói <b>${esc(pkg.name)} (${formatVND(pkg.price)})</b>.
+            </div>
+          </div>
+        `;
         return;
       }
 
-      const sub = sysData.subAccounts.find((u) => u.email.toLowerCase() === email && u.password === pass);
-      if (!sub) return alert('Sai Email hoặc Mật khẩu!');
-      if (sub.status === 'pending') return alert('Tài khoản đang chờ Chủ Sở Hữu duyệt kích hoạt!');
-      if (sub.status === 'locked') return alert('Tài khoản này đang bị Chủ Sở Hữu tạm khóa!');
-      if (new Date(sub.expiresAt) < new Date()) return alert('Tài khoản đã hết hạn sử dụng. Vui lòng liên hệ gia hạn!');
+      const qrUrl = `https://img.vietqr.io/image/${encodeURIComponent(bankCode)}-${encodeURIComponent(accountNo)}-compact2.png?amount=${pkg.price}&addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(accountName || '')}`;
 
-      sysData.currentSession = { role: 'sub', email: sub.email };
-      await saveDb(false);
-      closeModal('authModal');
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerText = 'Đăng Nhập Ngay'; }
-    }
-  }
-
-  async function handleRegisterSubmit() {
-    const name = document.getElementById('regNameInput').value.trim();
-    const phone = document.getElementById('regPhoneInput').value.trim();
-    const email = document.getElementById('regEmailInput').value.trim().toLowerCase();
-    const password = document.getElementById('regPasswordInput').value.trim();
-    const plan = document.getElementById('regPlanSelect').value;
-
-    if (!name || !phone || !email || !password) {
-      return alert('Vui lòng nhập đủ Họ tên, Số điện thoại/Zalo, Email và Mật khẩu!');
-    }
-    if (phone.replace(/\D/g, '').length < 9) {
-      return alert('Số điện thoại không hợp lệ (cần tối thiểu 9 chữ số)!');
-    }
-    if (sysData.firebaseUrl) await syncFromCloud(false);
-    if (sysData.subAccounts.some((u) => u.email.toLowerCase() === email) || email === sysData.ownerEmail) {
-      return alert('Email này đã được đăng ký!');
+      container.innerHTML = `
+        <div class="ac-qr-box">
+          <img class="ac-qr-img" src="${qrUrl}" alt="Mã QR Chuyển Khoản VietQR" />
+          <div style="flex:1; font-size:13px; line-height:1.6;">
+            <div style="color:#4ade80; font-weight:700; margin-bottom:4px;">Quét mã VietQR bằng App Ngân hàng bất kỳ</div>
+            <div>Ngân hàng: <b>${esc(bankCode)}</b></div>
+            <div>Số tài khoản: <b>${esc(accountNo)}</b>
+              <button type="button" class="ac-btn ac-btn-ghost" style="padding:2px 8px; font-size:11px; margin-left:6px;" onclick="navigator.clipboard.writeText('${esc(accountNo)}');alert('Đã copy STK!');">Copy STK</button>
+            </div>
+            ${accountName ? `<div>Chủ tài khoản: <b>${esc(accountName)}</b></div>` : ''}
+            <div>Số tiền: <b style="color:#fbbf24;">${formatVND(pkg.price)}</b></div>
+            <div>Nội dung CK: <b style="color:#38bdf8;">${esc(memo)}</b>
+              <button type="button" class="ac-btn ac-btn-ghost" style="padding:2px 8px; font-size:11px; margin-left:6px;" onclick="navigator.clipboard.writeText('${esc(memo)}');alert('Đã copy nội dung chuyển khoản!');">Copy Nội Dung</button>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    let days = 365;
-    if (plan.includes('1 Tháng')) days = 30;
-    else if (plan.includes('6 Tháng')) days = 180;
+    renderVietQR();
 
-    const exp = new Date();
-    exp.setDate(exp.getDate() + days);
+    document.getElementById('ac-close-x').onclick = closeModal;
+    document.getElementById('ac-reg-cancel').onclick = closeModal;
+    document.getElementById('ac-reg-phone').addEventListener('input', renderVietQR);
 
-    sysData.subAccounts.unshift({
-      id: 'SUB-' + Math.floor(100 + Math.random() * 900),
-      name,
-      phone,
-      email,
-      password,
-      plan,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      expiresAt: exp.toISOString(),
-      permissions: { autoEdit: true, export4k: true }
+    document.querySelectorAll('#ac-pkg-grid .ac-pkg-card').forEach((card) => {
+      card.onclick = () => {
+        state.selectedPkg = card.getAttribute('data-pkg');
+        document.querySelectorAll('#ac-pkg-grid .ac-pkg-card').forEach((c) => c.classList.remove('selected'));
+        card.classList.add('selected');
+        renderVietQR();
+      };
     });
 
-    await saveDb(true);
-    alert(`Đăng ký "${plan}" thành công!\nSĐT (${phone}) đã gửi tới Chủ Sở Hữu để liên hệ kích hoạt.`);
-    document.getElementById('regNameInput').value = '';
-    document.getElementById('regPhoneInput').value = '';
-    document.getElementById('regEmailInput').value = '';
-    document.getElementById('regPasswordInput').value = '';
-    switchAuthTab('login');
-    document.getElementById('loginEmailInput').value = email;
-  }
-
-  function logoutAccount() {
-    sysData.currentSession = null;
-    saveDb(false);
-    closeModal('authModal');
-    closeModal('ownerDashboardModal');
-  }
-
-  // Owner Dashboard
-  function openOwnerDashboard() {
-    openModal('ownerDashboardModal');
-    if (isOwner()) {
-      showOwnerUnlockedView();
-    } else {
-      document.getElementById('ownerAuthGate').classList.remove('hidden');
-      document.getElementById('ownerControlContent').classList.add('hidden');
-      document.getElementById('ownerMasterPassInput').value = '';
-    }
-  }
-
-  function verifyOwnerMaster() {
-    const val = document.getElementById('ownerMasterPassInput').value.trim();
-    if (val === sysData.ownerMasterPass) {
-      sysData.currentSession = { role: 'owner', email: sysData.ownerEmail, verifiedKey: sysData.ownerMasterPass };
-      saveDb(false);
-      showOwnerUnlockedView();
-    } else {
-      alert('Sai mật khẩu Chủ Sở Hữu!');
-    }
-  }
-
-  function showOwnerUnlockedView() {
-    document.getElementById('ownerAuthGate').classList.add('hidden');
-    document.getElementById('ownerControlContent').classList.remove('hidden');
-    document.getElementById('firebaseUrlInput').value = sysData.firebaseUrl || '';
-    document.getElementById('githubUrlInput').value = sysData.githubUrl || '';
-    renderSubTable();
-  }
-
-  function lockOwnerSession() {
-    sysData.currentSession = null;
-    saveDb(false);
-    document.getElementById('ownerAuthGate').classList.remove('hidden');
-    document.getElementById('ownerControlContent').classList.add('hidden');
-    document.getElementById('ownerMasterPassInput').value = '';
-  }
-
-  function switchOwnerTab(tab) {
-    document.querySelectorAll('.own-tab').forEach((b) => { b.className = 'own-tab py-3 px-4 text-zinc-400'; });
-    document.getElementById('own-tab-' + tab).className = 'own-tab py-3 px-4 text-amber-400 border-b-2 border-amber-400';
-    document.querySelectorAll('.own-panel').forEach((p) => p.classList.add('hidden'));
-    document.getElementById('own-panel-' + tab).classList.remove('hidden');
-  }
-
-  async function createSubAccountByOwner() {
-    if (!isOwner()) return alert('Không có quyền Chủ Sở Hữu!');
-    const name = document.getElementById('newSubName').value.trim();
-    const phone = document.getElementById('newSubPhone').value.trim() || 'Chưa cập nhật';
-    const email = document.getElementById('newSubEmail').value.trim().toLowerCase();
-    const password = document.getElementById('newSubPass').value.trim() || '123456';
-    const days = parseInt(document.getElementById('newSubDuration').value, 10);
-
-    if (!name || !email) return alert('Nhập tên và email khách hàng!');
-    if (sysData.subAccounts.some((u) => u.email.toLowerCase() === email)) return alert('Email này đã tồn tại!');
-
-    const planLabel = days === 30 ? 'Gói 1 Tháng (139k)' : days === 180 ? 'Gói 6 Tháng (699k)' : days === 365 ? 'Gói 1 Năm (1.490k)' : 'Gói 2 Năm';
-    const exp = new Date();
-    exp.setDate(exp.getDate() + days);
-
-    sysData.subAccounts.unshift({
-      id: 'SUB-' + Math.floor(100 + Math.random() * 900),
-      name,
-      phone,
-      email,
-      password,
-      plan: planLabel,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      expiresAt: exp.toISOString(),
-      permissions: { autoEdit: true, export4k: true }
-    });
-
-    document.getElementById('newSubName').value = '';
-    document.getElementById('newSubPhone').value = '';
-    document.getElementById('newSubEmail').value = '';
-    await saveDb(true);
-    renderSubTable();
-  }
-
-  async function toggleSubPerm(id, key) {
-    if (!isOwner()) return;
-    const sub = sysData.subAccounts.find((u) => u.id === id);
-    if (sub) { sub.permissions[key] = !sub.permissions[key]; await saveDb(true); }
-  }
-
-  async function toggleSubStatus(id) {
-    if (!isOwner()) return;
-    const sub = sysData.subAccounts.find((u) => u.id === id);
-    if (sub) { sub.status = sub.status === 'active' ? 'locked' : 'active'; await saveDb(true); renderSubTable(); }
-  }
-
-  async function renewSubDays(id, days) {
-    if (!isOwner()) return;
-    const sub = sysData.subAccounts.find((u) => u.id === id);
-    if (sub) {
-      const base = new Date(sub.expiresAt) > new Date() ? new Date(sub.expiresAt) : new Date();
-      base.setDate(base.getDate() + days);
-      sub.expiresAt = base.toISOString();
-      sub.status = 'active';
-      await saveDb(true);
-      renderSubTable();
-    }
-  }
-
-  async function deleteSub(id) {
-    if (!isOwner()) return;
-    if (!confirm('Xóa vĩnh viễn tài khoản khách hàng này?')) return;
-    sysData.subAccounts = sysData.subAccounts.filter((u) => u.id !== id);
-    await saveDb(true);
-    renderSubTable();
-  }
-
-  function copyPhone(phone) {
-    navigator.clipboard.writeText(phone);
-    alert('Đã sao chép SĐT / Zalo: ' + phone);
-  }
-
-  function copyInvite(email, pass) {
-    const msg = `AutoCut Studio AI: ${sysData.githubUrl}\nEmail: ${email}\nMật khẩu: ${pass}`;
-    navigator.clipboard.writeText(msg);
-    alert('Đã sao chép thông tin đăng nhập để gửi cho khách!');
-  }
-
-  function renderSubTable() {
-    const tbody = document.getElementById('subAccountsTableBody');
-    document.getElementById('subAccountCount').innerText = sysData.subAccounts.length;
-    const now = new Date();
-    let activeC = 0, pendingC = 0, expC = 0;
-
-    tbody.innerHTML = sysData.subAccounts.map((s) => {
-      const expDate = new Date(s.expiresAt);
-      const daysLeft = Math.ceil((expDate - now) / 86400000);
-      if (s.status === 'active' && daysLeft > 0) activeC++;
-      if (s.status === 'pending') pendingC++;
-      if (s.status === 'active' && daysLeft > 0 && daysLeft <= 7) expC++;
-
-      const statusHtml = s.status === 'pending'
-        ? '<span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">Chờ duyệt</span>'
-        : (s.status === 'locked' || daysLeft <= 0)
-          ? '<span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-[10px] font-bold">Khóa / Hết hạn</span>'
-          : `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Hoạt động (${daysLeft}d)</span>`;
-
-      return `
-        <tr class="hover:bg-zinc-900/50">
-          <td class="p-2.5">
-            <div class="font-bold text-white">${escapeHtml(s.name)}</div>
-            <div class="text-[10px] text-zinc-400">${escapeHtml(s.email)} • <span class="text-indigo-400">${escapeHtml(s.plan || 'Gói 1 Năm')}</span></div>
-          </td>
-          <td class="p-2.5 whitespace-nowrap">
-            <span class="font-mono text-emerald-400 font-semibold">${escapeHtml(s.phone || 'Chưa có')}</span>
-            ${s.phone ? `<button type="button" onclick="AuthCore.copyPhone('${escapeHtml(s.phone)}')" class="ml-1 text-[10px] text-zinc-400 hover:text-white" title="Copy SĐT"><i class="fa-solid fa-copy"></i></button>` : ''}
-          </td>
-          <td class="p-2.5 font-mono text-zinc-300">${escapeHtml(s.password)}</td>
-          <td class="p-2.5 text-center"><input type="checkbox" ${s.permissions && s.permissions.autoEdit ? 'checked' : ''} onchange="AuthCore.toggleSubPerm('${s.id}','autoEdit')" class="accent-indigo-500 cursor-pointer" /></td>
-          <td class="p-2.5 text-center"><input type="checkbox" ${s.permissions && s.permissions.export4k ? 'checked' : ''} onchange="AuthCore.toggleSubPerm('${s.id}','export4k')" class="accent-purple-500 cursor-pointer" /></td>
-          <td class="p-2.5 whitespace-nowrap">${expDate.toLocaleDateString('vi-VN')}</td>
-          <td class="p-2.5 whitespace-nowrap">${statusHtml}</td>
-          <td class="p-2.5 text-right space-x-1 whitespace-nowrap">
-            <button type="button" onclick="AuthCore.copyInvite('${escapeHtml(s.email)}','${escapeHtml(s.password)}')" class="px-1.5 py-1 rounded bg-zinc-800 hover:bg-indigo-600 text-[10px] text-white" title="Copy thông tin gửi khách"><i class="fa-solid fa-share-nodes"></i></button>
-            <button type="button" onclick="AuthCore.renewSubDays('${s.id}',30)" class="px-1.5 py-1 rounded bg-sky-600/20 text-sky-300">+1T</button>
-            <button type="button" onclick="AuthCore.renewSubDays('${s.id}',180)" class="px-1.5 py-1 rounded bg-emerald-600/20 text-emerald-300">+6T</button>
-            <button type="button" onclick="AuthCore.renewSubDays('${s.id}',365)" class="px-1.5 py-1 rounded bg-indigo-600/20 text-indigo-300">+1N</button>
-            <button type="button" onclick="AuthCore.toggleSubStatus('${s.id}')" class="px-1.5 py-1 rounded bg-amber-500/20 text-amber-300">${s.status === 'active' ? 'Khóa' : 'Duyệt/Mở'}</button>
-            <button type="button" onclick="AuthCore.deleteSub('${s.id}')" class="px-1.5 py-1 rounded bg-zinc-800 text-red-400">Xóa</button>
-          </td>
-        </tr>`;
-    }).join('');
-
-    document.getElementById('statActiveSubs').innerText = activeC;
-    document.getElementById('statPendingSubs').innerText = pendingC;
-    document.getElementById('statExpiringSubs').innerText = expC;
-  }
-
-  function exportBackupJson() {
-    if (!isOwner()) return;
-    const blob = new Blob([JSON.stringify(sysData, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `AutoCut_Accounts_Backup_${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-  }
-
-  function importBackupJson(e) {
-    if (!isOwner()) return;
-    const f = e.target.files[0];
-    if (!f) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        if (Array.isArray(parsed.subAccounts)) {
-          const map = new Map();
-          sysData.subAccounts.forEach((u) => map.set(u.email.toLowerCase(), u));
-          parsed.subAccounts.forEach((u) => map.set(u.email.toLowerCase(), u));
-          sysData.subAccounts = Array.from(map.values());
-          await saveDb(true);
-          renderSubTable();
-          alert(`Đã khôi phục thành công ${sysData.subAccounts.length} tài khoản!`);
-        }
-      } catch {
-        alert('File sao lưu JSON không hợp lệ!');
+    document.getElementById('ac-reg-submit').onclick = async () => {
+      const name = (document.getElementById('ac-reg-name').value || '').trim();
+      const phone = cleanPhone(document.getElementById('ac-reg-phone').value);
+      if (!name || phone.length < 9) {
+        alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại hợp lệ!');
+        return;
       }
+      const pkg = PACKAGES[state.selectedPkg] || PACKAGES['6M'];
+      const existing = state.users[phone] || {};
+      const userObj = {
+        name,
+        phone,
+        packageId: pkg.id,
+        packageName: pkg.name,
+        status: existing.status === 'active' ? 'active' : 'pending',
+        expiresAt: existing.expiresAt || (Date.now() + 3 * 86400000), // Tặng sẵn 3 ngày dùng thử
+        createdAt: existing.createdAt || Date.now(),
+        updatedAt: Date.now()
+      };
+
+      state.users[phone] = userObj;
+      state.currentUser = userObj;
+      persistLocal();
+
+      try {
+        await fbPut(`users/${phone}`, userObj);
+        alert(`Đăng ký thành công cho SĐT ${phone}!\nTài khoản đã được đồng bộ lên hệ thống để Chủ Sở Hữu kích hoạt gói ${pkg.name}.`);
+      } catch (_) {
+        alert(`Đã lưu đăng ký cho SĐT ${phone} trên thiết bị!`);
+      }
+      closeModal();
     };
-    reader.readAsText(f);
   }
 
-  async function saveFirebaseConfig() {
-    if (!isOwner()) return;
-    const statusEl = document.getElementById('firebaseTestStatus');
-    sysData.firebaseUrl = cleanFbUrl(document.getElementById('firebaseUrlInput').value);
-    document.getElementById('firebaseUrlInput').value = sysData.firebaseUrl;
-    if (!sysData.firebaseUrl) {
-      await saveDb(false);
-      if (statusEl) statusEl.innerText = 'Đã ngắt kết nối';
-      return;
+  // ================= 8. MODAL QUẢN TRỊ CHỦ SỞ HỮU =================
+  function openAdminModal() {
+    injectStyles();
+    if (!state.isOwner) {
+      const pass = prompt('Nhập Mật Khẩu Chủ Sở Hữu Độc Quyền:');
+      if (pass === null) return;
+      if (pass.trim() !== state.ownerPass) {
+        alert('Sai mật khẩu Chủ Sở Hữu!');
+        return;
+      }
+      state.isOwner = true;
+      sessionStorage.setItem(STORAGE_KEYS.OWNER_SESSION, '1');
+      updateStatusIndicators();
     }
-    if (statusEl) statusEl.innerText = 'Đang kiểm tra...';
-    const ok = await saveDb(true);
-    if (statusEl) {
-      statusEl.innerText = ok ? 'Kết nối thành công ✓' : 'Lỗi kết nối ✕';
-      statusEl.className = ok ? 'text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold' : 'text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold';
+
+    closeModal();
+    let activeTab = 'users';
+
+    const wrap = document.createElement('div');
+    wrap.id = 'ac-active-modal';
+    wrap.className = 'ac-modal-backdrop';
+    wrap.innerHTML = `
+      <div class="ac-modal-box">
+        <div class="ac-modal-header">
+          <div class="ac-modal-title">👑 Cổng Chủ Sở Hữu Độc Quyền — Quản Trị Tài Khoản & Cloud</div>
+          <button class="ac-close-btn" id="ac-close-x">✕</button>
+        </div>
+        <div class="ac-tabs">
+          <button class="ac-tab active" data-tab="users">1. Khách Hàng & SĐT</button>
+          <button class="ac-tab" data-tab="cloud">2. Firebase Cloud, VietQR & Bảo Mật</button>
+          <div style="flex:1;"></div>
+          <button class="ac-btn ac-btn-danger" id="ac-lock-owner" style="padding:6px 12px; font-size:12px; margin-bottom:6px;">🔒 Khóa Quyền Owner</button>
+        </div>
+        <div id="ac-admin-body"></div>
+      </div>
+    `;
+    document.body.appendChild(wrap);
+
+    document.getElementById('ac-close-x').onclick = closeModal;
+    document.getElementById('ac-lock-owner').onclick = () => {
+      state.isOwner = false;
+      sessionStorage.removeItem(STORAGE_KEYS.OWNER_SESSION);
+      updateStatusIndicators();
+      closeModal();
+      alert('Đã khóa quyền Chủ Sở Hữu ✓');
+    };
+
+    function renderAdminBody() {
+      const body = document.getElementById('ac-admin-body');
+      if (activeTab === 'users') {
+        const list = Object.values(state.users || {}).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+        body.innerHTML = `
+          <div class="ac-card" style="overflow-x:auto;">
+            <div class="ac-row" style="justify-content:space-between; margin-bottom:10px;">
+              <span style="font-size:13px; font-weight:600;">Tổng số khách hàng: <b style="color:#fbbf24;">${list.length}</b></span>
+              <button class="ac-btn ac-btn-ghost" id="ac-refresh-users" style="padding:6px 12px; font-size:12px;">↻ Tải mới từ Cloud</button>
+            </div>
+            ${list.length === 0 ? '<div style="color:#94a3b8; font-size:13px; padding:12px 0;">Chưa có khách hàng nào đăng ký.</div>' : `
+              <table class="ac-table">
+                <thead>
+                  <tr>
+                    <th>Khách hàng</th>
+                    <th>SĐT / Zalo</th>
+                    <th>Gói & Hạn dùng</th>
+                    <th>Gia hạn nhanh</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map((u) => `
+                    <tr>
+                      <td><b>${esc(u.name)}</b></td>
+                      <td>
+                        ${esc(u.phone)}
+                        <button class="ac-btn ac-btn-ghost" style="padding:2px 6px; font-size:11px; margin-left:4px;" onclick="navigator.clipboard.writeText('${esc(u.phone)}');alert('Đã copy SĐT ${esc(u.phone)}');">Copy</button>
+                      </td>
+                      <td>
+                        <span style="color:${u.status === 'active' ? '#4ade80' : '#fbbf24'}; font-weight:600;">${esc(u.packageName || 'Dùng thử')}</span><br/>
+                        <span style="color:#94a3b8;">HSD: ${formatDate(u.expiresAt)}</span>
+                      </td>
+                      <td>
+                        <div class="ac-row" style="gap:4px;">
+                          <button class="ac-btn ac-btn-success" style="padding:4px 8px; font-size:11px;" data-ext="${esc(u.phone)}" data-days="30">+1T</button>
+                          <button class="ac-btn ac-btn-primary" style="padding:4px 8px; font-size:11px;" data-ext="${esc(u.phone)}" data-days="180">+6T</button>
+                          <button class="ac-btn ac-btn-warn" style="padding:4px 8px; font-size:11px;" data-ext="${esc(u.phone)}" data-days="365">+1N</button>
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            `}
+          </div>
+        `;
+
+        document.getElementById('ac-refresh-users').onclick = async () => {
+          await syncFromCloud();
+          renderAdminBody();
+        };
+
+        body.querySelectorAll('[data-ext]').forEach((btn) => {
+          btn.onclick = async () => {
+            const phone = btn.getAttribute('data-ext');
+            const days = Number(btn.getAttribute('data-days'));
+            const user = state.users[phone];
+            if (!user) return;
+            const base = Math.max(Date.now(), Number(user.expiresAt || 0));
+            user.expiresAt = base + days * 86400000;
+            user.status = 'active';
+            user.packageName = days === 365 ? 'Gói 1 Năm' : days === 180 ? 'Gói 6 Tháng' : 'Gói 1 Tháng';
+            user.updatedAt = Date.now();
+            persistLocal();
+            try {
+              await fbPut(`users/${phone}`, user);
+            } catch (_) {}
+            renderAdminBody();
+          };
+        });
+      } else {
+        body.innerHTML = `
+          <div class="ac-card">
+            <div class="ac-row" style="justify-content:space-between;">
+              <label class="ac-label">Firebase Realtime Database URL (Đồng bộ mọi thiết bị)</label>
+              <span id="ac-fb-status" style="font-size:12px; color:${state.cloudConnected ? '#4ade80' : '#fbbf24'};">
+                ${state.cloudConnected ? 'Kết nối thành công ✓' : 'Chưa kiểm tra'}
+              </span>
+            </div>
+            <div class="ac-row">
+              <input class="ac-input" id="ac-fb-url" value="${esc(state.firebaseUrl)}" />
+              <button class="ac-btn ac-btn-primary" id="ac-fb-test">Kết Nối & Test</button>
+            </div>
+          </div>
+
+          <div class="ac-card">
+            <label class="ac-label">💳 Cấu Hình Ngân Hàng Nhận Tiền VietQR Tự Động</label>
+            <div class="ac-grid-3">
+              <div>
+                <label class="ac-label">Ngân hàng</label>
+                <select class="ac-select" id="ac-bank-code">
+                  ${BANKS.map((b) => `<option value="${b.code}" ${state.payment.bankCode === b.code ? 'selected' : ''}>${esc(b.name)}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="ac-label">Số tài khoản</label>
+                <input class="ac-input" id="ac-bank-acc" value="${esc(state.payment.accountNo || '')}" placeholder="Nhập số tài khoản nhận tiền" />
+              </div>
+              <div>
+                <label class="ac-label">Tên chủ tài khoản (Không dấu)</label>
+                <input class="ac-input" id="ac-bank-name" value="${esc(state.payment.accountName || '')}" placeholder="NGUYEN VAN A" />
+              </div>
+            </div>
+            <div style="margin-top:10px; text-align:right;">
+              <button class="ac-btn ac-btn-success" id="ac-save-bank">Lưu & Đồng Bộ VietQR Lên Cloud</button>
+            </div>
+          </div>
+
+          <div class="ac-grid-2">
+            <div class="ac-card">
+              <label class="ac-label">Link Web GitHub Pages</label>
+              <div class="ac-row">
+                <input class="ac-input" id="ac-web-url" value="${esc(state.webUrl)}" />
+                <button class="ac-btn ac-btn-success" id="ac-save-web">Lưu</button>
+              </div>
+            </div>
+            <div class="ac-card">
+              <label class="ac-label">Đổi Mật Khẩu Chủ Sở Hữu</label>
+              <div class="ac-row">
+                <input class="ac-input" id="ac-new-pass" placeholder="Nhập mật khẩu mới..." />
+                <button class="ac-btn ac-btn-warn" id="ac-save-pass">Đổi Mã</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('ac-fb-test').onclick = async () => {
+          const url = (document.getElementById('ac-fb-url').value || DEFAULTS.FIREBASE_URL).trim().replace(/\/+$/, '');
+          state.firebaseUrl = url;
+          persistLocal();
+          try {
+            await fbPatch('config', {
+              ai: state.aiConfig,
+              payment: state.payment,
+              webUrl: state.webUrl,
+              updatedAt: Date.now()
+            });
+            state.cloudConnected = true;
+            updateStatusIndicators();
+            document.getElementById('ac-fb-status').textContent = 'Kết nối thành công ✓';
+            document.getElementById('ac-fb-status').style.color = '#4ade80';
+            alert('Kết nối Firebase Cloud thành công ✓');
+          } catch (e) {
+            alert('Không ghi được lên Firebase: ' + e.message);
+          }
+        };
+
+        document.getElementById('ac-save-bank').onclick = async () => {
+          state.payment = {
+            bankCode: document.getElementById('ac-bank-code').value,
+            accountNo: (document.getElementById('ac-bank-acc').value || '').trim(),
+            accountName: (document.getElementById('ac-bank-name').value || '').trim().toUpperCase()
+          };
+          persistLocal();
+          try {
+            await fbPatch('config', { payment: state.payment, updatedAt: Date.now() });
+            alert('Đã lưu và đồng bộ thông tin VietQR lên Firebase Cloud ✓');
+          } catch (_) {
+            alert('Đã lưu thông tin VietQR trên trình duyệt ✓');
+          }
+        };
+
+        document.getElementById('ac-save-web').onclick = async () => {
+          state.webUrl = (document.getElementById('ac-web-url').value || DEFAULTS.WEB_URL).trim();
+          localStorage.setItem(STORAGE_KEYS.WEB_URL, state.webUrl);
+          try { await fbPatch('config', { webUrl: state.webUrl }); } catch (_) {}
+          alert('Đã lưu Link Web ✓');
+        };
+
+        document.getElementById('ac-save-pass').onclick = async () => {
+          const np = (document.getElementById('ac-new-pass').value || '').trim();
+          if (np.length < 4) {
+            alert('Mật khẩu mới cần tối thiểu 4 ký tự!');
+            return;
+          }
+          state.ownerPass = np;
+          localStorage.setItem(STORAGE_KEYS.OWNER_PASS, np);
+          try { await fbPatch('config', { ownerPass: np }); } catch (_) {}
+          alert('Đã đổi mật khẩu Chủ Sở Hữu thành công ✓');
+        };
+      }
     }
-    alert(ok ? 'Kết nối Firebase Cloud thành công!' : 'Không ghi được lên Firebase. Hãy kiểm tra URL hoặc bật Test Mode!');
+
+    document.querySelectorAll('.ac-tab').forEach((t) => {
+      t.onclick = () => {
+        activeTab = t.getAttribute('data-tab');
+        document.querySelectorAll('.ac-tab').forEach((x) => x.classList.remove('active'));
+        t.classList.add('active');
+        renderAdminBody();
+      };
+    });
+
+    renderAdminBody();
   }
 
-  async function saveGithubUrl() {
-    if (!isOwner()) return;
-    sysData.githubUrl = document.getElementById('githubUrlInput').value.trim();
-    await saveDb(true);
-    alert('Đã lưu Link Web!');
-  }
-
-  async function updateOwnerMasterPass() {
-    if (!isOwner()) return;
-    const next = document.getElementById('newOwnerMasterPass').value.trim();
-    if (next.length < 4) return alert('Mật khẩu tối thiểu 4 ký tự!');
-    sysData.ownerMasterPass = next;
-    sysData.currentSession.verifiedKey = next;
-    await saveDb(true);
-    document.getElementById('newOwnerMasterPass').value = '';
-    alert('Đã cập nhật mật khẩu Chủ Sở Hữu mới!');
-  }
-
-  // AI Settings Modal
-  function openAiConfigModal() {
-    document.getElementById('aiProviderSelect').value = sysData.aiProvider || 'builtin';
-    document.getElementById('aiProxyUrlInput').value = sysData.aiProxyUrl || '';
-    document.getElementById('aiApiKeyInput').value = sysData.geminiApiKey || '';
-    openModal('aiConfigModal');
-  }
-
-  async function saveAiSettings() {
-    sysData.aiProvider = document.getElementById('aiProviderSelect').value;
-    sysData.aiProxyUrl = document.getElementById('aiProxyUrlInput').value.trim();
-    sysData.geminiApiKey = document.getElementById('aiApiKeyInput').value.trim();
-    await saveDb(isOwner());
-    closeModal('aiConfigModal');
-    alert('Đã lưu cấu hình AI!');
-  }
-
-  // Close active modal on Escape key
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      document.querySelectorAll('.modal-backdrop.active').forEach((m) => m.classList.remove('active'));
-    }
-  });
-
-  // Expose clean public API
-  window.AuthCore = {
-    isOwner, getPerms, getAiConfig,
-    openModal, closeModal,
-    openAuthModal, switchAuthTab, selectPlanAndRegister,
-    handleLoginSubmit, handleRegisterSubmit, logoutAccount,
-    openOwnerDashboard, verifyOwnerMaster, lockOwnerSession, switchOwnerTab,
-    createSubAccountByOwner, toggleSubPerm, toggleSubStatus, renewSubDays, deleteSub,
-    copyPhone, copyInvite, exportBackupJson, importBackupJson,
-    saveFirebaseConfig, saveGithubUrl, updateOwnerMasterPass, syncFromCloud,
-    openAiConfigModal, saveAiSettings
+  // ================= 9. EXPORT API TOÀN CỤC =================
+  window.AutoCutAuth = {
+    defaults: DEFAULTS,
+    getAIConfig: () => ({ ...state.aiConfig }),
+    isOwner: () => state.isOwner,
+    canUseTool: () => true,
+    openAdmin: openAdminModal,
+    openAISettings: openAISettingsModal,
+    openAuth: openAuthModal,
+    syncFromCloud
   };
 
-  // Boot AuthCore
-  refreshUI();
-  syncFromCloud(false);
-})(window);
+  // Tương thích với các hàm gọi trực tiếp trong HTML cũ
+  window.openAdminModal = openAdminModal;
+  window.openAISettingsModal = openAISettingsModal;
+  window.openAuthModal = openAuthModal;
+  window.openPricingModal = openAuthModal;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateStatusIndicators();
+    syncFromCloud();
+  });
+})();
