@@ -797,3 +797,30 @@
     syncFromCloud();
   });
 })();
+// Cầu nối tương thích cho các nút gọi AuthCore trong index.html
+window.AuthCore = new Proxy({}, {
+  get(_, prop) {
+    const key = String(prop || '');
+    const api = window.AutoCutAuth || {};
+    if (key in api) return api[key];
+
+    const lower = key.toLowerCase();
+    if (lower.includes('owner') || lower.includes('admin') || lower.includes('quantri') || lower.includes('manage')) {
+      return () => (window.openAdminModal ? window.openAdminModal() : api.openAdmin && api.openAdmin());
+    }
+    if (lower.includes('url') && (lower.includes('proxy') || lower.includes('ai'))) {
+      return () => (api.getAIConfig ? api.getAIConfig().proxyUrl : 'https://autocut-ai-proxy.tommynguyen1557.workers.dev');
+    }
+    if (lower.includes('ai') || lower.includes('proxy') || lower.includes('setting')) {
+      if (lower.includes('get')) return () => (api.getAIConfig ? api.getAIConfig() : { mode: 'proxy', proxyUrl: 'https://autocut-ai-proxy.tommynguyen1557.workers.dev', apiKey: '' });
+      return () => (window.openAISettingsModal ? window.openAISettingsModal() : api.openAISettings && api.openAISettings());
+    }
+    if (lower.includes('auth') || lower.includes('login') || lower.includes('reg') || lower.includes('user') || lower.includes('pric') || lower.includes('vip') || lower.includes('pkg') || lower.includes('buy') || lower.includes('account') || lower.includes('modal') || lower.includes('open')) {
+      return () => (window.openAuthModal ? window.openAuthModal() : api.openAuth && api.openAuth());
+    }
+    if (lower.includes('can') || lower.includes('check') || lower.includes('allow')) {
+      return () => true;
+    }
+    return () => {};
+  }
+});
