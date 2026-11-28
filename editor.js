@@ -1324,6 +1324,7 @@ XUẤT MP4 SẮC NÉT ✨</textarea>
   // Keyboard shortcuts
   window.addEventListener('keydown', (e) => {
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+   if (!e.key) return;
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
     else if (e.key.toLowerCase() === 's') { e.preventDefault(); split(); }
     else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); }
