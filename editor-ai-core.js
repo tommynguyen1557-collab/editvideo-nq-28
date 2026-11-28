@@ -1,15 +1,92 @@
 /**
- * AutoCut Studio AI v6.0 — Autonomous Multi-Clip Director, Chat Co-Pilot, Real Beat-Sync,
- * Smart Focal Tracking, Viral Critic & Publish Kit + Isolated Firebase Cloud Sync
- * CÁCH LY 100%: Không chạm auth.js, crm.html, autocut_saas/users hay autocut_crm_isolated.
+ * AutoCut Studio AI v7.0 — Multi-Industry Pro Suite
+ * 5 Nâng cấp mới: 10 Kịch bản ngành nghề + Bộ lọc chống gậy chính sách (Policy Guard)
+ * + Đồ họa ngành (Thẻ giá gạch ngang, Spec Card, Before/After Split-Screen, Multi-Brand Kit)
+ * + 3 Biến thể Hook A/B/C + Khóa Vùng An Toàn Đa Nền Tảng (TikTok/Shopee/Reels)
+ * CÁCH LY 100%: Không chạm auth.js, crm.html, index.html hay dữ liệu khách hàng.
  */
 (function () {
   'use strict';
 
   const PROXY_URL = 'https://autocut-ai-proxy.tommynguyen1557.workers.dev';
   const FIREBASE_BASE = 'https://autocut-studio-30130-default-rtdb.asia-southeast1.firebasedatabase.app';
-  const SYNC_NODE = 'autocut_saas/studio_addons/v6_sync';
+  const SYNC_NODE = 'autocut_saas/studio_addons/v6_sync'; // Giữ nguyên nhánh sync cũ để bảo toàn 100% dự án đã lưu
   const LOCAL_CACHE_KEY = 'autocut_studio_v6_cache';
+
+  // ================= 1. 10 KỊCH BẢN CHUYÊN SÂU ĐA NGÀNH NGHỀ =================
+  const INDUSTRY_PLAYBOOKS = [
+    {
+      id: 'auto_detect', name: '🤖 Tự nhận diện ngành (Đa dụng)',
+      lut: 'tiktok_commerce', mode: 'deep_director', textStyle: 'auto', split: 'off',
+      aiRule: 'Tự quan sát khung hình nhận diện đúng ngành hàng và chọn công thức dựng viral tốt nhất.'
+    },
+    {
+      id: 'silver_jewelry', name: '💎 Trang Sức / Bạc Xi Bạch Kim',
+      lut: 'silver_platinum', mode: 'brand_preserve', textStyle: 'cinematic_clean', split: 'off',
+      aiRule: 'BẮT BUỘC giữ nguyên sắc bạc trắng sáng nguyên bản đã xi bạch kim, tuyệt đối khử ám vàng (lutPreset=silver_platinum), nhịp slow-motion 0.85x-0.95x tôn độ lấp lánh, SFX sparkle tinh tế, phụ đề sang trọng.'
+    },
+    {
+      id: 'fashion', name: '👗 Thời Trang / Lookbook / Shop Quần Áo',
+      lut: 'tiktok_commerce', mode: 'viral_hook', textStyle: 'karaoke_box', split: 'off',
+      aiRule: 'Cắt nhanh khớp nhịp beat 1.8-2.2s/cảnh, xen kẽ góc toàn dáng và cận chất liệu vải, bật priceTag nếu có ưu đãi, phụ đề ngắn bắt trend.'
+    },
+    {
+      id: 'cosmetics', name: '🧴 Mỹ Phẩm / Skincare / Làm Đẹp',
+      lut: 'clean_studio', mode: 'sales_converter', textStyle: 'hormozi', split: 'off',
+      aiRule: 'Ánh sáng sạch mịn trong trẻo, tập trung kết cấu sản phẩm và cảm nhận thực tế, TUYỆT ĐỐI tránh từ cấm y tế (không dùng trị dứt điểm/100%/kích trắng).'
+    },
+    {
+      id: 'spa_beauty', name: '💆 Spa / Thẩm Mỹ / Làm Tóc / Nail',
+      lut: 'clean_studio', mode: 'sales_converter', textStyle: 'cinematic_clean', split: 'lr',
+      aiRule: 'Ưu tiên phô diễn sự thay đổi Trước & Sau (Before/After), ánh sáng mềm mượt, giọng văn tinh tế tạo niềm tin, lách từ cam kết y tế.'
+    },
+    {
+      id: 'real_estate', name: '🏡 Bất Động Sản / Nhà Đất / Cho Thuê',
+      lut: 'natural_crisp', mode: 'deep_director', textStyle: 'minimal_lower', split: 'off',
+      aiRule: 'Chuyển động mượt mà ổn định, BẮT BUỘC điền specCard gồm 3 thông số cốt lõi (Vị trí, Diện tích/Kết cấu, Mức giá/Pháp lý), phụ đề gọn rõ ràng.'
+    },
+    {
+      id: 'automotive', name: '🚗 Ô Tô / Xe Máy / Phụ Kiện Xe',
+      lut: 'luxury_contrast', mode: 'viral_hook', textStyle: 'neon_glow', split: 'off',
+      aiRule: 'Tương phản cao sang trọng, cắt mạnh theo nhịp bass boom/whoosh, điền specCard (Đời xe/Động cơ, Tình trạng, Giá bán), tạo cảm giác mạnh mẽ.'
+    },
+    {
+      id: 'fnb_food', name: '🍜 F&B / Đồ Ăn / Quán Cà Phê',
+      lut: 'food_rich', mode: 'viral_hook', textStyle: 'hormozi', split: 'off',
+      aiRule: 'Màu sắc rực rỡ ngon mắt (food_rich), mở 3s đầu bằng cận cảnh món ăn hấp dẫn nhất, cắt nhanh giàu năng lượng, nhấn mạnh địa chỉ/món best-seller.'
+    },
+    {
+      id: 'interior_decor', name: '🛋️ Nội Thất / Kiến Trúc / Decor',
+      lut: 'warm_vlog', mode: 'storyteller', textStyle: 'cinematic_clean', split: 'lr',
+      aiRule: 'Ánh sáng ấm áp tinh tế, ưu tiên so sánh Trước & Sau thi công hoặc không gian hoàn thiện, nhịp chuyển cảnh êm mượt easeInOutCubic.'
+    },
+    {
+      id: 'education_expert', name: '🎓 Chuyên Gia / Giáo Dục / Tư Vấn B2B',
+      lut: 'natural_crisp', mode: 'deep_director', textStyle: 'karaoke_box', split: 'off',
+      aiRule: 'Giữ trọng tâm khuôn mặt người chia sẻ (smart_focal), cắt sạch khoảng lặng thừa, nhấn từ khóa giá trị cốt lõi trên phụ đề, bật lowerThird tên & chức danh.'
+    },
+    {
+      id: 'tech_home', name: '📱 Công Nghệ / Đồ Gia Dụng Thông Minh',
+      lut: 'tiktok_commerce', mode: 'sales_converter', textStyle: 'hormozi', split: 'off',
+      aiRule: 'Mở đầu đánh thẳng vào vấn đề hằng ngày và cách sản phẩm giải quyết trong 3 giây, điền specCard 3 tính năng chính và priceTag nếu có sale.'
+    }
+  ];
+
+  // ================= 2. BỘ LỌC TỪ CẤM CHÍNH SÁCH (LOCAL SCAN TỨC THÌ) =================
+  const POLICY_RISKY_TERMS = [
+    'trị dứt điểm', 'chữa khỏi', 'khỏi hẳn', '100%', 'tuyệt đối', 'vĩnh viễn',
+    'rẻ nhất', 'tốt nhất', 'số 1', 'cấp tốc', 'siêu tốc', 'cam kết khỏi',
+    'đảm bảo 100%', 'hoàn tiền 100%', 'nhất định', 'thần thánh', 'kích trắng',
+    'lột da', 'giảm cân nhanh', 'triệt để', 'dứt điểm', 'độc quyền số 1',
+    'bảo hành trọn đời', 'hiệu quả tức thì', 'trị mụn', 'trị nám', 'trị thâm'
+  ];
+
+  const SAFE_ZONES = {
+    tiktok: { label: 'TikTok (Né nút phải & mô tả dưới)', top: 0.11, bottom: 0.76, left: 0.05, right: 0.82 },
+    shopee: { label: 'Shopee Video (Né giỏ hàng cam)',    top: 0.12, bottom: 0.70, left: 0.05, right: 0.80 },
+    reels:  { label: 'Facebook Reels / YT Shorts',        top: 0.11, bottom: 0.77, left: 0.05, right: 0.83 },
+    none:   { label: 'Toàn khung (Không giới hạn)',       top: 0.05, bottom: 0.92, left: 0.04, right: 0.96 }
+  };
 
   const REASONING_MODES = [
     { id: 'deep_director',   label: '🧠 Đạo Diễn Tư Duy Sâu (Claude CoT)' },
@@ -65,11 +142,15 @@
     { id: 'riser',   label: '📈 Riser' }
   ];
 
-  // ================= 1. TRẠNG THÁI & ĐỒNG BỘ FIREBASE CLOUD (CÁCH LY HOÀN TOÀN) =================
+  // ================= 3. TRẠNG THÁI & ĐỒNG BỘ FIREBASE CLOUD (TƯƠNG THÍCH NGƯỢC V6) =================
   function defaultSyncedData() {
     return {
       preferences: {
+        industryId: 'auto_detect',
+        platformSafeZone: 'tiktok',
+        showSafeZoneGuide: true,
         brandTag: '',
+        activeBrandKitId: '',
         reasoningMode: 'deep_director',
         textStylePref: 'auto',
         activeSkills: PRO_SKILLS.map((s) => s.id),
@@ -79,6 +160,7 @@
         muteOrig: false,
         enableSearch: true
       },
+      brandKits: [],
       behavior: { totalActions: 0, recentGenres: [] },
       savedProjects: [],
       updatedAt: 0
@@ -88,21 +170,33 @@
   function loadLocalCache() {
     try {
       const parsed = JSON.parse(localStorage.getItem(LOCAL_CACHE_KEY) || 'null');
-      if (parsed && parsed.preferences) return { ...defaultSyncedData(), ...parsed };
+      if (parsed && parsed.preferences) {
+        return {
+          ...defaultSyncedData(),
+          ...parsed,
+          preferences: { ...defaultSyncedData().preferences, ...(parsed.preferences || {}) },
+          brandKits: Array.isArray(parsed.brandKits) ? parsed.brandKits : [],
+          savedProjects: Array.isArray(parsed.savedProjects) ? parsed.savedProjects : []
+        };
+      }
     } catch (_) {}
     return defaultSyncedData();
   }
 
   let syncData = loadLocalCache();
   let activeSkills = new Set(syncData.preferences.activeSkills || PRO_SKILLS.map((s) => s.id));
-  let loadedClips = []; // [{ file, url, name, durationSec }]
+  let loadedClips = [];
   let bgmFile = null;
   let bgmUrl = null;
-  let bgmBeatInfo = null; // { bpm, beats: [] }
+  let bgmBeatInfo = null;
   let attachedVoiceUrl = null;
   let attachedVoiceLabel = '';
   let lastTtsBlobUrl = null;
+  let baseMasterPlan = null; // Lưu bản gốc để chuyển Hook A/B/C qua lại không mất gốc
   let currentMasterPlan = null;
+  let hookVariants = [];
+  let activeHookId = 'BASE';
+  let splitMode = 'off'; // 'off' | 'lr' | 'tb'
   let currentCritic = null;
   let copilotHistory = [];
   let sttTranscriptLines = [];
@@ -110,6 +204,7 @@
   let previewAnimId = null;
   let grainCanvas = null;
   let syncTimer = null;
+  const brandLogoImgCache = new Map();
 
   function setSyncBadge(text, color = '#4ade80') {
     const el = document.getElementById('ac-sync-badge');
@@ -143,7 +238,7 @@
   }
 
   async function pullFromCloudSync() {
-    setSyncBadge('☁️ Đang tải dữ liệu đồng bộ...', '#38bdf8');
+    setSyncBadge('☁️ Đang tải đồng bộ Cloud...', '#38bdf8');
     try {
       const res = await fetch(`${FIREBASE_BASE}/${SYNC_NODE}.json`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -153,15 +248,17 @@
           ...defaultSyncedData(),
           ...remote,
           preferences: { ...defaultSyncedData().preferences, ...(remote.preferences || {}) },
+          brandKits: Array.isArray(remote.brandKits) ? remote.brandKits : [],
           behavior: { ...defaultSyncedData().behavior, ...(remote.behavior || {}) },
           savedProjects: Array.isArray(remote.savedProjects) ? remote.savedProjects : []
         };
         activeSkills = new Set(syncData.preferences.activeSkills || PRO_SKILLS.map((s) => s.id));
         localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(syncData));
         applyPreferencesToUI();
+        renderBrandKitSelector();
         renderSavedProjectsList();
       }
-      setSyncBadge(`☁️ Đã đồng bộ Cloud (${syncData.savedProjects.length} dự án) ✓`, '#4ade80');
+      setSyncBadge(`☁️ Cloud ✓ (${syncData.savedProjects.length} dự án • ${syncData.brandKits.length} Brand Kit)`, '#4ade80');
     } catch (_) {
       setSyncBadge('☁️ Chế độ cục bộ', '#fbbf24');
     }
@@ -173,7 +270,7 @@
       id: 'prj_' + Date.now(),
       savedAt: Date.now(),
       genre: currentMasterPlan.detectedGenre || 'Dự án dựng phim',
-      style: currentMasterPlan.matchedReference?.styleName || 'AutoCut v6',
+      style: currentMasterPlan.matchedReference?.styleName || 'AutoCut v7',
       score: currentCritic?.score || null,
       plan: currentMasterPlan,
       critic: currentCritic,
@@ -184,7 +281,35 @@
     saveLocalAndScheduleCloudSync(true);
   }
 
-  // ================= 2. TOÁN CHUYỂN ĐỘNG & SFX MIỄN PHÍ =================
+  function getActiveBrandKit() {
+    const id = syncData.preferences.activeBrandKitId;
+    return syncData.brandKits.find((b) => b.id === id) || null;
+  }
+
+  function getBrandLogoImage(kit) {
+    if (!kit || !kit.logoDataUrl) return null;
+    if (brandLogoImgCache.has(kit.id)) return brandLogoImgCache.get(kit.id);
+    const img = new Image();
+    img.src = kit.logoDataUrl;
+    brandLogoImgCache.set(kit.id, img);
+    return img;
+  }
+
+  // ================= 4. QUÉT TỪ CẤM CHÍNH SÁCH & TOÁN CHUYỂN ĐỘNG =================
+  function scanPlanForPolicyRisks(plan) {
+    if (!plan) return [];
+    const texts = [
+      plan.titleCard?.headline, plan.titleCard?.subline,
+      plan.lowerThird?.title, plan.lowerThird?.subtitle,
+      plan.endCard?.cta, plan.endCard?.subCta,
+      plan.voiceoverScript,
+      ...(plan.subtitles || []).map((s) => s.text),
+      ...(plan.stickers || []).map((s) => s.label)
+    ].filter(Boolean).join(' | ').toLowerCase();
+
+    return POLICY_RISKY_TERMS.filter((term) => texts.includes(term));
+  }
+
   function applyEasing(t, type = 'easeOutExpo') {
     const x = Math.min(1, Math.max(0, t));
     if (type === 'easeInOutCubic') return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
@@ -273,7 +398,7 @@
     } catch (_) {}
   }
 
-  // ================= 3. ĐO NHỊP NHẠC THẬT (REAL BEAT-SYNC) & SÓNG ÂM =================
+  // ================= 5. BEAT-SYNC, SÓNG ÂM & QUÉT ĐA CLIP =================
   async function detectMusicBeats(file) {
     try {
       const buf = await file.arrayBuffer();
@@ -282,58 +407,44 @@
       const audioBuf = await ctx.decodeAudioData(buf.slice(0));
       const ch = audioBuf.getChannelData(0);
       const sr = audioBuf.sampleRate;
-      const win = Math.floor(sr * 0.05); // 50ms
+      const win = Math.floor(sr * 0.05);
       const energies = [];
       for (let i = 0; i < ch.length; i += win) {
-        let sum = 0;
-        const end = Math.min(i + win, ch.length);
+        let sum = 0; const end = Math.min(i + win, ch.length);
         for (let j = i; j < end; j++) sum += ch[j] * ch[j];
         energies.push(Math.sqrt(sum / (end - i)));
       }
       const avg = energies.reduce((a, b) => a + b, 0) / Math.max(1, energies.length);
-      const beats = [];
-      let lastBeat = -1;
+      const beats = []; let lastBeat = -1;
       for (let i = 1; i < energies.length - 1; i++) {
         const t = i * 0.05;
-        if (energies[i] > avg * 1.42 && energies[i] > energies[i - 1] && energies[i] >= energies[i + 1]) {
-          if (t - lastBeat >= 0.38) {
-            beats.push(Number(t.toFixed(2)));
-            lastBeat = t;
-          }
+        if (energies[i] > avg * 1.42 && energies[i] > energies[i - 1] && energies[i] >= energies[i + 1] && t - lastBeat >= 0.38) {
+          beats.push(Number(t.toFixed(2))); lastBeat = t;
         }
       }
       ctx.close();
       let bpm = 120;
       if (beats.length >= 4) {
-        const diffs = [];
-        for (let i = 1; i < Math.min(beats.length, 20); i++) diffs.push(beats[i] - beats[i - 1]);
+        const diffs = []; for (let i = 1; i < Math.min(beats.length, 20); i++) diffs.push(beats[i] - beats[i - 1]);
         const med = diffs.sort((a, b) => a - b)[Math.floor(diffs.length / 2)] || 0.5;
         bpm = Math.round(Math.min(180, Math.max(70, 60 / med)));
       }
       return { bpm, beats: beats.slice(0, 40) };
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
   }
 
   function snapSegmentsToBeats(plan, beatInfo) {
-    if (!plan || !Array.isArray(plan.segments) || !beatInfo || !beatInfo.beats?.length) return plan;
-    const beats = beatInfo.beats;
+    if (!plan || !Array.isArray(plan.segments) || !beatInfo?.beats?.length) return plan;
     let cursorOut = 0;
     plan.segments.forEach((seg, idx) => {
-      const origOutDur = (seg.endSec - seg.startSec) / (seg.speed || 1);
-      const targetOut = cursorOut + origOutDur;
-      // Tìm mốc rơi beat gần nhất cách ít nhất 1.2s so với cursorOut
-      const bestBeat = beats.find((b) => b >= cursorOut + 1.2 && Math.abs(b - targetOut) <= 0.85);
-      if (bestBeat) {
-        const newOutDur = Math.max(1.0, bestBeat - cursorOut);
-        const maxClipDur = loadedClips[seg.clipIndex]?.durationSec || (seg.endSec + 2);
-        const desiredEnd = seg.startSec + newOutDur * (seg.speed || 1);
-        if (desiredEnd <= maxClipDur) seg.endSec = Number(desiredEnd.toFixed(2));
-        cursorOut = bestBeat;
-      } else {
-        cursorOut += origOutDur;
-      }
+      const origOut = (seg.endSec - seg.startSec) / (seg.speed || 1);
+      const best = beatInfo.beats.find((b) => b >= cursorOut + 1.2 && Math.abs(b - (cursorOut + origOut)) <= 0.85);
+      if (best) {
+        const desiredEnd = seg.startSec + Math.max(1.0, best - cursorOut) * (seg.speed || 1);
+        const maxDur = loadedClips[seg.clipIndex]?.durationSec || (seg.endSec + 2);
+        if (desiredEnd <= maxDur) seg.endSec = Number(desiredEnd.toFixed(2));
+        cursorOut = best;
+      } else cursorOut += origOut;
       if (idx > 0 && activeSkills.has('fx_trans')) seg.transition = idx % 2 === 0 ? 'zoom_burst' : 'flash';
     });
     return plan;
@@ -348,11 +459,9 @@
       const data = audioBuf.getChannelData(0);
       const sr = audioBuf.sampleRate;
       const winSize = Math.floor(sr * 0.5);
-      const silentRanges = [];
-      let silentStart = null;
+      const silentRanges = []; let silentStart = null;
       for (let i = 0; i < data.length; i += winSize) {
-        let sum = 0;
-        const end = Math.min(i + winSize, data.length);
+        let sum = 0; const end = Math.min(i + winSize, data.length);
         for (let j = i; j < end; j++) sum += data[j] * data[j];
         const rms = Math.sqrt(sum / (end - i));
         const t = Number((i / sr).toFixed(1));
@@ -364,7 +473,6 @@
     } catch (_) { return { hasAudio: false }; }
   }
 
-  // ================= 4. QUÉT ĐA CLIP THÔ (MULTI-CLIP SCANNER) =================
   function getVideoDuration(url) {
     return new Promise((resolve) => {
       const v = document.createElement('video');
@@ -377,27 +485,19 @@
   async function scanMultiClipFrames(clips) {
     const maxTotalFrames = 8;
     const perClip = Math.max(1, Math.floor(maxTotalFrames / Math.max(1, clips.length)));
-    const rawFrames = [];
-    const frameMeta = [];
-    const clipsInfo = [];
-
+    const rawFrames = []; const frameMeta = []; const clipsInfo = [];
     for (let cIdx = 0; cIdx < clips.length; cIdx++) {
       const clip = clips[cIdx];
       await new Promise((resolve) => {
         const v = document.createElement('video');
         v.muted = true; v.crossOrigin = 'anonymous'; v.playsInline = true; v.src = clip.url;
         v.onloadedmetadata = async () => {
-          const dur = v.duration || 10;
-          clip.durationSec = dur;
+          const dur = v.duration || 10; clip.durationSec = dur;
           clipsInfo.push({ clipIndex: cIdx, name: clip.name, durationSec: Number(dur.toFixed(1)) });
-
           const count = cIdx === 0 ? Math.min(maxTotalFrames - (clips.length - 1), Math.max(perClip, clips.length === 1 ? 8 : 2)) : perClip;
           const canvas = document.createElement('canvas');
-          const tw = 400;
-          const th = Math.max(180, Math.round((v.videoHeight / (v.videoWidth || 1)) * tw));
-          canvas.width = tw; canvas.height = th;
-          const ctx = canvas.getContext('2d');
-
+          const tw = 400; const th = Math.max(180, Math.round((v.videoHeight / (v.videoWidth || 1)) * tw));
+          canvas.width = tw; canvas.height = th; const ctx = canvas.getContext('2d');
           for (let i = 0; i < count && rawFrames.length < maxTotalFrames; i++) {
             const ratio = count === 1 ? 0.35 : (0.08 + (0.84 * i) / (count - 1));
             const t = Math.min(dur - 0.1, Math.max(0.05, dur * ratio));
@@ -421,14 +521,14 @@
     return { rawFrames, frameMeta, clipsInfo };
   }
 
-  function normalizePlanV6(plan, clipsInfo, brandTag) {
-    const p = plan && typeof plan === 'object' ? { ...plan } : {};
+  function normalizePlanV7(plan, clipsInfo, brandTag) {
+    const p = plan && typeof plan === 'object' ? JSON.parse(JSON.stringify(plan)) : {};
     const maxClipIdx = Math.max(0, clipsInfo.length - 1);
     if (!Array.isArray(p.segments) || !p.segments.length) {
       p.segments = clipsInfo.map((c, idx) => ({
         clipIndex: idx, startSec: 0, endSec: Math.min(3.0, c.durationSec || 3), speed: 1.0,
         zoomFrom: 1.0, zoomTo: 1.12, focalX: 0.5, focalY: 0.5, easing: 'easeOutExpo',
-        transition: idx === 0 ? 'flash' : 'slide_left', sfx: idx === 0 ? 'boom' : 'whoosh', label: `Cảnh từ ${c.name}`
+        transition: idx === 0 ? 'flash' : 'slide_left', sfx: idx === 0 ? 'boom' : 'whoosh', label: `Cảnh Clip #${idx + 1}`
       }));
     }
     p.segments = p.segments.map((s) => {
@@ -437,33 +537,32 @@
       const st = Math.max(0, Math.min(clipDur - 0.5, Number(s.startSec) || 0));
       const en = Math.max(st + 0.6, Math.min(clipDur, Number(s.endSec) || st + 2.5));
       return {
-        clipIndex: ci,
-        startSec: Number(st.toFixed(2)),
-        endSec: Number(en.toFixed(2)),
+        clipIndex: ci, startSec: Number(st.toFixed(2)), endSec: Number(en.toFixed(2)),
         speed: Math.min(1.6, Math.max(0.7, Number(s.speed) || 1.0)),
-        zoomFrom: Number(s.zoomFrom) || 1.0,
-        zoomTo: Number(s.zoomTo) || 1.12,
+        zoomFrom: Number(s.zoomFrom) || 1.0, zoomTo: Number(s.zoomTo) || 1.12,
         focalX: Math.min(0.85, Math.max(0.15, Number(s.focalX ?? 0.5))),
         focalY: Math.min(0.85, Math.max(0.15, Number(s.focalY ?? 0.5))),
-        easing: s.easing || 'easeOutExpo',
-        transition: s.transition || 'flash',
-        sfx: s.sfx || 'whoosh',
-        label: s.label || `Cảnh Clip #${ci + 1}`
+        easing: s.easing || 'easeOutExpo', transition: s.transition || 'flash',
+        sfx: s.sfx || 'whoosh', label: s.label || `Cảnh Clip #${ci + 1}`
       };
     }).slice(0, 12);
 
-    p.lutPreset = LUT_PRESETS[p.lutPreset] ? p.lutPreset : 'tiktok_commerce';
+    const pb = INDUSTRY_PLAYBOOKS.find((x) => x.id === syncData.preferences.industryId);
+    p.lutPreset = LUT_PRESETS[p.lutPreset] ? p.lutPreset : (pb?.lut || 'tiktok_commerce');
+    if (syncData.preferences.industryId === 'silver_jewelry') p.lutPreset = 'silver_platinum';
     p.aspectRatio = ['9:16', '16:9', '1:1'].includes(p.aspectRatio) ? p.aspectRatio : '9:16';
     p.textStyle = TEXT_STYLES.some((t) => t.id === p.textStyle && t.id !== 'auto') ? p.textStyle : 'hormozi';
     p.subtitles = Array.isArray(p.subtitles) ? p.subtitles : [];
     p.stickers = Array.isArray(p.stickers) ? p.stickers : [];
     p.titleCard = p.titleCard || { enabled: true, durationSec: 1.5, headline: brandTag || 'AUTOCUT PRO', subline: p.detectedGenre || 'Bản Dựng Chuyên Nghiệp' };
-    p.lowerThird = p.lowerThird || { enabled: Boolean(brandTag), startSec: 2.0, endSec: 5.5, title: brandTag || 'Điểm Nhấn Nổi Bật', subtitle: 'Chất lượng chuẩn cao cấp' };
-    p.endCard = p.endCard || { enabled: true, durationSec: 1.8, cta: 'Đặt Ngay Hôm Nay', subCta: brandTag || 'Cảm ơn bạn đã xem' };
+    p.lowerThird = p.lowerThird || { enabled: Boolean(brandTag), startSec: 2.0, endSec: 5.5, title: brandTag || 'Điểm Nhấn Nổi Bật', subtitle: 'Chất lượng chuẩn chỉnh' };
+    p.endCard = p.endCard || { enabled: true, durationSec: 1.8, cta: 'Nhắn Tin / Đặt Ngay', subCta: brandTag || 'Cảm ơn bạn đã xem' };
+    p.priceTag = p.priceTag || { enabled: false, origPrice: '', salePrice: '', badge: 'ƯU ĐÃI' };
+    p.specCard = p.specCard || { enabled: false, title: 'THÔNG SỐ NỔI BẬT', lines: [] };
     return p;
   }
 
-  // ================= 5. CHẠY QUÉT ĐA CLIP, CHAT CO-PILOT & CHẤM ĐIỂM VIRAL =================
+  // ================= 6. CHẠY QUÉT ĐA NGÀNH, POLICY GUARD, HOOK A/B/C & CO-PILOT =================
   function ensureClipsAvailable() {
     if (!loadedClips.length) {
       const extVid = Array.from(document.querySelectorAll('video')).find((v) => v.src && v.readyState >= 1);
@@ -472,12 +571,14 @@
     return loadedClips.length > 0;
   }
 
-  async function runAutoScanV6() {
+  async function runAutoScanV7() {
     const statusEl = document.getElementById('ac-auto-status');
     if (!ensureClipsAvailable()) { alert('Hãy bấm chọn ít nhất 1 Video Thô (hoặc nhiều clip cùng lúc) trước!'); return; }
 
     const userHint = (document.getElementById('ac-auto-hint').value || '').trim();
-    const brandTag = (document.getElementById('ac-brand-tag').value || '').trim();
+    const kit = getActiveBrandKit();
+    const brandTag = (document.getElementById('ac-brand-tag').value || kit?.name || '').trim();
+    const industryPb = INDUSTRY_PLAYBOOKS.find((x) => x.id === syncData.preferences.industryId) || INDUSTRY_PLAYBOOKS[0];
     const reasoningMode = document.getElementById('ac-reasoning-mode').value;
     const preferredTextStyle = document.getElementById('ac-text-style-pref').value;
     const enableWebSearch = document.getElementById('ac-enable-search').checked;
@@ -488,13 +589,13 @@
     syncData.preferences.enableSearch = enableWebSearch;
 
     try {
-      statusEl.innerHTML = `<span style="color:#38bdf8;">⏳ Bước 1/3: Đang quét hình ảnh từ ${loadedClips.length} clip thô & đo sóng âm...</span>`;
+      statusEl.innerHTML = `<span style="color:#38bdf8;">⏳ Bước 1/3: Đang quét ${loadedClips.length} clip thô & sóng âm theo kịch bản "${industryPb.name}"...</span>`;
       const [scanData, audioStats] = await Promise.all([
         scanMultiClipFrames(loadedClips),
         loadedClips[0]?.file ? analyzeAudioSilence(loadedClips[0].file) : Promise.resolve({ hasAudio: false })
       ]);
 
-      statusEl.innerHTML = '<span style="color:#a78bfa;">🧠 Bước 2/3: Đạo Diễn AI đang sắp xếp đa clip, định vị tâm chủ thể (x,y) & khớp Beat-Sync...</span>';
+      statusEl.innerHTML = '<span style="color:#a78bfa;">🧠 Bước 2/3: AI đang dựng đa clip, lọc chính sách nền tảng, khóa tiêu điểm (x,y) & Beat-Sync...</span>';
       const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
       const res = await fetch(proxy, {
         method: 'POST',
@@ -507,8 +608,10 @@
           durationSec: scanData.clipsInfo[0]?.durationSec || 12,
           audioStats,
           beatInfo: activeSkills.has('beat_sync') ? bgmBeatInfo : null,
+          industryPlaybook: industryPb,
+          platformSafeZone: syncData.preferences.platformSafeZone,
           userHint,
-          brandTag,
+          brandTag: kit ? `${kit.name}${kit.hotline ? ' • ' + kit.hotline : ''}` : brandTag,
           reasoningMode,
           preferredTextStyle,
           activeSkills: Array.from(activeSkills),
@@ -519,12 +622,17 @@
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
 
-      currentMasterPlan = normalizePlanV6(data.plan, scanData.clipsInfo, brandTag);
+      currentMasterPlan = normalizePlanV7(data.plan, scanData.clipsInfo, brandTag);
       if (preferredTextStyle !== 'auto') currentMasterPlan.textStyle = preferredTextStyle;
       if (activeSkills.has('beat_sync') && bgmBeatInfo) currentMasterPlan = snapSegmentsToBeats(currentMasterPlan, bgmBeatInfo);
+      if (loadedClips.length >= 2 && industryPb.split !== 'off') splitMode = industryPb.split;
 
+      baseMasterPlan = JSON.parse(JSON.stringify(currentMasterPlan));
+      hookVariants = [];
+      activeHookId = 'BASE';
       copilotHistory = [];
       currentCritic = null;
+
       syncData.behavior.totalActions += 1;
       if (currentMasterPlan.detectedGenre) {
         syncData.behavior.recentGenres = [currentMasterPlan.detectedGenre, ...syncData.behavior.recentGenres.filter((g) => g !== currentMasterPlan.detectedGenre)].slice(0, 6);
@@ -533,7 +641,7 @@
       const ttsBox = document.getElementById('ac-tts-text');
       if (ttsBox && currentMasterPlan.voiceoverScript) ttsBox.value = currentMasterPlan.voiceoverScript;
 
-      statusEl.innerHTML = `<span style="color:#4ade80;">✓ Đã dựng xong từ ${loadedClips.length} clip (${data.provider})! Bạn có thể Chat Co-Pilot tinh chỉnh hoặc Xuất ngay.</span>`;
+      statusEl.innerHTML = `<span style="color:#4ade80;">✓ Đã dựng xong bản Pro v7 (${data.provider})! Kiểm tra Policy Guard, Hook A/B/C & Xuất ngay.</span>`;
       renderMasterWorkspace(currentMasterPlan, data.sources || []);
       archiveCurrentProjectToSync();
     } catch (err) {
@@ -541,29 +649,129 @@
     }
   }
 
+  async function runPolicySanitize() {
+    if (!currentMasterPlan) return;
+    const box = document.getElementById('ac-policy-box');
+    const flagged = scanPlanForPolicyRisks(currentMasterPlan);
+    box.innerHTML = '<div style="font-size:11.5px; color:#38bdf8;">🛡️ AI đang tự động lách các cụm từ nhạy cảm chính sách sang ngôn từ an toàn...</div>';
+    try {
+      const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
+      const res = await fetch(proxy, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'policy_sanitize', currentPlan: currentMasterPlan, platform: syncData.preferences.platformSafeZone, flaggedWords: flagged })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Lỗi lọc chính sách');
+      const clipsInfo = loadedClips.map((c, i) => ({ clipIndex: i, name: c.name, durationSec: c.durationSec || 10 }));
+      currentMasterPlan = normalizePlanV7(data.plan, clipsInfo.length ? clipsInfo : [{ clipIndex: 0, name: 'Clip 1', durationSec: 15 }], syncData.preferences.brandTag);
+      if (activeHookId === 'BASE') baseMasterPlan = JSON.parse(JSON.stringify(currentMasterPlan));
+      const ttsBox = document.getElementById('ac-tts-text');
+      if (ttsBox && currentMasterPlan.voiceoverScript) ttsBox.value = currentMasterPlan.voiceoverScript;
+      renderMasterWorkspace(currentMasterPlan, []);
+      const b2 = document.getElementById('ac-policy-box');
+      if (b2) {
+        const chHtml = (data.changes || []).slice(0, 4).map((c) => `<div>• <s style="color:#f87171;">${c.before}</s> → <b style="color:#4ade80;">${c.after}</b></div>`).join('');
+        b2.innerHTML = `<div style="font-size:11.5px; color:#4ade80;">✅ ${data.summary || 'Đã lách từ an toàn chính sách!'}${chHtml}</div>`;
+      }
+      archiveCurrentProjectToSync();
+    } catch (err) {
+      box.innerHTML = `<div style="font-size:11.5px; color:#f87171;">⚠️ ${err.message}</div>`;
+    }
+  }
+
+  async function runGenerateABHooks() {
+    if (!currentMasterPlan) return;
+    const area = document.getElementById('ac-ab-hooks-area');
+    area.innerHTML = '<div style="font-size:11.5px; color:#a78bfa;">🔀 Đang nhân bản 3 biến thể Hook 3 giây đầu (A: Nỗi đau / B: Kết quả / C: Tò mò)...</div>';
+    try {
+      const pb = INDUSTRY_PLAYBOOKS.find((x) => x.id === syncData.preferences.industryId);
+      const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
+      const res = await fetch(proxy, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate_ab_hooks', currentPlan: baseMasterPlan || currentMasterPlan, industryName: pb?.name || '', brandTag: syncData.preferences.brandTag })
+      });
+      const data = await res.json();
+      if (!res.ok || data.error || !data.variants?.length) throw new Error(data.error || 'Không tạo được biến thể Hook');
+      hookVariants = data.variants;
+      renderABHooksBar();
+    } catch (err) {
+      area.innerHTML = `<div style="font-size:11.5px; color:#f87171;">⚠️ ${err.message}</div>`;
+    }
+  }
+
+  function applyHookVariant(variantId) {
+    if (!baseMasterPlan) baseMasterPlan = JSON.parse(JSON.stringify(currentMasterPlan));
+    activeHookId = variantId;
+    const next = JSON.parse(JSON.stringify(baseMasterPlan));
+    // Giữ lại các cấu hình priceTag/specCard/LUT/ratio người dùng vừa chỉnh
+    next.lutPreset = currentMasterPlan.lutPreset;
+    next.textStyle = currentMasterPlan.textStyle;
+    next.aspectRatio = currentMasterPlan.aspectRatio;
+    next.priceTag = currentMasterPlan.priceTag;
+    next.specCard = currentMasterPlan.specCard;
+
+    if (variantId !== 'BASE') {
+      const v = hookVariants.find((x) => x.id === variantId);
+      if (v) {
+        if (v.titleCard) next.titleCard = { ...next.titleCard, ...v.titleCard, enabled: true };
+        if (v.firstSegmentPatch && next.segments?.[0]) next.segments[0] = { ...next.segments[0], ...v.firstSegmentPatch };
+        if (v.openingSubtitle && next.subtitles?.[0]) {
+          next.subtitles[0] = { ...next.subtitles[0], text: v.openingSubtitle.text, highlight: v.openingSubtitle.highlight || '' };
+        }
+        if (v.openingVoiceLine) {
+          const rest = (next.voiceoverScript || '').split(/[.!?]\s+/).slice(1).join('. ');
+          next.voiceoverScript = v.openingVoiceLine + (rest ? '. ' + rest : '');
+          const ttsBox = document.getElementById('ac-tts-text');
+          if (ttsBox) ttsBox.value = next.voiceoverScript;
+        }
+      }
+    }
+    currentMasterPlan = next;
+    renderMasterWorkspace(currentMasterPlan, []);
+  }
+
+  function renderABHooksBar() {
+    const area = document.getElementById('ac-ab-hooks-area');
+    if (!area) return;
+    if (!hookVariants.length) {
+      area.innerHTML = '<button class="acp-btn acp-btn-main" id="ac-btn-gen-ab" style="width:100%; font-size:11.5px;">🔀 Nhân Bản 3 Biến Thể Mở Đầu (Hook A / B / C)</button>';
+      document.getElementById('ac-btn-gen-ab').onclick = runGenerateABHooks;
+      return;
+    }
+    const activeObj = hookVariants.find((v) => v.id === activeHookId);
+    area.innerHTML = `
+      <div style="font-size:11px; font-weight:800; color:#fbbf24; margin-bottom:5px;">🔀 CHUYỂN NHANH BIẾN THỂ MỞ ĐẦU (TEST ADS / KÊNH):</div>
+      <div style="display:flex; gap:5px; flex-wrap:wrap;">
+        <button class="acp-btn" data-hook-id="BASE" style="padding:5px 9px; font-size:11px; background:${activeHookId === 'BASE' ? '#4f46e5' : '#1e293b'};">Bản Gốc</button>
+        ${hookVariants.map((v) => `<button class="acp-btn" data-hook-id="${v.id}" style="padding:5px 9px; font-size:11px; background:${activeHookId === v.id ? '#7c3aed' : '#1e293b'};">${v.label || ('Hook ' + v.id)}</button>`).join('')}
+      </div>
+      ${activeObj ? `<div style="font-size:11px; color:#cbd5e1; margin-top:5px;">💡 <b>Góc ${activeObj.id}:</b> ${activeObj.angle || ''} • <i>"${activeObj.openingSubtitle?.text || ''}"</i></div>` : ''}
+    `;
+    area.querySelectorAll('[data-hook-id]').forEach((b) => {
+      b.onclick = () => applyHookVariant(b.getAttribute('data-hook-id'));
+    });
+  }
+
   async function runCopilotChat() {
     const inp = document.getElementById('ac-copilot-input');
     const logEl = document.getElementById('ac-copilot-log');
     const cmd = (inp?.value || '').trim();
     if (!currentMasterPlan || !cmd) return;
-
     inp.value = '';
     copilotHistory.push({ role: 'user', text: cmd });
     renderCopilotLog();
-    logEl.insertAdjacentHTML('beforeend', '<div id="ac-cp-wait" style="font-size:11px; color:#a78bfa; padding:4px 0;">🤖 Co-Pilot đang cập nhật đúng phần bạn yêu cầu...</div>');
-
+    logEl.insertAdjacentHTML('beforeend', '<div style="font-size:11px; color:#a78bfa; padding:4px 0;">🤖 Co-Pilot đang sửa đúng chi tiết bạn yêu cầu...</div>');
     try {
       const clipsInfo = loadedClips.map((c, i) => ({ clipIndex: i, name: c.name, durationSec: c.durationSec || 10 }));
       const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
       const res = await fetch(proxy, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'copilot_refine', currentPlan: currentMasterPlan, userCommand: cmd, clipsInfo, chatHistory: copilotHistory })
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Lỗi Co-Pilot');
-
-      currentMasterPlan = normalizePlanV6(data.plan, clipsInfo.length ? clipsInfo : [{ clipIndex: 0, name: 'Clip 1', durationSec: 15 }], syncData.preferences.brandTag);
+      currentMasterPlan = normalizePlanV7(data.plan, clipsInfo.length ? clipsInfo : [{ clipIndex: 0, name: 'Clip 1', durationSec: 15 }], syncData.preferences.brandTag);
+      if (activeHookId === 'BASE') baseMasterPlan = JSON.parse(JSON.stringify(currentMasterPlan));
       copilotHistory.push({ role: 'ai', text: data.reply || 'Đã sửa xong!' });
       renderMasterWorkspace(currentMasterPlan, []);
       archiveCurrentProjectToSync();
@@ -587,25 +795,23 @@
   async function runViralCritic(autoOptimize = false) {
     const box = document.getElementById('ac-critic-body');
     if (!currentMasterPlan) {
-      box.innerHTML = '<div style="color:#fbbf24; font-size:12px;">Hãy tạo hoặc khôi phục 1 bản dựng ở tab "Tự Dựng Pro" trước khi chấm điểm Viral!</div>';
+      box.innerHTML = '<div style="color:#fbbf24; font-size:12px;">Hãy tạo hoặc mở lại 1 bản dựng trước khi chấm điểm Viral!</div>';
       return;
     }
-    box.innerHTML = `<div style="color:#38bdf8; font-size:12px; padding:8px;">${autoOptimize ? '🚀 AI đang tự nâng cấp kịch bản lên 95+ điểm và xuất lại bộ Đăng Bài...' : '📊 AI đang chấm điểm thuật toán giữ chân & soạn Ảnh bìa + Caption...'}</div>`;
-
+    box.innerHTML = `<div style="color:#38bdf8; font-size:12px; padding:8px;">${autoOptimize ? '🚀 AI đang nâng cấp kịch bản lên 95+ điểm...' : '📊 Đang chấm điểm thuật toán & soạn Ảnh bìa + Caption...'}</div>`;
     try {
       const clipsInfo = loadedClips.map((c, i) => ({ clipIndex: i, name: c.name, durationSec: c.durationSec || 10 }));
       const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
       const res = await fetch(proxy, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'viral_critic', currentPlan: currentMasterPlan, autoOptimize, clipsInfo, brandTag: syncData.preferences.brandTag })
       });
       const data = await res.json();
-      if (!res.ok || data.error || !data.critic) throw new Error(data.error || 'Không nhận được kết quả chấm điểm');
-
+      if (!res.ok || data.error || !data.critic) throw new Error(data.error || 'Lỗi chấm điểm');
       currentCritic = data.critic;
       if (autoOptimize && data.critic.optimizedPlan) {
-        currentMasterPlan = normalizePlanV6(data.critic.optimizedPlan, clipsInfo.length ? clipsInfo : [{ clipIndex: 0, name: 'Clip 1', durationSec: 15 }], syncData.preferences.brandTag);
+        currentMasterPlan = normalizePlanV7(data.critic.optimizedPlan, clipsInfo.length ? clipsInfo : [{ clipIndex: 0, name: 'Clip 1', durationSec: 15 }], syncData.preferences.brandTag);
+        baseMasterPlan = JSON.parse(JSON.stringify(currentMasterPlan));
         renderMasterWorkspace(currentMasterPlan, []);
       }
       renderCriticAndPublishKit(currentCritic);
@@ -621,11 +827,9 @@
     canvas.width = 720; canvas.height = 1280;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#090d1f'; ctx.fillRect(0, 0, 720, 1280);
-
     const segIdx = Math.min((currentMasterPlan?.segments?.length || 1) - 1, Math.max(0, Number(kit.bestSegmentIndex) || 0));
     const seg = currentMasterPlan?.segments?.[segIdx];
     const clip = loadedClips[seg?.clipIndex || 0];
-
     if (clip?.url) {
       await new Promise((resolve) => {
         const v = document.createElement('video');
@@ -633,53 +837,36 @@
         v.onloadedmetadata = () => { v.currentTime = Math.min(v.duration - 0.1, (seg?.startSec || 0) + 0.5); };
         v.onseeked = () => {
           const lut = LUT_PRESETS[currentMasterPlan?.lutPreset] || LUT_PRESETS.tiktok_commerce;
-          ctx.save();
-          ctx.filter = lut.filter;
+          ctx.save(); ctx.filter = lut.filter;
           const sc = Math.max(720 / (v.videoWidth || 720), 1280 / (v.videoHeight || 1280));
-          const dw = (v.videoWidth || 720) * sc;
-          const dh = (v.videoHeight || 1280) * sc;
-          const dx = Math.min(0, Math.max(720 - dw, 360 - (seg?.focalX ?? 0.5) * dw));
-          const dy = Math.min(0, Math.max(1280 - dh, 640 - (seg?.focalY ?? 0.5) * dh));
-          ctx.drawImage(v, dx, dy, dw, dh);
-          ctx.restore();
-          resolve();
+          const dw = (v.videoWidth || 720) * sc; const dh = (v.videoHeight || 1280) * sc;
+          ctx.drawImage(v, Math.min(0, Math.max(720 - dw, 360 - (seg?.focalX ?? 0.5) * dw)), Math.min(0, Math.max(1280 - dh, 640 - (seg?.focalY ?? 0.5) * dh)), dw, dh);
+          ctx.restore(); resolve();
         };
         v.onerror = resolve;
       });
     }
-
-    // Lớp gradient tối dưới + trên giúp chữ Ảnh bìa cực nổi
     const grad = ctx.createLinearGradient(0, 0, 0, 1280);
-    grad.addColorStop(0, 'rgba(0,0,0,0.62)');
-    grad.addColorStop(0.45, 'rgba(0,0,0,0.08)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.78)');
+    grad.addColorStop(0, 'rgba(0,0,0,0.62)'); grad.addColorStop(0.45, 'rgba(0,0,0,0.08)'); grad.addColorStop(1, 'rgba(0,0,0,0.78)');
     ctx.fillStyle = grad; ctx.fillRect(0, 0, 720, 1280);
-
-    // Badge góc trên
     if (kit.thumbnailBadge) {
       ctx.font = '800 32px system-ui, sans-serif';
       const bw = ctx.measureText(kit.thumbnailBadge).width + 44;
-      ctx.fillStyle = '#ef4444';
-      drawRoundedRect(ctx, 360 - bw / 2, 130, bw, 58, 999); ctx.fill();
-      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(kit.thumbnailBadge, 360, 160);
+      ctx.fillStyle = getActiveBrandKit()?.accentColor || '#ef4444';
+      drawRoundedRect(ctx, 360 - bw / 2, 145, bw, 58, 999); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(kit.thumbnailBadge, 360, 175);
     }
-
-    // Tiêu đề lớn Ảnh bìa
-    const headline = (kit.thumbnailHeadline || 'VIDEO NỔI BẬT').toUpperCase();
-    const words = headline.split(/\s+/);
     const lines = []; let cur = '';
-    words.forEach((w) => { if ((cur + ' ' + w).trim().length > 14) { if (cur) lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
+    (kit.thumbnailHeadline || 'VIDEO NỔI BẬT').toUpperCase().split(/\s+/).forEach((w) => {
+      if ((cur + ' ' + w).trim().length > 14) { if (cur) lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim();
+    });
     if (cur) lines.push(cur);
-
-    ctx.font = '900 64px system-ui, sans-serif';
-    ctx.textAlign = 'center';
+    ctx.font = '900 64px system-ui, sans-serif'; ctx.textAlign = 'center';
     lines.forEach((ln, idx) => {
-      const y = 920 + idx * 78;
-      ctx.lineWidth = 12; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round';
-      ctx.strokeText(ln, 360, y);
-      ctx.fillStyle = idx === 0 ? '#fde047' : '#ffffff';
-      ctx.fillText(ln, 360, y);
+      const y = 880 + idx * 78;
+      ctx.lineWidth = 12; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round'; ctx.strokeText(ln, 360, y);
+      ctx.fillStyle = idx === 0 ? '#fde047' : '#fff'; ctx.fillText(ln, 360, y);
     });
   }
 
@@ -687,29 +874,26 @@
     const box = document.getElementById('ac-critic-body');
     if (!box || !c) return;
     const scoreColor = c.score >= 90 ? '#4ade80' : c.score >= 75 ? '#fbbf24' : '#f87171';
-    const b = c.breakdown || {};
-    const kit = c.publishKit || {};
-
+    const b = c.breakdown || {}; const kit = c.publishKit || {};
     box.innerHTML = `
       <div style="background:#090f1d; border:1px solid #334155; border-radius:10px; padding:12px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
           <div>
-            <div style="font-size:11px; color:#94a3b8; font-weight:700;">ĐIỂM TIỀM NĂNG VIRAL</div>
+            <div style="font-size:11px; color:#94a3b8; font-weight:700;">ĐIỂM VIRAL</div>
             <div style="font-size:32px; font-weight:900; color:${scoreColor};">${c.score || 85}<span style="font-size:14px; color:#94a3b8;">/100</span></div>
           </div>
           <div style="font-size:11px; color:#cbd5e1; line-height:1.6;">
-            🔥 Hook 3s: <b>${b.hook || 85}</b> • ✂️ Nhịp độ: <b>${b.pacing || 85}</b><br/>
-            💬 Phụ đề: <b>${b.subtitles || 85}</b> • 🎯 Chốt đơn CTA: <b>${b.cta || 85}</b>
+            🔥 Hook: <b>${b.hook || 85}</b> • ✂️ Nhịp: <b>${b.pacing || 85}</b><br/>
+            💬 Phụ đề: <b>${b.subtitles || 85}</b> • 🎯 CTA: <b>${b.cta || 85}</b>
           </div>
         </div>
-        ${(c.weaknesses || []).length ? `<div style="margin-top:8px; font-size:11.5px; color:#fca5a5;">⚠️ <b>Cần cải thiện:</b> ${c.weaknesses.join(' • ')}</div>` : ''}
-        <button class="acp-btn acp-btn-main" id="ac-btn-optimize-95" style="width:100%; margin-top:10px;">🚀 Tự Động Tối Ưu Bản Dựng Lên 95+ Điểm</button>
+        ${(c.weaknesses || []).length ? `<div style="margin-top:8px; font-size:11.5px; color:#fca5a5;">⚠️ ${c.weaknesses.join(' • ')}</div>` : ''}
+        <button class="acp-btn acp-btn-main" id="ac-btn-optimize-95" style="width:100%; margin-top:10px;">🚀 Tự Tối Ưu Lên 95+ Điểm</button>
       </div>
-
       <div style="background:#090f1d; border:1px solid #334155; border-radius:10px; padding:12px; margin-top:10px;">
-        <div style="font-size:12px; font-weight:800; color:#fbbf24; margin-bottom:8px;">🖼️ ẢNH BÌA THUMBNAIL & BỘ ĐĂNG BÀI (PUBLISH KIT)</div>
+        <div style="font-size:12px; font-weight:800; color:#fbbf24; margin-bottom:8px;">🖼️ ẢNH BÌA & BỘ ĐĂNG BÀI</div>
         <div style="text-align:center;">
-          <canvas id="ac-thumb-canvas" style="max-height:220px; border-radius:8px; border:1px solid #334155;"></canvas>
+          <canvas id="ac-thumb-canvas" style="max-height:210px; border-radius:8px; border:1px solid #334155;"></canvas>
           <div style="margin-top:6px;"><button class="acp-btn acp-btn-green" id="ac-dl-thumb">⬇️ Tải Ảnh Bìa (.png)</button></div>
         </div>
         <div style="margin-top:10px;">
@@ -722,47 +906,36 @@
               <div style="color:#e2e8f0; white-space:pre-wrap;">${cap.text || ''}</div>
             </div>
           `).join('')}
-          ${kit.hashtags ? `
-            <div style="background:#131c31; padding:8px; border-radius:8px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <span style="color:#a78bfa;">${kit.hashtags}</span>
-              <button class="acp-btn" id="ac-copy-tags" style="padding:3px 8px; font-size:10px;">Copy Tags</button>
-            </div>
-          ` : ''}
+          ${kit.hashtags ? `<div style="background:#131c31; padding:8px; border-radius:8px; font-size:11.5px; display:flex; justify-content:space-between; align-items:center; gap:8px;"><span style="color:#a78bfa;">${kit.hashtags}</span><button class="acp-btn" id="ac-copy-tags" style="padding:3px 8px; font-size:10px;">Copy</button></div>` : ''}
         </div>
       </div>
     `;
-
     document.getElementById('ac-btn-optimize-95').onclick = () => runViralCritic(true);
     document.getElementById('ac-dl-thumb').onclick = () => {
-      const cnv = document.getElementById('ac-thumb-canvas');
-      const a = document.createElement('a'); a.href = cnv.toDataURL('image/png'); a.download = `AutoCut-Thumbnail-${Date.now()}.png`; a.click();
+      const a = document.createElement('a'); a.href = document.getElementById('ac-thumb-canvas').toDataURL('image/png'); a.download = `AutoCut-Thumb-${Date.now()}.png`; a.click();
     };
     box.querySelectorAll('[data-copy-cap]').forEach((btn) => {
-      btn.onclick = () => {
-        const cap = kit.captions[Number(btn.dataset.copyCap)];
-        navigator.clipboard.writeText(`${cap.text}\n\n${kit.hashtags || ''}`);
-        btn.textContent = 'Đã Copy ✓';
-      };
+      btn.onclick = () => { const cap = kit.captions[Number(btn.dataset.copyCap)]; navigator.clipboard.writeText(`${cap.text}\n\n${kit.hashtags || ''}`); btn.textContent = 'Đã Copy ✓'; };
     });
-    const copyTagBtn = document.getElementById('ac-copy-tags');
-    if (copyTagBtn) copyTagBtn.onclick = () => { navigator.clipboard.writeText(kit.hashtags); copyTagBtn.textContent = 'Đã Copy ✓'; };
-
+    const ct = document.getElementById('ac-copy-tags');
+    if (ct) ct.onclick = () => { navigator.clipboard.writeText(kit.hashtags); ct.textContent = 'Đã Copy ✓'; };
     drawThumbnailCanvas(kit);
   }
 
-  // ================= 6. HIỂN THỊ KẾT QUẢ BẢN DỰNG & CHAT CO-PILOT =================
+  // ================= 7. GIAO DIỆN WORKSPACE BẢN DỰNG (POLICY + HOOK A/B/C + ĐỒ HỌA NGÀNH) =================
   function renderMasterWorkspace(plan, sources) {
     const el = document.getElementById('ac-auto-result');
     if (!el || !plan) return;
     const lutInfo = LUT_PRESETS[plan.lutPreset] || LUT_PRESETS.tiktok_commerce;
     const totalOutSec = plan.segments.reduce((acc, s) => acc + (s.endSec - s.startSec) / s.speed, 0) + (activeSkills.has('end_card') && plan.endCard?.enabled ? Number(plan.endCard.durationSec || 1.8) : 0);
+    const riskyWords = scanPlanForPolicyRisks(plan);
 
     const sourcesHtml = sources.length
-      ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">🌐 <b>Nguồn xu hướng:</b> ${sources.map((s) => `<a href="${s.url}" target="_blank" style="color:#38bdf8; margin-right:6px;">${s.title.slice(0, 32)}</a>`).join('')}</div>`
+      ? `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">🌐 <b>Xu hướng:</b> ${sources.map((s) => `<a href="${s.url}" target="_blank" style="color:#38bdf8; margin-right:6px;">${s.title.slice(0, 30)}</a>`).join('')}</div>`
       : '';
 
     const segsHtml = plan.segments.map((s, idx) => `
-      <div style="display:flex; justify-content:space-between; gap:6px; padding:5px 0; border-bottom:1px solid #1e293b; font-size:11px;">
+      <div style="display:flex; justify-content:space-between; gap:6px; padding:4px 0; border-bottom:1px solid #1e293b; font-size:11px;">
         <span style="color:#38bdf8; font-weight:700;">#${idx + 1} C${(s.clipIndex || 0) + 1}[${s.startSec}→${s.endSec}s]</span>
         <span style="flex:1; color:#e2e8f0;">${s.label}</span>
         <span style="color:#a78bfa;">🎯(${Math.round((s.focalX ?? 0.5) * 100)}%,${Math.round((s.focalY ?? 0.5) * 100)}%) • ${s.transition}</span>
@@ -776,30 +949,74 @@
           <span style="color:#4ade80; font-size:11px; font-weight:700;">~${totalOutSec.toFixed(1)}s • ${plan.aspectRatio} ${bgmBeatInfo ? `• 🥁 ${bgmBeatInfo.bpm} BPM` : ''}</span>
         </div>
         <div style="font-size:12px; color:#e2e8f0; margin-top:6px; line-height:1.45;">🧠 ${plan.thinkingSummary || ''}</div>
-        <div style="margin-top:6px; background:#131c31; padding:7px 9px; border-radius:8px; font-size:11px;">
-          🎨 <b>${lutInfo.name}</b> • 💬 ${plan.subtitles.length} phụ đề • ✨ ${plan.stickers.length} sticker • 🎙️ ${attachedVoiceLabel || 'Chưa gắn giọng AI'}
+
+        <!-- BỘ LỌC CHỐNG GẬY CHÍNH SÁCH (POLICY GUARD) -->
+        <div id="ac-policy-box" style="margin-top:8px; padding:8px 10px; border-radius:8px; background:${riskyWords.length ? 'rgba(239,68,68,0.14)' : 'rgba(16,185,129,0.12)'}; border:1px solid ${riskyWords.length ? '#ef4444' : '#10b981'};">
+          ${riskyWords.length ? `
+            <div style="font-size:11.5px; color:#fca5a5;">🛡️ <b>Cảnh báo chính sách (${syncData.preferences.platformSafeZone.toUpperCase()}):</b> Phát hiện từ nhạy cảm: <b style="color:#f87171;">${riskyWords.join(', ')}</b></div>
+            <button class="acp-btn" id="ac-btn-policy-fix" style="margin-top:6px; width:100%; background:#dc2626; font-size:11.5px;">🛡️ Lách Từ An Toàn Chính Sách (1 Chạm)</button>
+          ` : `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:#4ade80;">
+              <span>🛡️ <b>Policy Guard:</b> An toàn, không dính từ cấm phổ biến ✓</span>
+              <button class="acp-btn" id="ac-btn-policy-fix" style="padding:3px 8px; font-size:10px; background:#065f46;">Quét sâu AI</button>
+            </div>
+          `}
         </div>
+
+        <!-- BIẾN THỂ MỞ ĐẦU HOOK A/B/C -->
+        <div id="ac-ab-hooks-area" style="margin-top:8px; background:#11192e; border:1px solid #2b3856; border-radius:8px; padding:8px;"></div>
+
+        <!-- ĐỒ HỌA CHUYÊN NGÀNH: THẺ GIÁ, SPEC CARD & BEFORE/AFTER -->
+        <div style="margin-top:8px; background:#11192e; border:1px solid #2b3856; border-radius:8px; padding:9px; font-size:11px;">
+          <div style="font-weight:800; color:#38bdf8; margin-bottom:6px;">🎨 ĐỒ HỌA CHUYÊN NGÀNH (VẼ TRỰC TIẾP LÊN VIDEO)</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px;">
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+              <input type="checkbox" id="ac-pt-en" ${plan.priceTag?.enabled ? 'checked' : ''} /> 🏷️ Bật Thẻ Giá Sale
+            </label>
+            <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+              <input type="checkbox" id="ac-sc-en" ${plan.specCard?.enabled ? 'checked' : ''} /> 📋 Bật Bảng Thông Số
+            </label>
+          </div>
+          <div id="ac-pt-fields" style="display:${plan.priceTag?.enabled ? 'grid' : 'none'}; grid-template-columns:1fr 1fr 80px; gap:5px; margin-bottom:6px;">
+            <input class="acp-inp" id="ac-pt-orig" placeholder="Giá gốc (590k)" value="${plan.priceTag?.origPrice || ''}" />
+            <input class="acp-inp" id="ac-pt-sale" placeholder="Giá Sale (399k)" value="${plan.priceTag?.salePrice || ''}" />
+            <input class="acp-inp" id="ac-pt-badge" placeholder="Nhãn" value="${plan.priceTag?.badge || 'SALE'}" />
+          </div>
+          <div id="ac-sc-fields" style="display:${plan.specCard?.enabled ? 'block' : 'none'}; margin-bottom:6px;">
+            <input class="acp-inp" id="ac-sc-title" placeholder="Tiêu đề bảng (VD: THÔNG SỐ CĂN HỘ)" value="${plan.specCard?.title || 'THÔNG SỐ NỔI BẬT'}" style="margin-bottom:4px;" />
+            <input class="acp-inp" id="ac-sc-lines" placeholder="3 dòng cách nhau dấu | (VD: 85m² 2PN | Trung tâm | 2.8 Tỷ)" value="${(plan.specCard?.lines || []).join(' | ')}" />
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span style="color:#94a3b8; white-space:nowrap;">Before/After:</span>
+            <select id="ac-split-mode" class="acp-sel" style="padding:5px 8px;">
+              <option value="off" ${splitMode === 'off' ? 'selected' : ''}>Tắt (Chiếu nối tiếp từng clip)</option>
+              <option value="lr" ${splitMode === 'lr' ? 'selected' : ''}>Chia Trái | Phải (Clip 1 Trước • Clip 2 Sau)</option>
+              <option value="tb" ${splitMode === 'tb' ? 'selected' : ''}>Chia Trên / Dưới (Clip 1 Trước • Clip 2 Sau)</option>
+            </select>
+          </div>
+        </div>
+
         ${sourcesHtml}
         <div style="margin-top:8px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <span style="font-size:11px; font-weight:700; color:#fbbf24;">✂️ TIMELINE ĐA CLIP (${plan.segments.length} cảnh):</span>
-            ${bgmBeatInfo ? '<button class="acp-btn" id="ac-btn-snap-beats" style="padding:3px 8px; font-size:10px; background:#0284c7;">🥁 Khóa Khớp Nhịp Nhạc</button>' : ''}
+            <span style="font-size:11px; font-weight:700; color:#fbbf24;">✂️ TIMELINE (${plan.segments.length} cảnh • ${lutInfo.name}):</span>
+            ${bgmBeatInfo ? '<button class="acp-btn" id="ac-btn-snap-beats" style="padding:3px 8px; font-size:10px; background:#0284c7;">🥁 Khớp Beat</button>' : ''}
           </div>
           ${segsHtml}
         </div>
 
-        <!-- CHAT CO-PILOT TINH CHỈNH TRỰC TIẾP -->
-        <div style="margin-top:10px; background:#11192e; border:1px solid #3b2f6e; border-radius:10px; padding:9px;">
-          <div style="font-size:11px; font-weight:800; color:#c4b5fd; margin-bottom:5px;">💬 CHAT CO-PILOT — Sửa từng cảnh không cần quét lại</div>
-          <div id="ac-copilot-log" style="max-height:115px; overflow-y:auto; margin-bottom:6px;"></div>
-          <div style="display:flex; gap:6px;">
-            <input class="acp-inp" id="ac-copilot-input" placeholder="VD: Đổi cảnh 2 sang Glitch, sửa phụ đề câu 1 thành..." />
-            <button class="acp-btn" id="ac-mic-copilot" data-default-label="🎙️" style="padding:0 10px;">🎙️</button>
+        <!-- CHAT CO-PILOT -->
+        <div style="margin-top:8px; background:#11192e; border:1px solid #3b2f6e; border-radius:9px; padding:8px;">
+          <div style="font-size:11px; font-weight:800; color:#c4b5fd; margin-bottom:4px;">💬 CHAT CO-PILOT — Tinh chỉnh trực tiếp</div>
+          <div id="ac-copilot-log" style="max-height:100px; overflow-y:auto; margin-bottom:5px;"></div>
+          <div style="display:flex; gap:5px;">
+            <input class="acp-inp" id="ac-copilot-input" placeholder="VD: Cảnh 2 chậm 0.85x, đổi phụ đề đầu thành..." />
+            <button class="acp-btn" id="ac-mic-copilot" data-default-label="🎙️" style="padding:0 9px;">🎙️</button>
             <button class="acp-btn acp-btn-main" id="ac-send-copilot">Sửa</button>
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr 82px; gap:6px; margin-top:10px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr 80px; gap:5px; margin-top:8px;">
           <select id="ac-lut-override" class="acp-sel">
             ${Object.entries(LUT_PRESETS).map(([k, v]) => `<option value="${k}" ${k === plan.lutPreset ? 'selected' : ''}>🎨 ${v.name}</option>`).join('')}
           </select>
@@ -813,39 +1030,69 @@
           </select>
         </div>
 
-        <div style="margin-top:10px; text-align:center;">
-          <canvas id="ac-pro-preview-canvas" style="max-width:100%; max-height:280px; border-radius:10px; background:#000; border:1px solid #334155;"></canvas>
+        <div style="margin-top:9px; text-align:center;">
+          <canvas id="ac-pro-preview-canvas" style="max-width:100%; max-height:290px; border-radius:10px; background:#000; border:1px solid #334155;"></canvas>
         </div>
-        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
           <button class="acp-btn acp-btn-main" id="ac-btn-play-edl" style="flex:1;">▶️ Xem Thử</button>
-          <button class="acp-btn acp-btn-green" id="ac-btn-export-edl" style="flex:1;">⬇️ Render & Xuất Video</button>
-          <button class="acp-btn" id="ac-btn-goto-critic" style="background:#b45309;">🏆 Chấm Điểm & Đăng Bài</button>
+          <button class="acp-btn acp-btn-green" id="ac-btn-export-edl" style="flex:1;">⬇️ Render & Xuất (${activeHookId})</button>
+          <button class="acp-btn" id="ac-btn-goto-critic" style="background:#b45309;">🏆 Viral & Đăng Bài</button>
         </div>
         <div id="ac-render-progress" style="font-size:12px; color:#fbbf24; margin-top:6px; text-align:center;"></div>
       </div>
     `;
 
+    renderABHooksBar();
     renderCopilotLog();
     preparePreviewCanvas();
+
+    document.getElementById('ac-btn-policy-fix').onclick = runPolicySanitize;
+    const syncGraphics = () => {
+      currentMasterPlan.priceTag = {
+        enabled: document.getElementById('ac-pt-en').checked,
+        origPrice: document.getElementById('ac-pt-orig').value.trim(),
+        salePrice: document.getElementById('ac-pt-sale').value.trim(),
+        badge: document.getElementById('ac-pt-badge').value.trim() || 'SALE'
+      };
+      currentMasterPlan.specCard = {
+        enabled: document.getElementById('ac-sc-en').checked,
+        title: document.getElementById('ac-sc-title').value.trim() || 'THÔNG SỐ',
+        lines: document.getElementById('ac-sc-lines').value.split('|').map((x) => x.trim()).filter(Boolean).slice(0, 4)
+      };
+      document.getElementById('ac-pt-fields').style.display = currentMasterPlan.priceTag.enabled ? 'grid' : 'none';
+      document.getElementById('ac-sc-fields').style.display = currentMasterPlan.specCard.enabled ? 'block' : 'none';
+    };
+    ['ac-pt-en', 'ac-pt-orig', 'ac-pt-sale', 'ac-pt-badge', 'ac-sc-en', 'ac-sc-title', 'ac-sc-lines'].forEach((id) => {
+      document.getElementById(id).addEventListener('change', syncGraphics);
+    });
+    document.getElementById('ac-split-mode').onchange = (e) => {
+      splitMode = e.target.value;
+      if (splitMode !== 'off' && loadedClips.length < 2) alert('Mẹo: Hãy chọn ít nhất 2 clip (Clip 1: Trước, Clip 2: Sau) để hiển thị chia đôi màn hình đẹp nhất!');
+    };
 
     const snapBtn = document.getElementById('ac-btn-snap-beats');
     if (snapBtn) snapBtn.onclick = () => { currentMasterPlan = snapSegmentsToBeats(currentMasterPlan, bgmBeatInfo); renderMasterWorkspace(currentMasterPlan, []); archiveCurrentProjectToSync(); };
     document.getElementById('ac-send-copilot').onclick = runCopilotChat;
     document.getElementById('ac-copilot-input').onkeydown = (e) => { if (e.key === 'Enter') runCopilotChat(); };
     document.getElementById('ac-mic-copilot').onclick = function () { toggleMicDictation('ac-copilot-input', this); };
-    document.getElementById('ac-lut-override').onchange = (e) => { currentMasterPlan.lutPreset = e.target.value; archiveCurrentProjectToSync(); };
-    document.getElementById('ac-text-override').onchange = (e) => { currentMasterPlan.textStyle = e.target.value; archiveCurrentProjectToSync(); };
-    document.getElementById('ac-ratio-override').onchange = (e) => { currentMasterPlan.aspectRatio = e.target.value; preparePreviewCanvas(); archiveCurrentProjectToSync(); };
+    document.getElementById('ac-lut-override').onchange = (e) => { currentMasterPlan.lutPreset = e.target.value; };
+    document.getElementById('ac-text-override').onchange = (e) => { currentMasterPlan.textStyle = e.target.value; };
+    document.getElementById('ac-ratio-override').onchange = (e) => { currentMasterPlan.aspectRatio = e.target.value; preparePreviewCanvas(); };
     document.getElementById('ac-btn-play-edl').onclick = () => executeRenderPipeline(false);
     document.getElementById('ac-btn-export-edl').onclick = () => executeRenderPipeline(true);
     document.getElementById('ac-btn-goto-critic').onclick = () => { switchDrawerTab('critic'); runViralCritic(false); };
   }
 
-  // ================= 7. BỘ VẼ CANVAS (SMART FOCAL TRACKING + 6 TEXT + STICKERS + CARDS) =================
+  // ================= 8. BỘ VẼ CANVAS v7 (SAFE-ZONE + SPLIT-SCREEN + PRICE/SPEC + BRAND KIT) =================
   function getCanvasDims(ratio) {
     if (ratio === '16:9') return { w: 1280, h: 720 };
     if (ratio === '1:1') return { w: 720, h: 720 };
     return { w: 720, h: 1280 };
+  }
+
+  function getSafeRect(w, h) {
+    const z = SAFE_ZONES[syncData.preferences.platformSafeZone] || SAFE_ZONES.tiktok;
+    return { top: h * z.top, bottom: h * z.bottom, left: w * z.left, right: w * z.right, cx: w * ((z.left + z.right) / 2), sw: w * (z.right - z.left) };
   }
 
   function preparePreviewCanvas() {
@@ -855,843 +1102,163 @@
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#050814'; ctx.fillRect(0, 0, w, h);
+    if (syncData.preferences.showSafeZoneGuide) drawSafeZoneOverlay(ctx, w, h);
     ctx.fillStyle = '#94a3b8'; ctx.font = 'bold 26px system-ui, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('Sẵn sàng phát thử & xuất bản dựng Pro v6', w / 2, h / 2);
+    ctx.fillText('Sẵn sàng phát thử & xuất Pro v7', w / 2, h / 2);
   }
 
-  function drawKineticSubtitle(ctx, w, h, sub, prog, styleId) {
+  function drawSafeZoneOverlay(ctx, w, h) {
+    const zKey = syncData.preferences.platformSafeZone;
+    if (zKey === 'none') return;
+    const s = getSafeRect(w, h);
+    ctx.save();
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.16)';
+    ctx.fillRect(0, 0, w, s.top);
+    ctx.fillRect(0, s.bottom, w, h - s.bottom);
+    ctx.fillRect(s.right, s.top, w - s.right, s.bottom - s.top);
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.78)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([12, 8]);
+    ctx.strokeRect(s.left, s.top, s.right - s.left, s.bottom - s.top);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#fde047';
+    ctx.font = '700 20px system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`VÙNG AN TOÀN ${zKey.toUpperCase()} (Tự ẩn khi xuất)`, s.left + 10, s.top + 26);
+    ctx.restore();
+  }
+
+  function drawKineticSubtitle(ctx, w, h, sub, prog, styleId, safe, accentColor) {
     if (!sub || !sub.text) return;
     ctx.save();
     const rawText = styleId === 'typewriter' ? sub.text.slice(0, Math.max(1, Math.ceil(sub.text.length * Math.min(1, prog * 1.45)))) : sub.text;
-    const fontSize = Math.round(w * (styleId === 'minimal_lower' || styleId === 'cinematic_clean' ? 0.044 : 0.056));
+    const fontSize = Math.round(w * (styleId === 'minimal_lower' || styleId === 'cinematic_clean' ? 0.042 : 0.052));
     ctx.font = `${styleId === 'cinematic_clean' ? '700' : '900'} ${fontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
 
     const lines = []; let cur = '';
     rawText.split(/\s+/).forEach((wd) => {
-      if ((cur + ' ' + wd).trim().length > 22) { if (cur) lines.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim();
+      if ((cur + ' ' + wd).trim().length > 20) { if (cur) lines.push(cur); cur = wd; } else cur = (cur + ' ' + wd).trim();
     });
     if (cur) lines.push(cur);
 
     const enter = applyEasing(Math.min(1, prog / 0.16), 'springPop');
-    const baseY = h * (styleId === 'minimal_lower' ? 0.86 : 0.77) - ((lines.length - 1) * fontSize * 0.65) + (1 - enter) * 18;
+    const blockH = lines.length * fontSize * 1.3;
+    // Tự động neo bên trong vùng an toàn (không bao giờ bị giỏ hàng Shopee/mô tả TikTok đè)
+    const baseY = safe.bottom - blockH / 2 - 22 + (1 - enter) * 16;
     ctx.globalAlpha = Math.min(1, prog / 0.1);
-    ctx.translate(w / 2, baseY);
+    ctx.translate(safe.cx, baseY);
     if (styleId === 'hormozi' || styleId === 'karaoke_box') { const sc = 0.88 + 0.12 * enter; ctx.scale(sc, sc); }
 
     const hl = (sub.highlight || '').toLowerCase();
     lines.forEach((line, idx) => {
-      const y = idx * (fontSize * 1.3);
-      const mw = ctx.measureText(line).width;
+      const y = (idx - (lines.length - 1) / 2) * (fontSize * 1.28);
+      const mw = Math.min(safe.sw - 24, ctx.measureText(line).width);
       const isHL = hl && line.toLowerCase().includes(hl);
       if (styleId === 'karaoke_box') {
-        ctx.fillStyle = isHL ? '#7c3aed' : 'rgba(15,23,42,0.82)';
-        drawRoundedRect(ctx, -mw / 2 - 22, y - fontSize / 2 - 10, mw + 44, fontSize + 20, 16); ctx.fill();
+        ctx.fillStyle = isHL ? accentColor : 'rgba(15,23,42,0.84)';
+        drawRoundedRect(ctx, -mw / 2 - 18, y - fontSize / 2 - 8, mw + 36, fontSize + 16, 14); ctx.fill();
         ctx.fillStyle = isHL ? '#fde047' : '#ffffff'; ctx.fillText(line, 0, y);
       } else if (styleId === 'neon_glow') {
-        ctx.shadowColor = isHL ? '#f43f5e' : '#38bdf8'; ctx.shadowBlur = 22;
+        ctx.shadowColor = isHL ? '#f43f5e' : accentColor; ctx.shadowBlur = 20;
         ctx.lineWidth = 4; ctx.strokeStyle = '#0f172a'; ctx.strokeText(line, 0, y);
         ctx.fillStyle = isHL ? '#fda4af' : '#e0f2fe'; ctx.fillText(line, 0, y);
       } else if (styleId === 'cinematic_clean' || styleId === 'minimal_lower') {
-        ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 12;
-        ctx.fillStyle = 'rgba(0,0,0,0.38)';
-        drawRoundedRect(ctx, -mw / 2 - 18, y - fontSize / 2 - 8, mw + 36, fontSize + 16, 10); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.44)';
+        drawRoundedRect(ctx, -mw / 2 - 16, y - fontSize / 2 - 7, mw + 32, fontSize + 14, 10); ctx.fill();
         ctx.fillStyle = isHL ? '#fbbf24' : '#f8fafc'; ctx.fillText(line, 0, y);
       } else {
-        ctx.fillStyle = 'rgba(0,0,0,0.52)';
-        drawRoundedRect(ctx, -mw / 2 - 20, y - fontSize / 2 - 9, mw + 40, fontSize + 18, 14); ctx.fill();
-        ctx.lineWidth = Math.max(5, Math.round(fontSize * 0.16)); ctx.strokeStyle = '#000'; ctx.lineJoin = 'round';
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        drawRoundedRect(ctx, -mw / 2 - 18, y - fontSize / 2 - 8, mw + 36, fontSize + 16, 12); ctx.fill();
+        ctx.lineWidth = Math.max(5, Math.round(fontSize * 0.15)); ctx.strokeStyle = '#000'; ctx.lineJoin = 'round';
         ctx.strokeText(line, 0, y); ctx.fillStyle = isHL ? '#facc15' : '#ffffff'; ctx.fillText(line, 0, y);
       }
     });
     ctx.restore();
   }
 
-  function drawOverlaysV6(ctx, w, h, plan, elapsed) {
-    // Title Card
+  function drawIndustryGraphicsAndBrand(ctx, w, h, plan, elapsed, safe) {
+    const kit = getActiveBrandKit();
+    const accent = kit?.accentColor || '#7c3aed';
+
+    // 1. Brand Kit Logo & Hotline strip (góc trên trái vùng an toàn)
+    if (kit) {
+      ctx.save();
+      const logoImg = getBrandLogoImage(kit);
+      let textX = safe.left + 8;
+      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+        const lh = Math.round(w * 0.085);
+        const lw = Math.round((logoImg.naturalWidth / logoImg.naturalHeight) * lh);
+        drawRoundedRect(ctx, safe.left + 4, safe.top + 6, lw + 10, lh + 10, 12);
+        ctx.fillStyle = 'rgba(15,23,42,0.55)'; ctx.fill();
+        ctx.drawImage(logoImg, safe.left + 9, safe.top + 11, lw, lh);
+        textX = safe.left + lw + 22;
+      }
+      if (kit.name || kit.hotline) {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 8;
+        ctx.font = `800 ${Math.round(w * 0.032)}px system-ui, sans-serif`;
+        if (kit.name) ctx.fillText(kit.name.slice(0, 22), textX, safe.top + 30);
+        if (kit.hotline) {
+          ctx.fillStyle = '#fde047';
+          ctx.font = `700 ${Math.round(w * 0.026)}px system-ui, sans-serif`;
+          ctx.fillText(`📞 ${kit.hotline}`, textX, safe.top + 56);
+        }
+      }
+      ctx.restore();
+    }
+
+    // 2. Thẻ Giá Gạch Ngang (Price Tag Sale) — nằm góc trên phải trong Safe Zone
+    if (plan.priceTag?.enabled && (plan.priceTag.salePrice || plan.priceTag.origPrice)) {
+      const pop = applyEasing(Math.min(1, elapsed / 0.5), 'springPop');
+      ctx.save();
+      const bw = Math.round(w * 0.34); const bh = Math.round(w * 0.21);
+      const px = safe.right - bw - 8; const py = safe.top + 10;
+      ctx.translate(px + bw / 2, py + bh / 2); ctx.scale(pop, pop);
+      const g = ctx.createLinearGradient(-bw / 2, -bh / 2, bw / 2, bh / 2);
+      g.addColorStop(0, '#dc2626'); g.addColorStop(1, accent);
+      ctx.fillStyle = g; drawRoundedRect(ctx, -bw / 2, -bh / 2, bw, bh, 16); ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#fde047'; ctx.font = `800 ${Math.round(w * 0.026)}px system-ui, sans-serif`;
+      ctx.fillText(plan.priceTag.badge || 'ƯU ĐÃI', 0, -bh * 0.28);
+      if (plan.priceTag.origPrice) {
+        const fsOrig = Math.round(w * 0.031);
+        ctx.font = `600 ${fsOrig}px system-ui, sans-serif`; ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        const ow = ctx.measureText(plan.priceTag.origPrice).width;
+        ctx.fillText(plan.priceTag.origPrice, 0, 2);
+        ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(-ow / 2 - 4, -2); ctx.lineTo(ow / 2 + 4, -2); ctx.stroke();
+      }
+      ctx.fillStyle = '#ffffff'; ctx.font = `900 ${Math.round(w * 0.048)}px system-ui, sans-serif`;
+      ctx.fillText(plan.priceTag.salePrice || '', 0, bh * 0.30);
+      ctx.restore();
+    }
+
+    // 3. Bảng Thông Số Chuyên Ngành (Spec Card — BĐS, Ô tô, Công nghệ)
+    if (plan.specCard?.enabled && Array.isArray(plan.specCard.lines) && plan.specCard.lines.length) {
+      const slide = applyEasing(Math.min(1, Math.max(0, (elapsed - 0.8) / 0.45)), 'easeOutExpo');
+      if (elapsed >= 0.8) {
+        ctx.save(); ctx.globalAlpha = slide;
+        const lines = plan.specCard.lines.slice(0, 4);
+        const bw = Math.min(safe.sw * 0.72, 420); const lineH = 34; const bh = 46 + lines.length * lineH;
+        const x = safe.left + 8 - (1 - slide) * 80;
+        const y = safe.top + (kit ? 88 : 18);
+        ctx.fillStyle = 'rgba(9, 13, 28, 0.84)'; drawRoundedRect(ctx, x, y, bw, bh, 14); ctx.fill();
+        ctx.fillStyle = accent; drawRoundedRect(ctx, x, y, 7, bh, 4); ctx.fill();
+        ctx.textAlign = 'left'; ctx.fillStyle = '#fde047'; ctx.font = `800 ${Math.round(w * 0.029)}px system-ui, sans-serif`;
+        ctx.fillText(plan.specCard.title || 'THÔNG SỐ NỔI BẬT', x + 20, y + 28);
+        ctx.fillStyle = '#f8fafc'; ctx.font = `600 ${Math.round(w * 0.027)}px system-ui, sans-serif`;
+        lines.forEach((ln, idx) => ctx.fillText('▪ ' + ln.slice(0, 32), x + 20, y + 58 + idx * lineH));
+        ctx.restore();
+      }
+    }
+
+    // 4. Title Card (trong Safe Zone)
     if (activeSkills.has('hook_3s') && plan.titleCard?.enabled && elapsed <= (plan.titleCard.durationSec || 1.6)) {
       const p = elapsed / (plan.titleCard.durationSec || 1.6);
       const inE = applyEasing(Math.min(1, p / 0.3), 'easeOutExpo');
       ctx.save(); ctx.globalAlpha = inE * (p > 0.78 ? Math.max(0, 1 - (p - 0.78) / 0.22) : 1);
-      const y = h * 0.2 + (1 - inE) * 26;
-      const fm = Math.round(w * 0.064); ctx.font = `900 ${fm}px system-ui, sans-serif`; ctx.textAlign = 'center';
-      const tw = Math.min(w * 0.88, Math.max(ctx.measureText(plan.titleCard.headline || '').width + 52, w * 0.54));
-      const bh = fm * 2.1;
-      const g = ctx.createLinearGradient(w / 2 - tw / 2, y - bh / 2, w / 2 + tw / 2, y + bh / 2);
-      g.addColorStop(0, 'rgba(15,23,42,0.84)'); g.addColorStop(1, 'rgba(49,46,129,0.84)');
-      ctx.fillStyle = g; drawRoundedRect(ctx, w / 2 - tw / 2, y - bh / 2, tw, bh, 18); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.fillText(plan.titleCard.headline || '', w / 2, y - fm * 0.15);
-      if (plan.titleCard.subline) { ctx.font = `600 ${Math.round(w * 0.032)}px system-ui, sans-serif`; ctx.fillStyle = '#fde047'; ctx.fillText(plan.titleCard.subline, w / 2, y + fm * 0.55); }
-      ctx.restore();
-    }
-    // Lower Third
-    if (activeSkills.has('lower_third') && plan.lowerThird?.enabled && elapsed >= plan.lowerThird.startSec && elapsed <= plan.lowerThird.endSec) {
-      const loc = (elapsed - plan.lowerThird.startSec) / Math.max(0.5, plan.lowerThird.endSec - plan.lowerThird.startSec);
-      const sIn = applyEasing(Math.min(1, loc / 0.18), 'easeOutExpo');
-      ctx.save(); ctx.globalAlpha = sIn * (loc > 0.85 ? Math.max(0, 1 - (loc - 0.85) / 0.15) : 1);
-      const x = 28 - (1 - sIn) * 140; const y = h * 0.62; const bw = Math.min(w * 0.72, 430);
-      ctx.fillStyle = 'rgba(10,15,30,0.82)'; drawRoundedRect(ctx, x, y, bw, 84, 14); ctx.fill();
-      ctx.fillStyle = '#8b5cf6'; drawRoundedRect(ctx, x, y, 8, 84, 4); ctx.fill();
-      ctx.textAlign = 'left'; ctx.fillStyle = '#f8fafc'; ctx.font = `800 ${Math.round(w * 0.036)}px system-ui, sans-serif`;
-      ctx.fillText((plan.lowerThird.title || '').slice(0, 28), x + 22, y + 34);
-      ctx.fillStyle = '#38bdf8'; ctx.font = `600 ${Math.round(w * 0.026)}px system-ui, sans-serif`;
-      ctx.fillText((plan.lowerThird.subtitle || '').slice(0, 36), x + 22, y + 62);
-      ctx.restore();
-    }
-    // Stickers
-    if (activeSkills.has('stickers') && Array.isArray(plan.stickers)) {
-      plan.stickers.forEach((st) => {
-        if (elapsed < st.startSec || elapsed > st.endSec) return;
-        const loc = (elapsed - st.startSec) / Math.max(0.2, st.endSec - st.startSec);
-        const pop = applyEasing(Math.min(1, loc / 0.25), 'springPop');
-        ctx.save(); ctx.globalAlpha = loc > 0.85 ? Math.max(0, 1 - (loc - 0.85) / 0.15) : 1;
-        const px = st.position === 'top_left' ? w * 0.24 : w * 0.74;
-        const py = (st.position === 'mid_right' ? h * 0.44 : h * 0.14) + Math.sin(elapsed * 5) * 5;
-        ctx.translate(px, py); ctx.scale(pop, pop);
-        const txt = `${st.icon || '✨'} ${st.label || ''}`.trim();
-        const fs = Math.round(w * 0.035); ctx.font = `800 ${fs}px system-ui, sans-serif`;
-        const tw = ctx.measureText(txt).width + 30; const th = fs + 22;
-        const g = ctx.createLinearGradient(-tw / 2, -th / 2, tw / 2, th / 2); g.addColorStop(0, '#f59e0b'); g.addColorStop(1, '#ef4444');
-        ctx.fillStyle = g; drawRoundedRect(ctx, -tw / 2, -th / 2, tw, th, 999); ctx.fill();
-        ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(txt, 0, 1);
-        ctx.restore();
-      });
-    }
-    // Subtitles
-    if (activeSkills.has('kinetic_text') && plan.subtitles?.length) {
-      const sub = plan.subtitles.find((s) => elapsed >= Number(s.startSec) && elapsed <= Number(s.endSec));
-      if (sub) drawKineticSubtitle(ctx, w, h, sub, (elapsed - Number(sub.startSec)) / Math.max(0.2, Number(sub.endSec) - Number(sub.startSec)), plan.textStyle);
-    }
-  }
-
-  function drawVideoFrameV6(ctx, video, w, h, seg, segProgress, lut, elapsedOut, plan) {
-    ctx.save();
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
-
-    const vw = video.videoWidth || 1280;
-    const vh = video.videoHeight || 720;
-    const easedP = activeSkills.has('remotion_ease') ? applyEasing(segProgress, seg.easing) : segProgress;
-    let zoom = seg.zoomFrom + (seg.zoomTo - seg.zoomFrom) * easedP;
-    let offsetX = 0;
-
-    const transActive = activeSkills.has('fx_trans') && segProgress < 0.16;
-    const transP = transActive ? 1 - segProgress / 0.16 : 0;
-    if (transActive && seg.transition === 'slide_left') offsetX = transP * w * 0.24;
-    if (transActive && seg.transition === 'zoom_burst') zoom *= (1 + transP * 0.22);
-
-    // SMART FOCAL TRACKING: khóa đúng tâm chủ thể (focalX, focalY) khi đóng khung 9:16 và phóng to
-    const fx = activeSkills.has('smart_focal') ? (seg.focalX ?? 0.5) : 0.5;
-    const fy = activeSkills.has('smart_focal') ? (seg.focalY ?? 0.5) : 0.5;
-    const curFx = 0.5 + (fx - 0.5) * Math.min(1, easedP * 1.35 + 0.35);
-    const curFy = 0.5 + (fy - 0.5) * Math.min(1, easedP * 1.35 + 0.35);
-
-    const coverScale = Math.max(w / vw, h / vh) * Math.max(1, zoom);
-    const dw = vw * coverScale;
-    const dh = vh * coverScale;
-    const dx = Math.min(0, Math.max(w - dw, w / 2 - curFx * dw)) + offsetX;
-    const dy = Math.min(0, Math.max(h - dh, h / 2 - curFy * dh));
-
-    ctx.save();
-    ctx.filter = activeSkills.has('pro_lut') ? lut.filter : 'none';
-    ctx.drawImage(video, dx, dy, dw, dh);
-    ctx.restore();
-
-    if (activeSkills.has('film_grain')) {
-      const pat = ctx.createPattern(getGrainCanvas(), 'repeat');
-      if (pat) {
-        ctx.save(); ctx.globalAlpha = 0.25; ctx.translate((Math.random() * 40) | 0, (Math.random() * 40) | 0);
-        ctx.fillStyle = pat; ctx.fillRect(-40, -40, w + 80, h + 80); ctx.restore();
-      }
-      if (lut.vignette > 0) {
-        const g = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.32, w / 2, h / 2, Math.max(w, h) * 0.72);
-        g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${lut.vignette})`);
-        ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-      }
-    }
-
-    if (transActive) {
-      if (seg.transition === 'flash') { ctx.fillStyle = `rgba(255,255,255,${(transP * 0.58).toFixed(2)})`; ctx.fillRect(0, 0, w, h); }
-      else if (seg.transition === 'light_leak') {
-        const lg = ctx.createLinearGradient(0, 0, w, h);
-        lg.addColorStop(0, `rgba(251,146,60,${(transP * 0.52).toFixed(2)})`); lg.addColorStop(1, `rgba(168,85,247,${(transP * 0.35).toFixed(2)})`);
-        ctx.fillStyle = lg; ctx.fillRect(0, 0, w, h);
-      } else if (seg.transition === 'glitch') {
-        ctx.fillStyle = `rgba(56,189,248,${(transP * 0.25).toFixed(2)})`; ctx.fillRect(0, Math.random() * h * 0.6, w, 28);
-        ctx.fillStyle = `rgba(244,63,94,${(transP * 0.25).toFixed(2)})`; ctx.fillRect(0, Math.random() * h * 0.8, w, 18);
-      } else if (seg.transition === 'fade') { ctx.fillStyle = `rgba(0,0,0,${(transP * 0.78).toFixed(2)})`; ctx.fillRect(0, 0, w, h); }
-    }
-
-    drawOverlaysV6(ctx, w, h, plan, elapsedOut);
-    ctx.restore();
-  }
-
-  // ================= 8. ĐỘNG CƠ RENDER ĐA CLIP + TRỘN ÂM ĐA KÊNH =================
-  async function executeRenderPipeline(exportFile = false) {
-    if (!currentMasterPlan || !ensureClipsAvailable() || isRendering) return;
-    isRendering = true;
-
-    const progEl = document.getElementById('ac-render-progress');
-    const canvas = document.getElementById('ac-pro-preview-canvas');
-    const { w, h } = getCanvasDims(currentMasterPlan.aspectRatio);
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d');
-    const lut = LUT_PRESETS[currentMasterPlan.lutPreset] || LUT_PRESETS.tiktok_commerce;
-
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioCtx();
-    const mixBus = audioCtx.createGain();
-    mixBus.connect(audioCtx.destination);
-    const destNode = exportFile ? audioCtx.createMediaStreamDestination() : null;
-    if (destNode) mixBus.connect(destNode);
-
-    const bgmVol = Number(document.getElementById('ac-bgm-vol')?.value || 30) / 100;
-    const autoDuck = Boolean(document.getElementById('ac-auto-duck')?.checked);
-    const origMute = Boolean(document.getElementById('ac-mute-orig')?.checked);
-    const sfxVol = Number(document.getElementById('ac-sfx-vol')?.value || 55) / 100;
-
-    // Nạp sẵn thẻ <video> cho từng clip được dùng
-    const videoPool = new Map();
-    const bgmAudio = bgmUrl ? new Audio(bgmUrl) : null;
-    const voiceAudio = attachedVoiceUrl ? new Audio(attachedVoiceUrl) : null;
-    if (bgmAudio) { bgmAudio.loop = true; bgmAudio.crossOrigin = 'anonymous'; }
-    if (voiceAudio) voiceAudio.crossOrigin = 'anonymous';
-
-    let mediaRecorder = null;
-    const recordedChunks = [];
-
-    try {
-      const neededClips = [...new Set(currentMasterPlan.segments.map((s) => Math.min(loadedClips.length - 1, Math.max(0, Number(s.clipIndex) || 0))))];
-      for (const ci of neededClips) {
-        const v = document.createElement('video');
-        v.src = loadedClips[ci].url; v.crossOrigin = 'anonymous'; v.playsInline = true; v.muted = false;
-        await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error(`Lỗi nạp Clip #${ci + 1}`)); });
-        try {
-          const vSrc = audioCtx.createMediaElementSource(v);
-          const vGain = audioCtx.createGain(); vGain.gain.value = origMute ? 0 : 1;
-          vSrc.connect(vGain); vGain.connect(mixBus);
-        } catch (_) {}
-        videoPool.set(ci, v);
-      }
-
-      if (bgmAudio) {
-        const bSrc = audioCtx.createMediaElementSource(bgmAudio);
-        const bGain = audioCtx.createGain(); bGain.gain.value = (voiceAudio && autoDuck) ? bgmVol * 0.35 : bgmVol;
-        bSrc.connect(bGain); bGain.connect(mixBus);
-      }
-      if (voiceAudio) {
-        const voSrc = audioCtx.createMediaElementSource(voiceAudio);
-        const voGain = audioCtx.createGain(); voGain.gain.value = 1.05;
-        voSrc.connect(voGain); voGain.connect(mixBus);
-      }
-
-      let chosenMime = 'video/webm'; let fileExt = 'webm';
-      if (exportFile) {
-        const stream = canvas.captureStream(30);
-        if (destNode) destNode.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
-        const cands = [
-          { mime: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
-          { mime: 'video/mp4', ext: 'mp4' },
-          { mime: 'video/webm;codecs=vp9,opus', ext: 'webm' },
-          { mime: 'video/webm', ext: 'webm' }
-        ];
-        const found = cands.find((c) => window.MediaRecorder && MediaRecorder.isTypeSupported(c.mime));
-        if (found) { chosenMime = found.mime; fileExt = found.ext; }
-        mediaRecorder = new MediaRecorder(stream, { mimeType: chosenMime, videoBitsPerSecond: 5200000 });
-        mediaRecorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
-        mediaRecorder.start(250);
-      }
-
-      if (bgmAudio) await bgmAudio.play().catch(() => {});
-      if (voiceAudio) await voiceAudio.play().catch(() => {});
-
-      const segs = currentMasterPlan.segments;
-      const triggeredStickers = new Set();
-      let elapsedOut = 0;
-
-      for (let i = 0; i < segs.length; i++) {
-        const seg = segs[i];
-        const ci = Math.min(loadedClips.length - 1, Math.max(0, Number(seg.clipIndex) || 0));
-        const v = videoPool.get(ci);
-        progEl.textContent = exportFile
-          ? `🎬 Đang Render cảnh ${i + 1}/${segs.length} (Clip #${ci + 1}): ${seg.label}...`
-          : `▶️ Phát thử cảnh ${i + 1}/${segs.length} (Clip #${ci + 1}): ${seg.label}`;
-
-        v.playbackRate = seg.speed;
-        v.currentTime = seg.startSec;
-        await new Promise((r) => { const d = () => { v.removeEventListener('seeked', d); r(); }; v.addEventListener('seeked', d); });
-        if (activeSkills.has('sfx_synth') && seg.sfx && seg.sfx !== 'none') triggerSFX(audioCtx, mixBus, seg.sfx, sfxVol);
-
-        await v.play();
-        const segStartWall = performance.now();
-        const segOutDur = (seg.endSec - seg.startSec) / seg.speed;
-
-        await new Promise((resolveSeg) => {
-          function tick() {
-            const le = (performance.now() - segStartWall) / 1000;
-            const curOut = elapsedOut + le;
-            if (activeSkills.has('sfx_synth') && activeSkills.has('stickers')) {
-              currentMasterPlan.stickers.forEach((st, idx) => {
-                if (!triggeredStickers.has(idx) && curOut >= st.startSec) {
-                  triggeredStickers.add(idx); triggerSFX(audioCtx, mixBus, st.sfx || 'pop', sfxVol * 0.75);
-                }
-              });
-            }
-            drawVideoFrameV6(ctx, v, w, h, seg, Math.min(1, le / Math.max(0.1, segOutDur)), lut, curOut, currentMasterPlan);
-            if (v.currentTime >= seg.endSec || v.ended || le >= segOutDur + 0.08) {
-              v.pause(); cancelAnimationFrame(previewAnimId); resolveSeg(); return;
-            }
-            previewAnimId = requestAnimationFrame(tick);
-          }
-          previewAnimId = requestAnimationFrame(tick);
-        });
-        elapsedOut += segOutDur;
-      }
-
-      if (activeSkills.has('end_card') && currentMasterPlan.endCard?.enabled) {
-        const endDur = Number(currentMasterPlan.endCard.durationSec || 1.8);
-        if (activeSkills.has('sfx_synth')) triggerSFX(audioCtx, mixBus, 'sparkle', sfxVol);
-        const endStart = performance.now();
-        await new Promise((resEnd) => {
-          function tickEnd() {
-            const le = (performance.now() - endStart) / 1000;
-            const prog = Math.min(1, le / endDur);
-            ctx.save();
-            const g = ctx.createLinearGradient(0, 0, w, h); g.addColorStop(0, '#090d1f'); g.addColorStop(0.5, '#1e1b4b'); g.addColorStop(1, '#090d1f');
-            ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-            const ease = applyEasing(Math.min(1, prog / 0.35), 'springPop');
-            ctx.translate(w / 2, h / 2); ctx.scale(0.8 + 0.2 * ease, 0.8 + 0.2 * ease); ctx.textAlign = 'center';
-            ctx.font = `900 ${Math.round(w * 0.07)}px system-ui, sans-serif`; ctx.fillStyle = '#fde047';
-            ctx.fillText(currentMasterPlan.endCard.cta || 'Đặt Ngay Hôm Nay', 0, -22);
-            if (currentMasterPlan.endCard.subCta) { ctx.font = `700 ${Math.round(w * 0.038)}px system-ui, sans-serif`; ctx.fillStyle = '#e2e8f0'; ctx.fillText(currentMasterPlan.endCard.subCta, 0, 42); }
-            ctx.restore();
-            if (le >= endDur) { cancelAnimationFrame(previewAnimId); resEnd(); return; }
-            previewAnimId = requestAnimationFrame(tickEnd);
-          }
-          previewAnimId = requestAnimationFrame(tickEnd);
-        });
-      }
-
-      if (exportFile && mediaRecorder) {
-        await new Promise((r) => { mediaRecorder.onstop = r; mediaRecorder.stop(); });
-        const blob = new Blob(recordedChunks, { type: chosenMime });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `AutoCut-Pro-v6-${Date.now()}.${fileExt}`; document.body.appendChild(a); a.click(); a.remove();
-        progEl.innerHTML = `<span style="color:#4ade80;">✓ Đã xuất xong video thành phẩm (.${fileExt})!</span>`;
-      } else {
-        progEl.innerHTML = `<span style="color:#4ade80;">✓ Phát thử xong! Bấm "Render & Xuất Video" để tải file về máy.</span>`;
-      }
-    } catch (err) {
-      progEl.innerHTML = `<span style="color:#f87171;">⚠️ Lỗi Render: ${err.message}</span>`;
-    } finally {
-      videoPool.forEach((v) => v.pause());
-      if (bgmAudio) { bgmAudio.pause(); bgmAudio.currentTime = 0; }
-      if (voiceAudio) { voiceAudio.pause(); voiceAudio.currentTime = 0; }
-      audioCtx.close().catch(() => {});
-      isRendering = false;
-    }
-  }
-
-  // ================= 9. GIỌNG NÓI 2 CHIỀU & CẮT THEO LỜI THOẠI (TEXT-BASED EDIT) =================
-  let recognition = null; let isListening = false;
-
-  function toggleMicDictation(targetId, btnEl) {
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRec) { alert('Hãy dùng Google Chrome hoặc Microsoft Edge để dùng Micro trực tiếp!'); return; }
-    if (isListening && recognition) { recognition.stop(); return; }
-    recognition = new SpeechRec();
-    recognition.lang = 'vi-VN'; recognition.continuous = true; recognition.interimResults = true;
-    const target = document.getElementById(targetId);
-    const base = target ? target.value.trim() : '';
-    recognition.onstart = () => { isListening = true; btnEl.textContent = '🔴 Dừng'; btnEl.style.background = '#dc2626'; };
-    recognition.onresult = (e) => {
-      let tr = ''; for (let i = 0; i < e.results.length; i++) tr += e.results[i][0].transcript;
-      if (target) target.value = (base ? base + ' ' : '') + tr.trim();
-    };
-    recognition.onend = () => { isListening = false; btnEl.textContent = btnEl.dataset.defaultLabel; btnEl.style.background = ''; };
-    recognition.start();
-  }
-
-  async function transcribeForTextEdit(file) {
-    if (!file) return;
-    if (file.size > 12 * 1024 * 1024) { alert('File để bóc băng cần nhỏ hơn 12MB.'); return; }
-    const st = document.getElementById('ac-stt-status');
-    st.textContent = '⏳ AI đang bóc băng & tự phát hiện từ ngập ngừng ("à, ừm...")...';
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const b64 = String(reader.result).split(',')[1];
-        const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
-        const res = await fetch(proxy, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'transcribe', audioBase64: b64, audioMime: file.type || 'audio/mp3' })
-        });
-        const data = await res.json();
-        if (!res.ok || data.error) throw new Error(data.error || 'Lỗi bóc băng');
-        document.getElementById('ac-tts-text').value = data.fullText || '';
-        sttTranscriptLines = (data.subtitles || []).map((s, idx) => ({ ...s, keep: !s.isFiller, idx }));
-        st.innerHTML = `<span style="color:#4ade80;">✓ Đã bóc xong ${sttTranscriptLines.length} câu thoại (tự bỏ tick các câu ngập ngừng)!</span>`;
-        renderTextEditBox();
-      } catch (e) { st.innerHTML = `<span style="color:#f87171;">⚠️ ${e.message}</span>`; }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function renderTextEditBox() {
-    const box = document.getElementById('ac-text-edit-box');
-    if (!box || !sttTranscriptLines.length) return;
-    box.innerHTML = `
-      <div style="margin-top:8px; background:#0a0f1d; border:1px solid #2b3856; border-radius:8px; padding:8px;">
-        <div style="font-size:11px; font-weight:700; color:#fbbf24; margin-bottom:6px;">✂️ DỰNG PHIM THEO LỜI THOẠI (Bỏ tick câu muốn cắt bỏ):</div>
-        <div style="max-height:140px; overflow-y:auto;">
-          ${sttTranscriptLines.map((l, i) => `
-            <label style="display:flex; gap:6px; align-items:flex-start; font-size:11.5px; margin-bottom:5px; cursor:pointer; color:${l.keep ? '#e2e8f0' : '#64748b'};">
-              <input type="checkbox" data-stt-keep="${i}" ${l.keep ? 'checked' : ''} />
-              <span><b style="color:#38bdf8;">[${l.startSec}→${l.endSec}s]</b> ${l.text} ${l.isFiller ? '<em style="color:#f87171;">(ngập ngừng)</em>' : ''}</span>
-            </label>
-          `).join('')}
-        </div>
-        <button class="acp-btn acp-btn-main" id="ac-apply-text-cut" style="width:100%; margin-top:6px;">✂️ Áp Dụng Cắt Theo Văn Bản Vào Timeline</button>
-      </div>
-    `;
-    box.querySelectorAll('[data-stt-keep]').forEach((cb) => {
-      cb.onchange = () => { sttTranscriptLines[Number(cb.dataset.sttKeep)].keep = cb.checked; };
-    });
-    document.getElementById('ac-apply-text-cut').onclick = () => {
-      const kept = sttTranscriptLines.filter((l) => l.keep);
-      if (!kept.length) { alert('Cần giữ lại ít nhất 1 câu thoại!'); return; }
-      let outCursor = 0;
-      const newSegs = []; const newSubs = [];
-      kept.forEach((l, i) => {
-        const dur = Math.max(0.6, (Number(l.endSec) || 2) - (Number(l.startSec) || 0));
-        newSegs.push({
-          clipIndex: 0, startSec: Number(l.startSec) || 0, endSec: Number(l.endSec) || dur, speed: 1.0,
-          zoomFrom: 1.0, zoomTo: i % 2 === 0 ? 1.08 : 1.0, focalX: 0.5, focalY: 0.45,
-          easing: 'easeOutExpo', transition: i === 0 ? 'flash' : 'fade', sfx: i === 0 ? 'pop' : 'none', label: l.text.slice(0, 28)
-        });
-        newSubs.push({ startSec: Number(outCursor.toFixed(2)), endSec: Number((outCursor + dur).toFixed(2)), text: l.text, highlight: l.highlight || '' });
-        outCursor += dur;
-      });
-      if (!currentMasterPlan) currentMasterPlan = normalizePlanV6({}, [{ clipIndex: 0, name: 'Video thoại', durationSec: 60 }], syncData.preferences.brandTag);
-      currentMasterPlan.segments = newSegs;
-      currentMasterPlan.subtitles = newSubs;
-      renderMasterWorkspace(currentMasterPlan, []);
-      archiveCurrentProjectToSync();
-      switchDrawerTab('auto');
-      alert(`Đã cắt gọn theo văn bản: giữ ${kept.length}/${sttTranscriptLines.length} câu thoại và đồng bộ phụ đề chuẩn từng giây!`);
-    };
-  }
-
-  async function runTextToSpeech() {
-    const text = (document.getElementById('ac-tts-text').value || '').trim();
-    const voice = document.getElementById('ac-tts-voice').value;
-    const speed = parseFloat(document.getElementById('ac-tts-speed').value || '1.0');
-    const st = document.getElementById('ac-tts-status');
-    const wrap = document.getElementById('ac-tts-player');
-    if (!text) { alert('Chưa có văn bản cần đọc!'); return; }
-    st.textContent = '⏳ Đang tạo giọng đọc AI Studio...'; wrap.innerHTML = '';
-    try {
-      const proxy = (window.AutoCutAuth && window.AutoCutAuth.getAIConfig().proxyUrl) || PROXY_URL;
-      const res = await fetch(proxy, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'tts', text, voice, speed }) });
-      const data = await res.json();
-      if (data.audioBase64) {
-        if (lastTtsBlobUrl) URL.revokeObjectURL(lastTtsBlobUrl);
-        const bin = atob(data.audioBase64); const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-        const ext = (data.audioMime || '').includes('wav') ? 'wav' : 'mp3';
-        lastTtsBlobUrl = URL.createObjectURL(new Blob([arr], { type: data.audioMime || 'audio/wav' }));
-        st.innerHTML = `<span style="color:#4ade80;">✓ Tạo giọng thành công (${data.provider || 'AI Studio'})!</span>`;
-        wrap.innerHTML = `
-          <audio controls autoplay src="${lastTtsBlobUrl}" style="width:100%; height:36px; margin-top:6px;"></audio>
-          <div style="display:flex; gap:8px; margin-top:6px;">
-            <button class="acp-btn acp-btn-main" id="ac-attach-tts" style="flex:1;">🎙️ Gắn Vào Video Render</button>
-            <a href="${lastTtsBlobUrl}" download="autocut-voice.${ext}" class="acp-btn" style="text-decoration:none;">⬇️ Tải (.${ext})</a>
-          </div>
-        `;
-        document.getElementById('ac-attach-tts').onclick = () => { attachedVoiceUrl = lastTtsBlobUrl; attachedVoiceLabel = `Giọng AI (${voice})`; updateAudioBadge(); alert('Đã gắn giọng đọc AI vào bộ trộn Render!'); };
-        return;
-      }
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'vi-VN'; u.rate = speed;
-      const vi = window.speechSynthesis.getVoices().find((x) => x.lang.toLowerCase().includes('vi'));
-      if (vi) u.voice = vi;
-      window.speechSynthesis.speak(u);
-      st.innerHTML = '<span style="color:#4ade80;">🔊 Đang phát giọng đọc tiếng Việt trên trình duyệt!</span>';
-    } catch (e) { st.innerHTML = `<span style="color:#f87171;">⚠️ ${e.message}</span>`; }
-  }
-
-  // ================= 10. QUẢN LÝ UI, CLIP LIST & DỰ ÁN ĐỒNG BỘ =================
-  function renderBehaviorBanner() {
-    const el = document.getElementById('ac-behavior-summary');
-    if (!el) return;
-    const g = (syncData.behavior.recentGenres || []).slice(0, 3).join(', ');
-    el.innerHTML = `<b>🧠 Học Hành Vi:</b> ${syncData.behavior.totalActions} phiên dựng${g ? ' • Gu gần đây: ' + g : ' • Sẵn sàng phân tích đa clip'}`;
-  }
-
-  function renderClipsList() {
-    const el = document.getElementById('ac-clips-list');
-    if (!el) return;
-    if (!loadedClips.length) { el.innerHTML = '<div style="font-size:11px; color:#94a3b8; margin-top:4px;">Hoặc tự nhận video đã nạp ngoài màn hình chính</div>'; return; }
-    el.innerHTML = loadedClips.map((c, idx) => `
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#131c31; padding:5px 8px; border-radius:6px; margin-top:5px; font-size:11px;">
-        <span style="color:#4ade80; font-weight:700;">Clip #${idx + 1}: ${c.name.slice(0, 26)} (${c.durationSec ? c.durationSec.toFixed(1) + 's' : '...'})</span>
-        <button class="acp-btn" data-rm-clip="${idx}" style="padding:2px 6px; font-size:10px; background:#7f1d1d;">✕</button>
-      </div>
-    `).join('');
-    el.querySelectorAll('[data-rm-clip]').forEach((b) => {
-      b.onclick = (e) => {
-        e.stopPropagation();
-        const i = Number(b.dataset.rmClip);
-        if (loadedClips[i]?.url && loadedClips[i].file) URL.revokeObjectURL(loadedClips[i].url);
-        loadedClips.splice(i, 1);
-        renderClipsList();
-      };
-    });
-  }
-
-  function renderSavedProjectsList() {
-    const box = document.getElementById('ac-cloud-projects');
-    if (!box) return;
-    const list = syncData.savedProjects || [];
-    if (!list.length) { box.innerHTML = '<div style="font-size:11.5px; color:#94a3b8;">Chưa có dự án nào được lưu trên Cloud.</div>'; return; }
-    box.innerHTML = list.map((p, idx) => `
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; background:#0a0f1d; border:1px solid #1e293b; border-radius:8px; padding:7px 9px; margin-bottom:6px; font-size:11.5px;">
-        <div>
-          <b style="color:#f8fafc;">${p.genre}</b> ${p.score ? `<span style="color:#4ade80;">(${p.score}đ)</span>` : ''}<br/>
-          <span style="font-size:10.5px; color:#94a3b8;">${p.style} • ${new Date(p.savedAt).toLocaleString('vi-VN')}</span>
-        </div>
-        <button class="acp-btn acp-btn-main" data-load-prj="${idx}" style="padding:4px 9px; font-size:11px;">Mở lại</button>
-      </div>
-    `).join('');
-    box.querySelectorAll('[data-load-prj]').forEach((b) => {
-      b.onclick = () => {
-        const prj = list[Number(b.dataset.loadPrj)];
-        if (!prj) return;
-        currentMasterPlan = prj.plan;
-        currentCritic = prj.critic || null;
-        copilotHistory = Array.isArray(prj.copilotHistory) ? [...prj.copilotHistory] : [];
-        renderMasterWorkspace(currentMasterPlan, []);
-        if (currentCritic) renderCriticAndPublishKit(currentCritic);
-        switchDrawerTab('auto');
-      };
-    });
-  }
-
-  function updateAudioBadge() {
-    const el = document.getElementById('ac-audio-summary');
-    if (!el) return;
-    el.innerHTML = `🎵 BGM: <b>${bgmFile ? `${bgmFile.name}${bgmBeatInfo ? ` (${bgmBeatInfo.bpm} BPM ✓)` : ''}` : 'Chưa chọn'}</b> • 🎙️ Giọng AI: <b>${attachedVoiceLabel || 'Chưa gắn'}</b>`;
-  }
-
-  function applyPreferencesToUI() {
-    const p = syncData.preferences;
-    const setVal = (id, val) => { const e = document.getElementById(id); if (e && val !== undefined) e.value = val; };
-    const setChk = (id, val) => { const e = document.getElementById(id); if (e && val !== undefined) e.checked = Boolean(val); };
-    setVal('ac-brand-tag', p.brandTag);
-    setVal('ac-reasoning-mode', p.reasoningMode);
-    setVal('ac-text-style-pref', p.textStylePref);
-    setVal('ac-bgm-vol', p.bgmVol);
-    setVal('ac-sfx-vol', p.sfxVol);
-    setChk('ac-auto-duck', p.autoDuck);
-    setChk('ac-mute-orig', p.muteOrig);
-    setChk('ac-enable-search', p.enableSearch);
-    const bv = document.getElementById('ac-bgm-vol-lbl'); if (bv) bv.textContent = (p.bgmVol || 30) + '%';
-    const sv = document.getElementById('ac-sfx-vol-lbl'); if (sv) sv.textContent = (p.sfxVol || 55) + '%';
-    document.querySelectorAll('#ac-skills-wrap .acp-skill').forEach((el) => {
-      el.classList.toggle('on', activeSkills.has(el.getAttribute('data-sid')));
-    });
-    renderBehaviorBanner();
-  }
-
-  function switchDrawerTab(tabKey) {
-    document.querySelectorAll('#ac-pro-drawer .acp-tab').forEach((x) => x.classList.toggle('active', x.getAttribute('data-t') === tabKey));
-    ['auto', 'audio', 'voice', 'critic'].forEach((k) => {
-      const pane = document.getElementById('ac-tab-' + k);
-      if (pane) pane.style.display = k === tabKey ? 'block' : 'none';
-    });
-  }
-
-  function mountProStudioV6() {
-    if (document.getElementById('ac-pro-fab')) return;
-
-    const style = document.createElement('style');
-    style.textContent = `
-      #ac-pro-fab {
-        position: fixed; left: 16px; bottom: 16px; z-index: 9995;
-        background: linear-gradient(135deg, #f59e0b, #7c3aed, #0ea5e9); color: #fff;
-        border: 1px solid rgba(255,255,255,0.28); border-radius: 999px;
-        padding: 11px 18px; font-size: 13px; font-weight: 800; cursor: pointer;
-        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.58); font-family: system-ui, sans-serif;
-      }
-      #ac-pro-drawer {
-        position: fixed; top: 0; right: -530px; width: 510px; max-width: 96vw; height: 100vh;
-        background: #0b1120; border-left: 1px solid #26324d; z-index: 9998;
-        box-shadow: -16px 0 48px rgba(0,0,0,0.8); transition: right 0.25s ease;
-        display: flex; flex-direction: column; color: #f1f5f9; font-family: system-ui, sans-serif;
-      }
-      #ac-pro-drawer.open { right: 0; }
-      .acp-head { padding: 13px 16px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center; }
-      .acp-tabs { display: flex; border-bottom: 1px solid #1e293b; background: #0f172a; }
-      .acp-tab { flex: 1; padding: 9px 4px; border: none; background: transparent; color: #94a3b8; font-size: 11.5px; font-weight: 700; cursor: pointer; border-bottom: 2px solid transparent; }
-      .acp-tab.active { color: #fbbf24; border-bottom-color: #fbbf24; background: #131c31; }
-      .acp-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
-      .acp-sec { background: #131b2e; border: 1px solid #23304d; border-radius: 12px; padding: 11px; margin-bottom: 11px; }
-      .acp-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; display: block; }
-      .acp-inp, .acp-sel, .acp-ta { width: 100%; box-sizing: border-box; background: #0a0f1d; border: 1px solid #2b3856; color: #f8fafc; border-radius: 8px; padding: 8px 10px; font-size: 12px; outline: none; }
-      .acp-ta { min-height: 54px; resize: vertical; }
-      .acp-btn { border: none; border-radius: 8px; padding: 8px 11px; font-size: 12px; font-weight: 700; cursor: pointer; color: #fff; background: #334155; }
-      .acp-btn-main { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
-      .acp-btn-green { background: #10b981; color: #052e16; }
-      .acp-skill { display: inline-block; padding: 4px 8px; margin: 2px; border-radius: 999px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid #2e3b5b; background: #0b1120; color: #cbd5e1; }
-      .acp-skill.on { background: #312e81; border-color: #a78bfa; color: #fff; }
-      .acp-drop { border: 2px dashed #4f46e5; border-radius: 10px; padding: 11px; text-align: center; cursor: pointer; background: #0e1529; }
-    `;
-    document.head.appendChild(style);
-
-    const fab = document.createElement('button');
-    fab.id = 'ac-pro-fab';
-    fab.textContent = '🚀 AutoCut AI Pro v6 (Sync)';
-    document.body.appendChild(fab);
-
-    const drawer = document.createElement('div');
-    drawer.id = 'ac-pro-drawer';
-    drawer.innerHTML = `
-      <div class="acp-head">
-        <div>
-          <div style="font-size:15px; font-weight:800; color:#fbbf24;">🚀 AUTOCUT AI PRO v6.0</div>
-          <div id="ac-sync-badge" style="font-size:11px; color:#38bdf8;">☁️ Đang kết nối đồng bộ Cloud...</div>
-        </div>
-        <div style="display:flex; gap:6px;">
-          <button class="acp-btn" id="ac-force-sync" title="Đồng bộ ngay với Firebase Cloud">↻ Sync</button>
-          <button class="acp-btn" id="ac-pro-close">✕</button>
-        </div>
-      </div>
-      <div class="acp-tabs">
-        <button class="acp-tab active" data-t="auto">🎬 Đa Clip & Co-Pilot</button>
-        <button class="acp-tab" data-t="audio">🥁 Beat & SFX</button>
-        <button class="acp-tab" data-t="voice">🎙️ Thoại & TTS</button>
-        <button class="acp-tab" data-t="critic">🏆 Viral & Cloud</button>
-      </div>
-      <div class="acp-body">
-        <!-- TAB 1: ĐA CLIP + SMART FOCAL + CHAT CO-PILOT -->
-        <div id="ac-tab-auto">
-          <div class="acp-sec" style="border-color:#4c1d95;">
-            <div id="ac-behavior-summary" style="font-size:12px; color:#ddd6fe;"></div>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">1. Chọn 1 Hoặc Nhiều Clip Thô Cùng Lúc (Multi-Clip AI)</label>
-            <input type="file" id="ac-raw-input" accept="video/*" multiple style="display:none;" />
-            <div class="acp-drop" id="ac-raw-drop">
-              <div style="font-size:13px; font-weight:700; color:#a5b4fc;">📂 Bấm chọn 1 hoặc nhiều clip quay thô (tối đa 8 clip)</div>
-              <div id="ac-clips-list"></div>
-            </div>
-            <input class="acp-inp" id="ac-brand-tag" style="margin-top:8px;" placeholder="Tên thương hiệu / Nhãn hàng (tự đồng bộ Cloud)..." />
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">2. Chế Độ Đọc Hiểu Thông Minh & Kiểu Chữ</label>
-            <select class="acp-sel" id="ac-reasoning-mode" style="margin-bottom:6px;">
-              ${REASONING_MODES.map((m) => `<option value="${m.id}">${m.label}</option>`).join('')}
-            </select>
-            <select class="acp-sel" id="ac-text-style-pref">
-              ${TEXT_STYLES.map((t) => `<option value="${t.id}">${t.label}</option>`).join('')}
-            </select>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">3. Kho 13 Pro Skills (Tự lưu Cloud)</label>
-            <div id="ac-skills-wrap">
-              ${PRO_SKILLS.map((s) => `<span class="acp-skill on" data-sid="${s.id}">${s.name}</span>`).join('')}
-            </div>
-            <label style="display:flex; align-items:center; gap:6px; margin-top:7px; font-size:12px; color:#cbd5e1; cursor:pointer;">
-              <input type="checkbox" id="ac-enable-search" checked /> 🌐 Tìm xu hướng Viral mới nhất qua Google Search
-            </label>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">4. Yêu Cầu Dựng Phim (Gõ hoặc Nói qua Mic)</label>
-            <textarea class="acp-ta" id="ac-auto-hint" placeholder="Để trống nếu muốn AI tự lo 100%, hoặc mô tả ngắn gọn..."></textarea>
-            <div style="display:flex; gap:8px; margin-top:8px;">
-              <button class="acp-btn" id="ac-mic-hint" data-default-label="🎙️ Nói lệnh">🎙️ Nói lệnh</button>
-              <button class="acp-btn acp-btn-main" id="ac-btn-auto-scan" style="flex:1;">🚀 Quét Đa Clip & Tự Edit v6</button>
-            </div>
-            <div id="ac-auto-status" style="font-size:12px; margin-top:8px;"></div>
-            <div id="ac-auto-result"></div>
-          </div>
-        </div>
-
-        <!-- TAB 2: REAL BEAT-SYNC, BGM & 6 SFX -->
-        <div id="ac-tab-audio" style="display:none;">
-          <div class="acp-sec">
-            <div id="ac-audio-summary" style="font-size:12px; color:#38bdf8; margin-bottom:8px;"></div>
-            <label class="acp-label">Nhạc Nền BGM (Tự đo BPM & Khớp Nhịp Beat Thật)</label>
-            <input type="file" id="ac-bgm-input" accept="audio/*" style="display:none;" />
-            <div style="display:flex; gap:8px;">
-              <button class="acp-btn acp-btn-main" id="ac-btn-bgm" style="flex:1;">🎵 Chọn Nhạc Nền (.mp3/.wav)</button>
-              <button class="acp-btn" id="ac-clear-bgm">Xóa</button>
-            </div>
-            <div id="ac-beat-info" style="font-size:11.5px; color:#4ade80; margin-top:6px;"></div>
-            <div style="margin-top:8px; font-size:12px;">
-              <label style="display:flex; justify-content:space-between;"><span>Âm lượng nhạc nền BGM:</span><b id="ac-bgm-vol-lbl">30%</b></label>
-              <input type="range" id="ac-bgm-vol" min="5" max="100" value="30" style="width:100%;" />
-              <label style="display:flex; justify-content:space-between; margin-top:6px;"><span>Âm lượng SFX tự động:</span><b id="ac-sfx-vol-lbl">55%</b></label>
-              <input type="range" id="ac-sfx-vol" min="10" max="100" value="55" style="width:100%;" />
-            </div>
-            <label style="display:flex; align-items:center; gap:6px; margin-top:8px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" id="ac-auto-duck" checked /> 🎧 Auto-Ducking (Tự hạ nhạc nền khi có giọng nói)
-            </label>
-            <label style="display:flex; align-items:center; gap:6px; margin-top:6px; font-size:12px; cursor:pointer;">
-              <input type="checkbox" id="ac-mute-orig" /> 🔇 Tắt tiếng gốc video thô
-            </label>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">Kho 6 SFX Tự Tổng Hợp Miễn Phí (Bấm nghe thử)</label>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-              ${SFX_LIST.map((s) => `<button class="acp-btn" data-test-sfx="${s.id}" style="text-align:left;">${s.label}</button>`).join('')}
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 3: BÓC BĂNG CẮT THEO LỜI THOẠI & GIỌNG ĐỌC TTS -->
-        <div id="ac-tab-voice" style="display:none;">
-          <div class="acp-sec">
-            <label class="acp-label">1. Bóc Băng & Dựng Phim Theo Văn Bản (Bỏ "à, ừm...")</label>
-            <input type="file" id="ac-stt-file" accept="audio/*,video/*" style="display:none;" />
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <button class="acp-btn acp-btn-main" id="ac-btn-stt-file">📂 Bóc Băng File Video/Audio</button>
-              <button class="acp-btn" id="ac-mic-tts" data-default-label="🎙️ Đọc Micro → Chữ">🎙️ Đọc Micro → Chữ</button>
-            </div>
-            <div id="ac-stt-status" style="font-size:12px; margin-top:6px;"></div>
-            <div id="ac-text-edit-box"></div>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">2. Văn Bản → Giọng Đọc AI Studio (TTS)</label>
-            <textarea class="acp-ta" id="ac-tts-text" style="min-height:105px;" placeholder="Lời bình AI tự tạo hoặc văn bản cần đọc..."></textarea>
-            <div style="display:flex; gap:6px; margin-top:8px;">
-              <select class="acp-sel" id="ac-tts-voice" style="flex:1;">
-                <option value="nova">Giọng Nữ Truyền Cảm</option>
-                <option value="alloy">Giọng Tự Nhiên</option>
-                <option value="onyx">Giọng Nam Trầm Ấm</option>
-                <option value="shimmer">Giọng Nữ Năng Động</option>
-              </select>
-              <select class="acp-sel" id="ac-tts-speed" style="width:76px;">
-                <option value="0.9">0.9x</option><option value="1.0" selected>1.0x</option><option value="1.15">1.15x</option><option value="1.25">1.25x</option>
-              </select>
-              <button class="acp-btn acp-btn-green" id="ac-run-tts">🔊 Tạo Giọng</button>
-            </div>
-            <div id="ac-tts-status" style="font-size:12px; margin-top:6px;"></div>
-            <div id="ac-tts-player"></div>
-          </div>
-        </div>
-
-        <!-- TAB 4: CHẤM ĐIỂM VIRAL, PUBLISH KIT & LỊCH SỬ ĐỒNG BỘ CLOUD -->
-        <div id="ac-tab-critic" style="display:none;">
-          <div class="acp-sec">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <label class="acp-label" style="margin:0;">🏆 AI Chấm Điểm Viral & Bộ Đăng Bài</label>
-              <button class="acp-btn acp-btn-main" id="ac-btn-run-critic" style="padding:5px 10px; font-size:11px;">📊 Chấm Điểm Ngay</button>
-            </div>
-            <div id="ac-critic-body"><div style="font-size:12px; color:#94a3b8;">Bấm "Chấm Điểm Ngay" sau khi dựng để xem điểm giữ chân 0–100, xuất Ảnh bìa Thumbnail và 3 mẫu Caption bán hàng.</div></div>
-          </div>
-          <div class="acp-sec">
-            <label class="acp-label">☁️ Lịch Sử Dự Án Đã Đồng Bộ Trên Firebase Cloud</label>
-            <div id="ac-cloud-projects"></div>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(drawer);
-
-    fab.onclick = () => drawer.classList.toggle('open');
-    document.getElementById('ac-pro-close').onclick = () => drawer.classList.remove('open');
-    document.getElementById('ac-force-sync').onclick = () => pullFromCloudSync();
-
-    drawer.querySelectorAll('.acp-tab').forEach((tab) => {
-      tab.onclick = () => switchDrawerTab(tab.getAttribute('data-t'));
-    });
-
-    // Multi-clip picker
-    document.getElementById('ac-raw-drop').onclick = () => document.getElementById('ac-raw-input').click();
-    document.getElementById('ac-raw-input').onchange = async (e) => {
-      const files = Array.from(e.target.files || []).slice(0, 8 - loadedClips.length);
-      for (const f of files) {
-        const url = URL.createObjectURL(f);
-        const dur = await getVideoDuration(url);
-        loadedClips.push({ file: f, url, name: f.name, durationSec: dur });
-      }
-      renderClipsList();
-      e.target.value = '';
-    };
-
-    // BGM + Beat detection
-    document.getElementById('ac-btn-bgm').onclick = () => document.getElementById('ac-bgm-input').click();
-    document.getElementById('ac-bgm-input').onchange = async (e) => {
-      const f = e.target.files[0]; if (!f) return;
-      if (bgmUrl) URL.revokeObjectURL(bgmUrl);
-      bgmFile = f; bgmUrl = URL.createObjectURL(f);
-      document.getElementById('ac-beat-info').textContent = '⏳ Đang phân tích nhịp trống (BPM & Beats)...';
-      bgmBeatInfo = await detectMusicBeats(f);
-      document.getElementById('ac-beat-info').textContent = bgmBeatInfo
-        ? `🥁 Phát hiện nhịp nhạc ~${bgmBeatInfo.bpm} BPM (${bgmBeatInfo.beats.length} điểm rơi beat sẵn sàng đồng bộ cắt cảnh!)`
-        : '✓ Đã nạp nhạc nền BGM.';
-      updateAudioBadge();
-    };
-    document.getElementById('ac-clear-bgm').onclick = () => {
-      if (bgmUrl) URL.revokeObjectURL(bgmUrl);
-      bgmFile = null; bgmUrl = null; bgmBeatInfo = null;
-      document.getElementById('ac-beat-info').textContent = ''; updateAudioBadge();
-    };
-
-    // Sync preferences on change
-    const bindPref = (id, key, isCheck = false) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('change', () => {
-        syncData.preferences[key] = isCheck ? el.checked : (el.type === 'range' ? Number(el.value) : el.value);
-        saveLocalAndScheduleCloudSync(false);
-      });
-    };
-    bindPref('ac-brand-tag', 'brandTag');
-    bindPref('ac-reasoning-mode', 'reasoningMode');
-    bindPref('ac-text-style-pref', 'textStylePref');
-    bindPref('ac-bgm-vol', 'bgmVol');
-    bindPref('ac-sfx-vol', 'sfxVol');
-    bindPref('ac-auto-duck', 'autoDuck', true);
-    bindPref('ac-mute-orig', 'muteOrig', true);
-    bindPref('ac-enable-search', 'enableSearch', true);
-
-    document.getElementById('ac-bgm-vol').oninput = (e) => { document.getElementById('ac-bgm-vol-lbl').textContent = e.target.value + '%'; };
-    document.getElementById('ac-sfx-vol').oninput = (e) => { document.getElementById('ac-sfx-vol-lbl').textContent = e.target.value + '%'; };
-
-    drawer.querySelectorAll('[data-test-sfx]').forEach((b) => {
-      b.onclick = () => {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const c = new AudioCtx(); triggerSFX(c, c.destination, b.getAttribute('data-test-sfx'), 0.65);
-        setTimeout(() => c.close().catch(() => {}), 900);
-      };
-    });
-
-    drawer.querySelectorAll('#ac-skills-wrap .acp-skill').forEach((el) => {
-      el.onclick = () => {
-        const sid = el.getAttribute('data-sid');
-        if (activeSkills.has(sid)) { activeSkills.delete(sid); el.classList.remove('on'); }
-        else { activeSkills.add(sid); el.classList.add('on'); }
-        saveLocalAndScheduleCloudSync(false);
-      };
-    });
-
-    document.getElementById('ac-btn-auto-scan').onclick = runAutoScanV6;
-    document.getElementById('ac-btn-run-critic').onclick = () => runViralCritic(false);
-    document.getElementById('ac-mic-hint').onclick = function () { toggleMicDictation('ac-auto-hint', this); };
-    document.getElementById('ac-mic-tts').onclick = function () { toggleMicDictation('ac-tts-text', this); };
-    document.getElementById('ac-btn-stt-file').onclick = () => document.getElementById('ac-stt-file').click();
-    document.getElementById('ac-stt-file').onchange = (e) => transcribeForTextEdit(e.target.files[0]);
-    document.getElementById('ac-run-tts').onclick = runTextToSpeech;
-
-    applyPreferencesToUI();
-    renderClipsList();
-    renderSavedProjectsList();
-    updateAudioBadge();
-    pullFromCloudSync();
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountProStudioV6);
-  else mountProStudioV6();
-})();
+      const y = safe.top + (safe.bottom - safe.top)
